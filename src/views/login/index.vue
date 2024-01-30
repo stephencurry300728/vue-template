@@ -7,6 +7,8 @@
         <h3 class="title">登 录</h3>
       </div>
 
+      <!-- 在 Form 组件中，每一个表单域由一个 Form-Item 组件构成，表单域中可以放置各种类型的表单控件
+      包括 Input、Select、Checkbox、Radio、Switch、DatePicker、TimePicker -->
       <el-form-item prop="username">
         <span class="svg-container">
           <!-- 矢量小图标 -->
@@ -15,7 +17,7 @@
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="用户名"
           name="username"
           type="text"
           tabindex="1"
@@ -28,12 +30,13 @@
           <!-- 矢量小图标 -->
           <svg-icon icon-class="password" />
         </span>
+        <!--  通过 @keyup.enter.native 监听键盘事件，当用户按下回车键时，调用 handleLogin 方法 -->
         <el-input
           :key="passwordType"
           ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
+          placeholder="密码"
           name="password"
           tabindex="2"
           auto-complete="on"
@@ -62,28 +65,40 @@ import { validUsername } from '@/utils/validate'
 export default {
   name: 'Login',
   data() {
+    // 检查用户名是否属于预定义的有效列表
+    // valid_map = ['admin', 'editor']
     const validateUsername = (rule, value, callback) => {
+      // 调用 validUsername 函数，传入用户输入的用户名
       if (!validUsername(value)) {
+        // 如果用户名不在有效列表中，则通过 callback 返回一个错误信息
         callback(new Error('Please enter the correct user name'))
       } else {
+        // 如果用户名在有效列表中，通过 callback 正常返回
         callback()
       }
     }
+    // validatePassword 是一个自定义验证函数，用于验证密码
     const validatePassword = (rule, value, callback) => {
+      // 简单的密码长度验证
       if (value.length < 6) {
         callback(new Error('The password can not be less than 6 digits'))
       } else {
         callback()
       }
     }
+
     return {
-      // 收集表单信息
+      // 收集表单信息绑定在 :model="loginForm" 上，loginForm 是一个对象，包含用户名和密码
+      // 组件的 data 返回对象，包含表单数据和验证规则
       loginForm: {
+        // 默认用户名和密码
         username: 'admin',
         password: '111111'
       },
       loginRules: {
+        // 当用户在表单中填写用户名并失去焦点时（即触发 blur 事件），validateUsername 函数被触发
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        // 为密码字段设置验证规则，使用 validatePassword 函数
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       loading: false,
