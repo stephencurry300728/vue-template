@@ -51,6 +51,7 @@ service.interceptors.response.use(
    * Determine the request status by custom code
    * Here is just an example. You can also judge the status by HTTP Status Code
    */
+  // 拿到响应后的处理逻辑并赋值给 response
   response => {
     const res = response
     return res

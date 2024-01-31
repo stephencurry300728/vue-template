@@ -127,7 +127,8 @@ export default {
         if (valid) {
           // 按钮会有一个loading的效果
           this.loading = true
-          // 带着用户名与密码的载荷派发一个action给user.js下面的login
+          // 带着用户名与密码的loginForm
+          // 派发一个 action 请求给user.js下面的login函数来处理登陆业务
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             // 登陆成功进行路由的跳转到首页
             this.$router.push({ path: this.redirect || '/' })

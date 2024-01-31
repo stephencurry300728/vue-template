@@ -14,7 +14,7 @@ const state = getDefaultState()
 
 const actions = {
 /* 处理用户登录的业务
-  通过解构赋值先得到context对象中的commit方法
+  通过解构赋值先得到context对象中的commit方法方便后续Mutation使用
   如果不使用解构赋值，代码将是这样的：
   login(context, userInfo) {
     const commit = context.commit}
