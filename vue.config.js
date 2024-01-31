@@ -6,7 +6,9 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Admin Template' // page title
+// 尝试读取 settings.js 中的 title 属性 '数据分析平台' 作为应用名称
+// 如果该属性不存在或为空，就使用 'vue Admin Template' 作为默认名称
+const name = defaultSettings.title || 'vue Admin Template'
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -28,41 +30,53 @@ module.exports = {
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
+  
+  // 默认mock数据的代理服务器配置
   devServer: {
-    // 转发到后端的配置
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:8000/api',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': ''
-        }
-      }
-    },
     port: port,
     open: true,
     overlay: {
       warnings: false,
       errors: true
     },
-    // 当不再使用 Mock 数据时，可移除或注释 Mock 服务器配置
     before: require('./mock/mock-server.js')
   },
+
+  // 解决前后端跨域问题并配置好后端接口代理
+  //参考文档https://www.webpackjs.com/configuration/dev-server/#devserver-proxy
+  // devServer: {
+  //   port: port,
+  //   open: true,
+  //   overlay: {
+  //     warnings: false,
+  //     errors: true
+  //   },
+  //   proxy: {
+  //     [process.env.VUE_APP_BASE_API]: {
+  //       target: `http://127.0.0.1:8000/api`,
+  //       changeOrigin: true,
+  //       pathRewrite: {
+  //         ['^' + process.env.VUE_APP_BASE_API]: ''
+  //       }
+  //     }
+  //   }
+  //   // before: require('./mock/mock-server.js')
+  // },
+
   configureWebpack: {
-    // provide the app's title in webpack's name field, so that
-    // it can be accessed in index.html to inject the correct title.
+    // 提供 webpack 的 name 字段，以便可以在 index.html 中访问它来注入正确的标题
     name: name,
     resolve: {
+      // 配置别名，使得我们可以使用 '@' 来代替 'src' 路径，简化模块引用。
       alias: {
-        // 配置src的别名为 @
         '@': resolve('src')
       }
     }
   },
   chainWebpack(config) {
 
-     // 移除 eslint-loader
-     config.module.rules.delete('eslint');
+    // 移除 eslint-loader 以在生产环境下加快构建速度
+    config.module.rules.delete('eslint');
 
     // it can improve the speed of the first screen, it is recommended to turn on preload
     config.plugin('preload').tap(() => [
@@ -102,7 +116,7 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end()

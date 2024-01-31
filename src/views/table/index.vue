@@ -36,7 +36,7 @@
       </el-table-column>
 
       <!-- 第二列 -->
-      <el-table-column label="Title">
+      <el-table-column label="标题" align="center">
         <template slot-scope="scope">
           <!-- scope.row 指的是当前行的数据对象，title 是该对象的一个属性 -->
           {{ scope.row.title }}
@@ -44,7 +44,7 @@
       </el-table-column>
 
       <!-- 第三列 -->
-      <el-table-column label="Author" width="110" align="center">
+      <el-table-column label="作者" width="110" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.author }}</span>
         </template>
@@ -58,7 +58,7 @@
       </el-table-column>
 
       <!-- 第五列 -->
-      <el-table-column class-name="status-col" label="Status" width="110" align="center">
+      <el-table-column class-name="status-col" label="状态" width="110" align="center">
         <template slot-scope="scope">
           <!-- 调用filters中的 statusFilter 方法-->
           <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
@@ -66,7 +66,7 @@
       </el-table-column>
 
       <!-- 第六列 -->
-      <el-table-column align="center" prop="created_at" label="Display_time" width="200">
+      <el-table-column align="center" prop="created_at" label="展示时间" width="200">
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.display_time }}</span>
@@ -93,6 +93,7 @@ export default {
   // 用于定义可以在模板插值中使用的过滤器函数。一般用于格式化文本，比如日期格式化、数字格式化、字符串转换等
   filters: {
     // 将状态代码（如 published, draft, deleted）转换为对应的字符串
+    // element-ui 的标签组件 el-tag 有一个属性 type，可以设置标签的类型，比如 success、info、warning、danger 等
     statusFilter(status) {
       const statusMap = {
         published: 'success',

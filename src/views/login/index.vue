@@ -1,7 +1,8 @@
 <template>
   <div class="login-container">
     <!-- model：表单数据对象 rules：表单验证规则-->
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on"
+      label-position="left">
 
       <div class="title-container">
         <h3 class="title">登 录</h3>
@@ -14,15 +15,8 @@
           <!-- 矢量小图标 -->
           <svg-icon icon-class="user" />
         </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="用户名"
-          name="username"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
-        />
+        <el-input ref="username" v-model="loginForm.username" placeholder="用户名" name="username" type="text" tabindex="1"
+          auto-complete="on" />
       </el-form-item>
 
       <el-form-item prop="password">
@@ -31,24 +25,17 @@
           <svg-icon icon-class="password" />
         </span>
         <!--  通过 @keyup.enter.native 监听键盘事件，当用户按下回车键时，调用 handleLogin 方法 -->
-        <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="密码"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
-        />
+        <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="密码"
+          name="password" tabindex="2" auto-complete="on" @keyup.enter.native="handleLogin" />
         <span class="show-pwd" @click="showPwd">
           <!-- 矢量小图标样式的切换 -->
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登录</el-button>
+      <!-- 点击登录按钮也调用 handleLogin 方法 -->
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="handleLogin">登录</el-button>
 
       <div class="tips">
         <span style="margin-right:20px;">用户名：admin</span>
@@ -71,7 +58,7 @@ export default {
       // 调用 validUsername 函数，传入用户输入的用户名
       if (!validUsername(value)) {
         // 如果用户名不在有效列表中，则通过 callback 返回一个错误信息
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入正确的用户名'))
       } else {
         // 如果用户名在有效列表中，通过 callback 正常返回
         callback()
@@ -81,7 +68,7 @@ export default {
     const validatePassword = (rule, value, callback) => {
       // 简单的密码长度验证
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('密码长度至少为6位'))
       } else {
         callback()
       }
@@ -96,7 +83,7 @@ export default {
         password: '111111'
       },
       loginRules: {
-        // 当用户在表单中填写用户名并失去焦点时（即触发 blur 事件），validateUsername 函数被触发
+        // 当用户在表单中填写用户名并失去焦点时，validateUsername 函数被触发
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
         // 为密码字段设置验证规则，使用 validatePassword 函数
         password: [{ required: true, trigger: 'blur', validator: validatePassword }]
@@ -107,10 +94,16 @@ export default {
     }
   },
   watch: {
+    // 监视 $route 对象，这是 Vue Router 注入到每个 Vue 组件中的特殊对象，包含当前路由的信息
     $route: {
-      handler: function(route) {
+      // handler 是当被监视的对象发生变化时调用的函数
+      handler: function (route) {
+        // 尝试从路由的 query 参数中读取 'redirect' 参数
+        // 这通常用于在登录后将用户重定向到他们之前试图访问的页面
         this.redirect = route.query && route.query.redirect
       },
+      // immediate: true 表示这个 watch 在组件实例被创建时立即触发一次
+      // 这确保了即使在首次加载页面时，也会检查是否有重定向的需求
       immediate: true
     }
   },
@@ -125,6 +118,7 @@ export default {
         this.$refs.password.focus()
       })
     },
+
     //登陆业务:发请求，带着用户名与密码给服务器（返回成功与失败）
     handleLogin() {
       // 验证表单（用户名与密码）是否符合规则
@@ -156,8 +150,8 @@ export default {
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
 
-$bg:#283443;
-$light_gray:#fff;
+$bg: #283443;
+$light_gray: #fff;
 $cursor: #fff;
 
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
@@ -200,9 +194,9 @@ $cursor: #fff;
 </style>
 
 <style lang="scss" scoped>
-$bg:#2d3a4b;
-$dark_gray:#889aa4;
-$light_gray:#eee;
+$bg: #2d3a4b;
+$dark_gray: #889aa4;
+$light_gray: #eee;
 
 .login-container {
   min-height: 100%;
