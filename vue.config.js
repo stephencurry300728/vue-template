@@ -32,18 +32,6 @@ module.exports = {
   productionSourceMap: false,
   
   // 默认mock数据的代理服务器配置
-  devServer: {
-    port: port,
-    open: true,
-    overlay: {
-      warnings: false,
-      errors: true
-    },
-    before: require('./mock/mock-server.js')
-  },
-
-  // 解决前后端跨域问题并配置好后端接口代理
-  //参考文档https://www.webpackjs.com/configuration/dev-server/#devserver-proxy
   // devServer: {
   //   port: port,
   //   open: true,
@@ -51,17 +39,28 @@ module.exports = {
   //     warnings: false,
   //     errors: true
   //   },
-  //   proxy: {
-  //     [process.env.VUE_APP_BASE_API]: {
-  //       target: `http://127.0.0.1:8000/api`,
-  //       changeOrigin: true,
-  //       pathRewrite: {
-  //         ['^' + process.env.VUE_APP_BASE_API]: ''
-  //       }
-  //     }
-  //   }
-  //   // before: require('./mock/mock-server.js')
+  //   before: require('./mock/mock-server.js')
   // },
+
+  // 解决前后端跨域问题并配置好后端接口代理
+  //参考文档https://www.webpackjs.com/configuration/dev-server/#devserver-proxy
+  devServer: {
+    port: port,
+    open: true,
+    overlay: {
+      warnings: false,
+      errors: true
+    },
+    proxy: {
+      [process.env.VUE_APP_BASE_API]: {
+        target: `http://127.0.0.1:8000/api`,
+        changeOrigin: true,
+        pathRewrite: {
+          ['^' + process.env.VUE_APP_BASE_API]: ''
+        }
+      }
+    }
+  },
 
   configureWebpack: {
     // 提供 webpack 的 name 字段，以便可以在 index.html 中访问它来注入正确的标题

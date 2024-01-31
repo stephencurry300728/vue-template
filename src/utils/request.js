@@ -5,8 +5,8 @@ import { getToken } from '@/utils/auth'
 
 // 创建 axios 实例
 const service = axios.create({
-  // 基础 URL,从环境变量获取,这里我全部置空了
-  baseURL: process.env.VUE_APP_BASE_API, // 最后在浏览器的url = base url + request url
+  // 从环境变量获取的基础 URL
+  baseURL: process.env.VUE_APP_BASE_API, // 最后在浏览器的url = base url + request url进行拼接
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // 请求超时时间为5s
 })
@@ -24,15 +24,12 @@ service.interceptors.request.use(
 // 然后，这个函数返回修改后的 config 对象，确保这些改动被应用到实际的请求中。
   config => {
     // 发送请求前的处理逻辑
-
     if (store.getters.token) {
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
 
-      // 如果 Vuex store 中存在 token，则添加到请求头中
-      // 这里的getToken()是从cookie中获取的常量'vue_admin_template_token'
-      config.headers['X-Token'] = getToken()
+      config.headers['Authorization'] = 'Bearer ' + getToken()
     }
     return config
   },
@@ -52,14 +49,10 @@ service.interceptors.response.use(
 
   /**
    * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
+   * Here is just an example. You can also judge the status by HTTP Status Code
    */
   response => {
-    console.log(response) // 调试用
-    // 规避了response.data.data
-    // 直接可从response.data中获取到数据
-    const res = response.data
+    const res = response
     return res
     // if the custom code is not 20000, it is judged as an error.
     // if (res.code !== 20000) {

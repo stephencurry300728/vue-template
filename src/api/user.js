@@ -1,26 +1,27 @@
 // 引入axios(axios的二次封装)
 import request from '@/utils/request'
 
-// 对外暴露登录接口函数
+// 登录接口函数
+// 发送一个 HTTP 请求到后端服务，用于进行用户登录
 export function login(data) {
   return request({
-    url: '/vue-admin-template/user/login',
+    url: '/login/',
     method: 'post',
     data
   })
 }
-// 对外暴露获取用户信息的函数
+// 获取用户信息的函数
 export function getInfo(token) {
   return request({
-    url: '/vue-admin-template/user/info',
+    url: '/info/',
     method: 'get',
     params: { token }
   })
 }
-// 对外暴露退出登录的函数
+// 退出登录的函数
 export function logout() {
   return request({
-    url: '/vue-admin-template/user/logout',
+    url: '/logout',
     method: 'post'
   })
 }
