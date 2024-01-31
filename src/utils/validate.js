@@ -10,7 +10,7 @@ export function isExternal(path) {
 
 
 /**
- * 验证是否是预定义的有效用户名
+ * 验证是否是预定义的有效用户名数组
  * @param {string} str - 要验证的用户名字符串
  * @returns {Boolean} - 如果用户名有效返回 true，否则返回 false
  */
