@@ -19,9 +19,10 @@ export function getInfo(token) {
   })
 }
 // 退出登录的函数
-export function logout() {
+export function logout(refreshToken) {
   return request({
-    url: '/logout',
-    method: 'post'
+    url: '/logout/',
+    method: 'post',
+    data: { refresh_token: refreshToken }
   })
 }

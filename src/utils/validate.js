@@ -16,7 +16,7 @@ export function isExternal(path) {
  */
 export function validUsername(str) {
   // 预定义的有效用户名数组
-  const valid_map = ['admin', 'editor']
+  const valid_map = ['admin', 'editor','user']
 
   // 检查传入的用户名（即参数str）是否在有效用户名数组中
   // 使用 trim() 移除字符串两端的空白字符

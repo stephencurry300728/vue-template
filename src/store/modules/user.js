@@ -66,7 +66,6 @@ const actions = {
         if (!data) {
           return reject('Verification failed, please Login again.')
         }
-
         const { name, avatar } = data
 
         commit('SET_NAME', name)
@@ -82,7 +81,6 @@ const actions = {
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
-        // 当用户退出登录时，需要移除cookie并重置路由
         removeToken() // must remove  token  first
         resetRouter()
         commit('RESET_STATE')
