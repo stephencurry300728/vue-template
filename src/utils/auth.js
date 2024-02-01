@@ -26,7 +26,7 @@ export function removeToken() {
 }
 
 // 定义了存储在 Cookies 中的 refreshToken 的键名
-const RefreshTokenKey = 'vue_refresh_token'
+const RefreshTokenKey = 'vue_admin_template_refresh_token'
 
 // 获取当前存储在 Cookies 中的 refreshToken
 export function getRefreshToken() {
