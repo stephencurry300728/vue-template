@@ -23,3 +23,21 @@ export function removeToken() {
   // 在用户登出或需要移除登录状态时，调用 removeToken
   return Cookies.remove(TokenKey)
 }
+
+// 定义了存储在 Cookies 中的 refreshToken 的键名
+const RefreshTokenKey = 'vue_admin_template_refresh_token'
+
+// 获取当前存储在 Cookies 中的 refreshToken
+export function getRefreshToken() {
+  return Cookies.get(RefreshTokenKey)
+}
+
+// 将 refreshToken 存储到 Cookies 中
+export function setRefreshToken(refreshToken) {
+  return Cookies.set(RefreshTokenKey, refreshToken)
+}
+
+// 从 Cookies 中移除 refreshToken
+export function removeRefreshToken() {
+  return Cookies.remove(RefreshTokenKey)
+}
