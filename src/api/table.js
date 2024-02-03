@@ -14,11 +14,11 @@ export function getList(params) {
   })
 }
 
-// 编辑api
+// 部分修改数据万一有错误
 export function updateItem(id, data) {
   return request({
     url: `/assessment-base/${id}/`,
-    method: 'put',
+    method: 'patch',
     data
   })
 }

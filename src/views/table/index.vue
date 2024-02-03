@@ -1,8 +1,8 @@
 <template>
   <div class="app-container">
 
-    <el-dialog title="编辑数据" :visible.sync="editDialogVisible" align="center" :width="'50%'" class="custom-dialog">
-      <el-form :model="editForm">
+    <el-dialog title="编辑数据" :visible.sync="editDialogVisible" align="center" class="custom-dialog">
+      <el-form :model="editForm" class="compact-form">
         <el-form-item label="乘务班组">
           <el-input v-model="editForm.crew_group"></el-input>
         </el-form-item>
@@ -13,17 +13,20 @@
           <el-input v-model="editForm.work_certificate_number"></el-input>
         </el-form-item>
         <!-- 不可编辑的字段展示 -->
-        <el-form-item label="文件名">
-          <el-input v-model="editForm.file_name" disabled></el-input>
-        </el-form-item>
         <el-form-item label="记录日期">
           <el-input v-model="editForm.record_date" disabled></el-input>
         </el-form-item>
         <el-form-item label="车型">
           <el-input v-model="editForm.train_model" disabled></el-input>
         </el-form-item>
+        <el-form-item label="考核项目">
+          <el-input v-model="editForm.assessment_item" disabled></el-input>
+        </el-form-item>
         <el-form-item label="考核结果">
           <el-input v-model="editForm.assessment_result" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="文件来源">
+          <el-input v-model="editForm.file_name" disabled></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -184,11 +187,14 @@ export default {
 
 <style scoped>
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
-.custom-dialog .el-dialog {
-  max-height: 40vh;
-  /* 限制对话框的最大高度为视窗高度的70% */
-  overflow-y: auto;
-  /* 超出部分可滚动 */
+.custom-dialog {
+  margin-top: -70px;
+  /* 根据需要调整对话框的垂直位置 */
+}
+
+.compact-form .el-form-item {
+  margin-bottom: 4px;
+  /* 减少表单项之间的垂直间距 */
 }
 
 .el-table {
@@ -210,4 +216,5 @@ export default {
   /* 垂直居中 (如果需要) */
   margin-top: 20px;
   /* 与上方表格的间距 */
-}</style>
+}
+</style>
