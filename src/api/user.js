@@ -26,6 +26,7 @@ export function logout(refreshToken) {
   return request({
     url: '/logout/',
     method: 'post',
+    // 通过 data 选项设置请求体中的数据
     data: { refresh_token: refreshToken }
   })
 }

@@ -3,11 +3,11 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-// 创建 axios 实例
+// 创建 axios 实例 并赋值给 service
 const service = axios.create({
-  // 从环境变量获取的基础 URL
+  // 从环境变量获取的基础 URL, 在api下面不需要再写baseURL了
   baseURL: process.env.VUE_APP_BASE_API, // 最后在浏览器的url = base url + request url进行拼接
-  // withCredentials: true, // send cookies when cross-domain requests
+  // withCredentials: true, // 跨域请求的时候携带cookie
   timeout: 5000 // 请求超时时间为5s
 })
 
@@ -17,15 +17,15 @@ const service = axios.create({
 /* 如果在发送请求的过程中发生错误，错误处理函数将被调用，并且错误信息被传递出去
 */
 
-// 定义请求前的拦截器(由于封装request的原因，每一个请求都会经过这个拦截器)
+// 一次HTTP请求主要包括：请求（Request）和响应（Response）两个部分
+// 调用service 并定义请求前 request 的拦截器(由于封装 request 的原因，每一个请求都会经过这个拦截器)
 service.interceptors.request.use( 
-// 第一个箭头函数接受一个 config 对象作为参数，这个对象包含即将发送的 HTTP 请求的配置信息。
-// 如果 Vuex store 中存在 token，就将这个 token 添加到请求的 headers 中。这通常用于 API 请求的身份验证。
+// 第一个箭头函数接受一个 config 对象作为参数，这个对象包含即将发送的 HTTP 请求的配置信息,常用于 API 请求的身份验证
 // 然后，这个函数返回修改后的 config 对象，确保这些改动被应用到实际的请求中。
   config => {
-    // 发送请求前的处理逻辑
+    // 如果 Vuex store 中有 token，拦截器会修改请求的 config，添加 token 到请求头
     if (store.getters.token) {
-      // let each request carry token
+      // 请求头信息每次请求携带 后端JWT 验证的 access_token
       config.headers['Authorization'] = 'Bearer ' + getToken()
     }
     return config
@@ -37,10 +37,11 @@ service.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// 响应拦截器 response
 service.interceptors.response.use(
   // 拿到响应后的处理逻辑并赋值给 response
   response => {
+    // 这个response是从后端返回的所有api的响应数据
     console.log(response)
     const res = response
     return res

@@ -58,14 +58,6 @@
       </el-table-column>
 
       <!-- 第五列 -->
-      <el-table-column class-name="status-col" label="状态" width="110" align="center">
-        <template slot-scope="scope">
-          <!-- 调用filters中的 statusFilter 方法-->
-          <el-tag :type="scope.row.status | statusFilter">{{ scope.row.status }}</el-tag>
-        </template>
-      </el-table-column>
-
-      <!-- 第六列 -->
       <el-table-column align="center" prop="created_at" label="展示时间" width="200">
         <template slot-scope="scope">
           <i class="el-icon-time" />
@@ -90,19 +82,6 @@
 import { getList } from '@/api/table'
 
 export default {
-  // 用于定义可以在模板插值中使用的过滤器函数。一般用于格式化文本，比如日期格式化、数字格式化、字符串转换等
-  filters: {
-    // 将状态代码（如 published, draft, deleted）转换为对应的字符串
-    // element-ui 的标签组件 el-tag 有一个属性 type，可以设置标签的类型，比如 success、info、warning、danger 等
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'gray',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
   data() {
     return {
       // list: 表格的数据

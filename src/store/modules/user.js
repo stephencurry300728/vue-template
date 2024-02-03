@@ -63,6 +63,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       // 调用封装好的 getInfo 函数，向后端 api 发送请求
       getInfo(state.token).then(response => {
+        // 从response中解构出data (response.data)
         const { data } = response
 
         if (!data) {
@@ -85,7 +86,7 @@ const actions = {
       // 从Cookies中获取 refreshToken
       const refreshToken = getRefreshToken();
       if (!refreshToken) {
-        reject('No refresh token found.');
+        reject('未找到刷新令牌！');
         return;
       }
       // 调用前端定义的 API 函数发送logout请求
