@@ -83,7 +83,7 @@
 </template>
 
 <script>
-import { getList, updateItem } from '@/api/table' // 假设这个文件在 '@/api/table' 路径下
+import { getList, updateItem, deleteItem } from '@/api/table' // 假设这个文件在 '@/api/table' 路径下
 import dayjs from 'dayjs'
 
 export default {
@@ -136,8 +136,6 @@ export default {
     },
 
     onDateRangeChange(value) {
-      console.log("Date range changed:", value);
-      // 不检查dateRange的长度，直接调用fetchData
       // fetchData将处理是否包含日期范围的逻辑
       this.fetchData();
     },
@@ -180,6 +178,32 @@ export default {
           console.error("更新失败:", error);
           this.$message.error('更新失败');
         });
+    },
+
+    deleteItem(row) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 用户确认删除，调用 API 删除数据
+        deleteItem(row.id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          // 刷新列表，例如重新获取数据
+          this.fetchData();
+        }).catch(error => {
+          this.$message.error('删除失败');
+        })
+      }).catch(() => {
+        // 用户取消删除
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     },
   }
 }

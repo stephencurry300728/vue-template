@@ -22,3 +22,11 @@ export function updateItem(id, data) {
     data
   })
 }
+
+// 封装删除操作的 API 请求
+export function deleteItem(id) {
+  return request({
+    url: `/assessment-base/${id}/`,
+    method: 'delete',
+  })
+}
