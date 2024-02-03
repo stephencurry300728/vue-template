@@ -79,15 +79,28 @@ export const constantRoutes = [
     }]
   },
 
+  // {
+  //   path: '/form',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       name: 'Form',
+  //       component: () => import('@/views/form/index'),
+  //       meta: { title: '表单提交', icon: 'form' }
+  //     }
+  //   ]
+  // },
+
   {
-    path: '/form',
+    path: '/table',
     component: Layout,
     children: [
       {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: '表单提交', icon: 'form' }
+        path: 'table',
+        name: 'table',
+        component: () => import('@/views/table/index'),
+        meta: { title: '表格数据', icon: 'el-icon-document' }
       }
     ]
   },

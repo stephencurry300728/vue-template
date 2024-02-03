@@ -16,7 +16,7 @@
       <!-- trigger	属性触发click下拉的行为 -->
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <img :src="require('@/assets/avatar.jpeg')" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <!-- 通过组件slot来设置下拉触发的元素，并通过具名slot为dropdown 来设置下拉式菜单
@@ -56,7 +56,6 @@ export default {
     // 使用 mapGetters 将 Vuex store 中的 getters 映射为计算属性
     ...mapGetters([
       'sidebar', // 映射 app 模块中的 侧边栏 状态
-      'avatar'   // 映射 user 模块中的 头像 状态
     ])
   },
   methods: {

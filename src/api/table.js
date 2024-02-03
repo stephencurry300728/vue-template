@@ -7,7 +7,7 @@ export function getList(params) {
     // 定义 API 请求的 URL 地址
     // baseURL: process.env.VUE_APP_BASE_API
     // 最后在浏览器的url = base url + request url
-    url: '/dirver/', // request url
+    url: '/assessment-base/', // request url
     // 定义请求方法为 get
     method: 'get',
     params

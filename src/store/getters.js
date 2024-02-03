@@ -6,7 +6,6 @@ const getters = {
 
   // user 模块
   token: state => state.user.token, // 从 user 模块获取 token 状态
-  avatar: state => state.user.avatar, // 从 user 模块获取 avatar 状态
   name: state => state.user.name // 从 user 模块获取 name 状态
   
 }

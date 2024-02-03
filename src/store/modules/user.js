@@ -6,8 +6,7 @@ const getDefaultState = () => {
   return {
     token: getToken(), // access_token
     refreshToken: getRefreshToken(),  // 添加这个新的属性来存储 refresh_token
-    name: '',
-    avatar: ''
+    name: ''
   }
 }
 
@@ -69,10 +68,9 @@ const actions = {
         if (!data) {
           return reject('验证失败，请重新登录！')
         }
-        const { username, avatar } = data
+        const { username} = data
 
         commit('SET_NAME', username)
-        commit('SET_AVATAR', avatar)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -126,9 +124,6 @@ const mutations = {
   },
   SET_NAME: (state, name) => {
     state.name = name
-  },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
   },
   SET_REFRESH_TOKEN: (state, refreshToken) => {
     state.refreshToken = refreshToken
