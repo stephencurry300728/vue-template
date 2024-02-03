@@ -4,9 +4,8 @@
     <!-- 公共的 合并导航栏组件 -->
     <!-- 父组件使用computed计算属性 sidebar.opened 来控制 Hamburger 组件开启或合并的状态 -->
     <!-- 通过自定义属性的方式向子组件传递数据 isActive -->
-    <hamburger :is-active="sidebar.opened" 
-    class="hamburger-container" 
-    @toggleClick="toggleSideBar" />  <!-- 调用 toggleSideBar 方法来开启或关闭导航栏 -->
+    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <!-- 调用 toggleSideBar 方法来开启或关闭导航栏 -->
 
     <!-- 公共的 面包屑 封装组件 -->
     <breadcrumb class="breadcrumb-container" />
@@ -24,15 +23,15 @@
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
 
           <!-- router-link 组件是 Vue Router 提供的，它会被渲染成一个 <a> 标签 -->
-          <router-link to="/">   <!-- to 属性指定链接的目标路由为主页，但是路由器分发会被redirect到/dashboard -->
-            <el-dropdown-item>
-              Home
+          <router-link to="/"> <!-- to 属性指定链接的目标路由为主页，但是路由器分发会被redirect到/dashboard -->
+            <el-dropdown-item align="center">
+              主页
             </el-dropdown-item>
           </router-link>
           <!-- divided	表示在页面中显示分割线 -->
           <!-- native 修饰符表示监听的是原生 DOM 事件 -->
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">退出登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -81,7 +80,7 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
 
   .hamburger-container {
     line-height: 46px;
@@ -89,7 +88,7 @@ export default {
     float: left;
     cursor: pointer;
     transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
       background: rgba(0, 0, 0, .025)

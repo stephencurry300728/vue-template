@@ -166,7 +166,7 @@ export default {
       this.editDialogVisible = true;
     },
 
-    // 更新单一数据
+    // 更新
     saveEdit() {
       const id = this.editForm.id;
       updateItem(id, this.editForm)
