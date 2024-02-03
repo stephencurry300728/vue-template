@@ -43,7 +43,7 @@
     </div>
 
     <el-table v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit highlight-current-row stripe
-      @sort-change="handleSortChange">
+      @sort-change="handleSortChange" height="756">
       <el-table-column align="center" label="ID" width="70">
         <!-- 声明一个作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
@@ -75,7 +75,8 @@
     <!-- 添加flexbox -->
     <div class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-        :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
+        :page-sizes="[12, 30, 50, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+        :total="total">
       </el-pagination>
     </div>
 
@@ -93,7 +94,7 @@ export default {
       listLoading: true,
       total: 0,
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 12,
       sort: {
         prop: '',
         order: ''
@@ -228,7 +229,7 @@ export default {
 }
 
 .date-picker-offset {
-  padding-left: 60px;
+  padding-left: 50px;
   /* 推动日期选择器向右边移动 */
 }
 

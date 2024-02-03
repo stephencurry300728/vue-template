@@ -84,10 +84,10 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'upload',
+        path: '',
         name: 'upload',
         component: () => import('@/views/upload/index'),
-        meta: { title: '上传文件', icon: 'el-icon-upload' }
+        meta: { title: '上传文件', icon: 'el-icon-document' }
       }
     ]
   },
@@ -97,7 +97,7 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'table',
+        path: '',
         name: 'table',
         component: () => import('@/views/table/index'),
         meta: { title: '表格数据', icon: 'el-icon-document' }
