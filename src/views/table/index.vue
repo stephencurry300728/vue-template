@@ -166,6 +166,7 @@ export default {
       this.editDialogVisible = true;
     },
 
+    // 更新单一数据
     saveEdit() {
       const id = this.editForm.id;
       updateItem(id, this.editForm)
@@ -192,7 +193,7 @@ export default {
             type: 'success',
             message: '删除成功!'
           });
-          // 刷新列表，例如重新获取数据
+          // 刷新列表，重新获取删除后数据
           this.fetchData();
         }).catch(error => {
           this.$message.error('删除失败');

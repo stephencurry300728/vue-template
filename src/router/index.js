@@ -79,7 +79,18 @@ export const constantRoutes = [
     }]
   },
 
-
+  {
+    path: '/upload',
+    component: Layout,
+    children: [
+      {
+        path: 'upload',
+        name: 'upload',
+        component: () => import('@/views/upload/index'),
+        meta: { title: '上传文件', icon: 'el-icon-upload' }
+      }
+    ]
+  },
 
   {
     path: '/table',
