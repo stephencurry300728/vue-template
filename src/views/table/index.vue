@@ -1,112 +1,213 @@
 <template>
   <div class="app-container">
-    <!-- 
-    表格组件tabel的属性:
-      1.自定义指令v-loading: 表格组件加载时的loading效果 
-      这个值通常会根据数据加载的状态来动态改变，比如在发送请求获取数据时设置为 true，数据加载完成后设置为 false
-      2.data: 表格组件将来需要真实的内容 ----数组array类型
-      3.element-loading-text: 表格组件加载时的文字提示
-      4.border：给表格添加边框
-      5.fit：表格自适应
-      6.highlight-current-row：高亮当前行
-    -->
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="拼命加载中"
-      border
-      fit
-      highlight-current-row
-    >
-      <!-- 第一列 
-        表格列column的属性:
-      1.label: 列显示的标题，即表头
-      2.width: 对应列的宽度
-      3.align: 表头的对齐方式
-      4.prop: 对应列内容的字段名
-    -->
-      <el-table-column align="center" label="ID" width="95">
-        <!-- 声明一个作用域插槽 
-        scope 是一个对象，能够访问与表格的每一行相关的数据和方法
-        -->
+
+    <el-dialog title="编辑数据" :visible.sync="editDialogVisible" align="center" :width="'50%'" class="custom-dialog">
+      <el-form :model="editForm">
+        <el-form-item label="乘务班组">
+          <el-input v-model="editForm.crew_group"></el-input>
+        </el-form-item>
+        <el-form-item label="姓名">
+          <el-input v-model="editForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="工作证号">
+          <el-input v-model="editForm.work_certificate_number"></el-input>
+        </el-form-item>
+        <!-- 不可编辑的字段展示 -->
+        <el-form-item label="文件名">
+          <el-input v-model="editForm.file_name" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="记录日期">
+          <el-input v-model="editForm.record_date" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="车型">
+          <el-input v-model="editForm.train_model" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="考核结果">
+          <el-input v-model="editForm.assessment_result" disabled></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveEdit">保存</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 外部容器用于定位日期选择器 -->
+    <div class="date-picker-offset">
+      <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
+        start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange">
+      </el-date-picker>
+    </div>
+
+    <el-table v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit highlight-current-row stripe
+      @sort-change="handleSortChange">
+      <el-table-column align="center" label="ID" width="70">
+        <!-- 声明一个作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
           <!-- $index 是 ElementUI 提供的一个属性，用于获取当前表格行的行号 -->
-          {{ scope.$index }}
+          {{ scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column label="记录日期" prop="record_date" sortable="custom" align="center" />
+      <el-table-column label="乘务班组" prop="crew_group" sortable="custom" align="center" />
+      <el-table-column label="姓名" prop="name" sortable="custom" align="center" />
+      <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
+      <el-table-column label="车型" prop="train_model" sortable="custom" align="center" />
+      <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center" />
+      <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center" />
+
+      <el-table-column fixed="right" label="操作" width="120" align="center">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="editItem(scope.row)">
+            <i class="el-icon-edit"></i> 编辑
+          </el-button>
+          <el-button type="text" size="small" @click="deleteItem(scope.row)" style="margin-left: 10px; color: red;">
+            <i class="el-icon-delete"></i> 删除
+          </el-button>
         </template>
       </el-table-column>
 
-      <!-- 第二列 -->
-      <el-table-column label="标题" align="center">
-        <template slot-scope="scope">
-          <!-- scope.row 指的是当前行的数据对象，title 是该对象的一个属性 -->
-          {{ scope.row.title }}
-        </template>
-      </el-table-column>
-
-      <!-- 第三列 -->
-      <el-table-column label="作者" width="110" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-
-      <!-- 第四列 -->
-      <el-table-column label="Pageviews" width="110" align="center">
-        <template slot-scope="scope">
-          {{ scope.row.pageviews }}
-        </template>
-      </el-table-column>
-
-      <!-- 第五列 -->
-      <el-table-column align="center" prop="created_at" label="展示时间" width="200">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.display_time }}</span>
-        </template>
-      </el-table-column>
-    
     </el-table>
 
-    <!-- 需要用到分页器 el-pagnation 
-    current-page: 当前页码，代表当前第几页
-    total: 数据的总数
-    page-size: 每页显示多少条数据
-    page-sizes: 每页显示多少条数据的选择器，是一个数组array类型
-    layout: 分页器的布局，"prev, pager, next, jumper, ->, total, slot"，其中 slot 表示分页组件的插槽
-    pager-count: 页码按钮的数量，当总页数超过该值时会折叠
-    -->
+    <!-- 添加flexbox -->
+    <div class="pagination-container">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+        :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
+      </el-pagination>
+    </div>
+
   </div>
 </template>
 
 <script>
-import { getList } from '@/api/table'
+import { getList, updateItem } from '@/api/table' // 假设这个文件在 '@/api/table' 路径下
+import dayjs from 'dayjs'
 
 export default {
   data() {
     return {
-      // list: 表格的数据
-      list: null,
-      // listLoading: 表格加载时的loading效果默认设置为真（第一次打开）
-      listLoading: true
+      list: [],
+      listLoading: true,
+      total: 0,
+      currentPage: 1,
+      pageSize: 10,
+      sort: {
+        prop: '',
+        order: ''
+      },
+      // 设置dateRange的初始值，其中起始日期为2023-10-10
+      dateRange: [new Date(2023, 9, 10), undefined], // JavaScript中月份是从0开始的，所以10月是9
+      editDialogVisible: false, // 控制编辑对话框的显示
+      editForm: {}, // 存储正在编辑的行的数据
     }
   },
   created() {
-    // 在组件创建时就调用fetchData方法来获取表格数据
     this.fetchData()
   },
+
   methods: {
-    // 负责从后端 API 获取数据并更新list的赋值，同时控制加载指示器的显示
     fetchData() {
-      // 开启loading效果
-      this.listLoading = true
-      // 调用api/table.js中的getList方法来获取表格数据
-      getList().then(response => {
-        // 将获取到的数据赋值给list
-        this.list = response.data.items
-        // 关闭loading效果
-        this.listLoading = false
-      })
-    }
+      this.listLoading = true;
+      // 初始化请求参数
+      const params = {
+        page: this.currentPage,
+        page_size: this.pageSize,
+        ordering: this.sort.order === 'asc' ? this.sort.prop : `-${this.sort.prop}`,
+      };
+
+      // 检查dateRange是否有两个日期，如果有，则添加到请求参数
+      if (this.dateRange && this.dateRange.length === 2) {
+        params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
+        params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
+      } // 如果dateRange为空或不完整，不添加日期范围参数，即请求全部数据
+
+      console.log("Fetching data with params:", params);
+      getList(params).then(response => {
+        this.total = response.data.count;
+        this.list = response.data.results;
+        this.listLoading = false; // 成功获取数据后，停止加载状态
+      }).catch(error => {
+        console.error("There was a problem fetching the data:", error);
+        this.listLoading = false; // 请求出错也要确保停止加载状态
+      });
+    },
+
+    onDateRangeChange(value) {
+      console.log("Date range changed:", value);
+      // 不检查dateRange的长度，直接调用fetchData
+      // fetchData将处理是否包含日期范围的逻辑
+      this.fetchData();
+    },
+
+    handleSortChange({ prop, order }) {
+      // 检查是否是连续点击同一个列
+      if (this.sort.prop === prop) {
+        // 如果是，则根据当前的排序方向反转
+        this.sort.order = this.sort.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        // 如果不是，则重置排序属性和方向
+        this.sort.prop = prop;
+        this.sort.order = order === 'ascending' ? 'asc' : 'desc';
+      }
+      this.fetchData();
+    },
+
+    handleCurrentChange(val) {
+      this.currentPage = val
+      this.fetchData()
+    },
+    handleSizeChange(val) {
+      this.pageSize = val
+      this.fetchData()
+    },
+    editItem(row) {
+      this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
+      this.editDialogVisible = true;
+    },
+
+    saveEdit() {
+      const id = this.editForm.id;
+      updateItem(id, this.editForm)
+        .then(() => {
+          this.editDialogVisible = false; // 关闭对话框
+          this.fetchData(); // 重新加载数据
+          this.$message.success('更新成功');
+        })
+        .catch(error => {
+          console.error("更新失败:", error);
+          this.$message.error('更新失败');
+        });
+    },
   }
 }
 </script>
+
+<style scoped>
+/* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
+.custom-dialog .el-dialog {
+  max-height: 40vh;
+  /* 限制对话框的最大高度为视窗高度的70% */
+  overflow-y: auto;
+  /* 超出部分可滚动 */
+}
+
+.el-table {
+  margin-top: 0px;
+  /* 与日期范围选择器的间距 */
+}
+
+.date-picker-offset {
+  padding-left: 60px;
+  /* 推动日期选择器向右边移动 */
+}
+
+.pagination-container {
+  display: flex;
+  /* 启用 Flexbox 布局 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 (如果需要) */
+  margin-top: 20px;
+  /* 与上方表格的间距 */
+}</style>

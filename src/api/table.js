@@ -13,3 +13,12 @@ export function getList(params) {
     params
   })
 }
+
+// 编辑api
+export function updateItem(id, data) {
+  return request({
+    url: `/assessment-base/${id}/`,
+    method: 'put',
+    data
+  })
+}

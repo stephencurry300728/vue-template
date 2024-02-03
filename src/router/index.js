@@ -79,18 +79,7 @@ export const constantRoutes = [
     }]
   },
 
-  // {
-  //   path: '/form',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       name: 'Form',
-  //       component: () => import('@/views/form/index'),
-  //       meta: { title: '表单提交', icon: 'form' }
-  //     }
-  //   ]
-  // },
+
 
   {
     path: '/table',
@@ -101,6 +90,20 @@ export const constantRoutes = [
         name: 'table',
         component: () => import('@/views/table/index'),
         meta: { title: '表格数据', icon: 'el-icon-document' }
+      }
+    ]
+  },
+
+  {
+    path: '/assessment-detail/:id', // 使用动态路由匹配人员的ID
+    component: Layout,
+    children: [
+      {
+        path: '', // 默认子路由
+        name: 'AssessmentDetail',
+        component: () => import('@/views/table/AssessmentDetail'),
+        meta: { title: '详细信息', icon: 'el-icon-info' },
+        hidden: true // 该路由不会在侧边栏出现
       }
     ]
   },
