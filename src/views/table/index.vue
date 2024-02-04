@@ -41,8 +41,8 @@
       </el-date-picker>
     </div>
 
-    <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit highlight-current-row stripe
-      @sort-change="handleSortChange" height="758" >
+    <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
+      highlight-current-row stripe @sort-change="handleSortChange" height="758">
       <el-table-column align="center" label="ID" width="70">
         <!-- 声明一个作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
@@ -50,12 +50,26 @@
           {{ scope.$index + 1 }}
         </template>
       </el-table-column>
+
       <el-table-column label="记录日期" prop="record_date" sortable="custom" align="center" />
       <el-table-column label="乘务班组" prop="crew_group" sortable="custom" align="center" />
       <el-table-column label="姓名" prop="name" sortable="custom" align="center" />
       <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
-      <el-table-column label="车型" prop="train_model" sortable="custom" align="center" />
-      <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center" />
+
+      <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
+        <template slot-scope="scope">
+          <span class="link-like" @click.stop="goToDetail(scope.row.assessment_detail_url)">{{ scope.row.train_model
+          }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
+        <template slot-scope="scope">
+          <span class="link-like" @click="goToDetail(scope.row.assessment_detail_url)">{{ scope.row.assessment_item
+          }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
           {{ formatAssessmentResult(scope.row.assessment_result) }}
@@ -111,10 +125,20 @@ export default {
 
   // 在生命周期组件创建时获取数据
   created() {
-    this.fetchData()
+    this.fetchData();
   },
 
   methods: {
+
+    goToDetail(url) {
+      const id = url.split('/').slice(-2, -1)[0]; // 提取ID
+      // 使用Vuex mutation来设置detailUrl状态
+      this.$store.commit('table/setDetailUrl', url);
+      // 然后导航到详情页面，此时不需要通过查询参数传递url
+      this.$router.push(`/table/detail/${id}`);
+    },
+
+
     // 获取数据并分页和排序
     fetchData() {
       this.listLoading = true;
@@ -245,6 +269,10 @@ export default {
 </script>
 
 <style>
+.link-like {
+  cursor: pointer;
+}
+
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .custom-dialog {
   margin-top: -70px;
@@ -283,11 +311,13 @@ export default {
 }
 
 .el-table__fixed-right-patch {
-    position: absolute;
-    top: -1px;
-    right: 0;
-    background-color: #ffffff00 !important; /* 设置为透明 */
+  position: absolute;
+  top: -1px;
+  right: 0;
+  background-color: #ffffff00 !important;
+  /* 设置为透明 */
 }
+
 .date-picker-offset {
   padding-left: 50px;
   /* 推动日期选择器向右边移动 */
@@ -302,4 +332,5 @@ export default {
   /* 垂直居中 (如果需要) */
   margin-top: 20px;
   /* 与上方表格的间距 */
-}</style>
+}
+</style>
