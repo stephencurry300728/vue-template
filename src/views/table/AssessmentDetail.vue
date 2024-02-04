@@ -14,6 +14,7 @@
 <script>
 import { mapState } from 'vuex';
 import { getDetailByUrl } from '@/api/table';
+import fieldLabelMappings from './fieldToLabelMappings';
 
 export default {
     data() {
@@ -55,7 +56,9 @@ export default {
                 Object.keys(this.detailData[0]).forEach(key => {
                     if (key !== 'assessment_base' && key !== 'id') {
                         // 以字段名作为 label，实际使用时可根据需求进行映射或翻译
-                        columns[key] = key;
+                        // columns[key] = key;
+                        const label = fieldLabelMappings[key] || key; // 使用映射表或回退到字段名
+                        columns[key] = { label: label, sortable: true };
                     }
                 });
             }
