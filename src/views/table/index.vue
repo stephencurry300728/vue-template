@@ -58,15 +58,15 @@
 
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span class="link-like" @click.stop="goToDetail(scope.row.assessment_detail_url)">{{ scope.row.train_model
-          }}</span>
+          <span class="link-like" @click.stop="goToDetail(scope.row.assessment_detail_url)">
+            {{ scope.row.train_model }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span class="link-like" @click="goToDetail(scope.row.assessment_detail_url)">{{ scope.row.assessment_item
-          }}</span>
+          <span class="link-like" @click="goToDetail(scope.row.assessment_detail_url)">
+            {{ scope.row.assessment_item }}</span>
         </template>
       </el-table-column>
 
@@ -130,6 +130,7 @@ export default {
 
   methods: {
 
+    // 传递id和assessment_detail_url到详情页/table/detail/${id}
     goToDetail(url) {
       const id = url.split('/').slice(-2, -1)[0]; // 提取ID
       // 使用Vuex mutation来设置detailUrl状态
@@ -137,7 +138,6 @@ export default {
       // 然后导航到详情页面，此时不需要通过查询参数传递url
       this.$router.push(`/table/detail/${id}`);
     },
-
 
     // 获取数据并分页和排序
     fetchData() {
