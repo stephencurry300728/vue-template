@@ -105,11 +105,14 @@ export default {
       editForm: {}, // 存储正在编辑的行的数据
     }
   },
+
+  // 在生命周期组件创建时获取数据
   created() {
     this.fetchData()
   },
 
   methods: {
+    // 获取数据并分页和排序
     fetchData() {
       this.listLoading = true;
       // 初始化请求参数
@@ -125,7 +128,8 @@ export default {
         params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
       } // 如果dateRange为空或不完整，不添加日期范围参数，即请求全部数据
 
-      console.log("Fetching data with params:", params);
+      // 打印请求参数
+      // console.log("Fetching data with params---------------:", params);
       getList(params).then(response => {
         this.total = response.data.count;
         this.list = response.data.results;
@@ -136,11 +140,13 @@ export default {
       });
     },
 
+      // 日期范围选择器的值发生变化时触发
     onDateRangeChange(value) {
       // fetchData将处理是否包含日期范围的逻辑
       this.fetchData();
     },
 
+    // 排序变化时触发
     handleSortChange({ prop, order }) {
       // 检查是否是连续点击同一个列
       if (this.sort.prop === prop) {
@@ -154,20 +160,25 @@ export default {
       this.fetchData();
     },
 
+    // 分页的当前页变化时触发
     handleCurrentChange(val) {
       this.currentPage = val
       this.fetchData()
     },
+
+    // 每页大小pagesize变化时触发
     handleSizeChange(val) {
       this.pageSize = val
       this.fetchData()
     },
+
+    // 点击编辑特定行并弹出对话框
     editItem(row) {
       this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
       this.editDialogVisible = true;
     },
 
-    // 更新
+    // 具体执行更新 PATCH 特定行
     saveEdit() {
       const id = this.editForm.id;
       updateItem(id, this.editForm)
@@ -182,6 +193,7 @@ export default {
         });
     },
 
+    // 具体删除 DELETE 特定行
     deleteItem(row) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
         confirmButtonText: '确定',
