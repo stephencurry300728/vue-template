@@ -24,6 +24,7 @@ export default {
             const url = this.currentDetail.assessment_detail_url;
             getDetailByUrl(url).then(response => {
                 console.log(response);
+                // 将获取到的详情数据赋值给 detailData
                 this.detailData = response.data;
             }).catch(error => {
                 console.error("Error fetching detail data:", error);
