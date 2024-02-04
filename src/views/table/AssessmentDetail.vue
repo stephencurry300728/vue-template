@@ -4,9 +4,9 @@
             highlight-current-row stripe table-layout="fixed">
             <el-table-column v-for="(value, key) in columns" :key="key" :prop="key"
                 :label="typeof value === 'object' ? value.label : value" align="center"
-                :fixed="typeof value === 'object' && value.fixed ? value.fixed : false"
-                :formatter="key === 'assessment_result' ? assessmentResultFormatter : undefined">
+                :fixed="typeof value === 'object' && value.fixed ? value.fixed : false" :formatter="combinedFormatter">
             </el-table-column>
+
         </el-table>
     </div>
 </template>
@@ -47,7 +47,6 @@ export default {
                     'work_certificate_number': '工作证号',
                     'train_model': '列车型号',
                     'assessment_item': '评估项目',
-                    // 'assessment_result': '评估结果',
                     'assessment_result': { label: '评估结果', fixed: 'left' },
                 };
             }
@@ -79,12 +78,34 @@ export default {
 
     methods: {
         // 评估结果的格式化方法
-        assessmentResultFormatter(row, column, value) {
+        // 评估结果的格式化函数
+        assessmentResultFormatter(value) {
             switch (value) {
                 case 3: return '优秀';
                 case 2: return '合格';
                 case 1: return '不合格';
                 default: return '未知'; // 为了安全起见，添加一个默认返回值
+            }
+        },
+        // 通用格式化函数
+        generalFormatter(value) {
+            const timeRegex = /^\d{2}:\d{2}:\d{2}\.\d+$/;
+            if (timeRegex.test(value)) {
+                // 如果匹配时间格式，则进行相应的格式化
+                return value.replace(/^00:/, '').replace(/\.(\d)\d*$/, '.$1');
+            }
+            // 对于其他类型的值，直接返回原值
+            return value;
+        },
+        // 组合格式化函数
+        combinedFormatter(row, column, cellValue) {
+            // 根据列的属性（即column.property）决定使用哪个格式化逻辑
+            if (column.property === 'assessment_result') {
+                // 如果是评估结果列，使用评估结果格式化函数
+                return this.assessmentResultFormatter(cellValue);
+            } else {
+                // 对于其他列，使用通用格式化函数
+                return this.generalFormatter(cellValue);
             }
         },
     },
