@@ -4,8 +4,11 @@
             highlight-current-row stripe table-layout="fixed">
             <el-table-column v-for="(value, key) in columns" :key="key" :prop="key"
                 :label="typeof value === 'object' ? value.label : value" align="center"
-                :fixed="typeof value === 'object' && value.fixed ? value.fixed : false" :formatter="combinedFormatter">
+                :fixed="typeof value === 'object' && value.fixed ? value.fixed : false"
+                :min-width="typeof value === 'object' && value.minWidth ? value.minWidth : '120'"
+                :formatter="combinedFormatter">
             </el-table-column>
+
         </el-table>
     </div>
 </template>
@@ -42,22 +45,23 @@ export default {
                 columns = {
                     ...columns,
                     'record_date': '记录日期',
-                    'crew_group': '乘务组',
+                    'crew_group': '乘务班组',
                     'name': '姓名',
                     'work_certificate_number': '工作证号',
-                    'train_model': '列车型号',
-                    'assessment_item': '评估项目',
+                    'train_model': '车型',
+                    'assessment_item': '考核项目',
                     // 以评估结果作为固定列，便于查看测评
-                    'assessment_result': { label: '评估结果', fixed: 'left' },
+                    'assessment_result': { label: '考核结果', fixed: 'left' },
                 };
             }
             // 根据 detailData 动态添加字段，且排除 assessment_base 和 id 这两个字段
             if (this.detailData.length > 0) {
                 Object.keys(this.detailData[0]).forEach(key => {
                     if (key !== 'assessment_base' && key !== 'id') {
-                        // 以字段名作为 label，实际使用时可根据需求进行映射或翻译
-                        const label = fieldLabelMappings[key] || key; // 使用自定义的映射表回退到字段名，需与后端models约定的字段名一致
-                        columns[key] = { label: label, sortable: true };
+                        const label = fieldLabelMappings[key] || key; // 使用自定义映射表或回退到字段名
+                        // 为每个动态字段设置默认最小宽度，特定字段可以设置更大的宽度
+                        const minWidth = key === 'some_specific_field' ? '250' : '120'; // 举例，根据需要调整
+                        columns[key] = { label: label, minWidth: minWidth, sortable: true };
                     }
                 });
             }
