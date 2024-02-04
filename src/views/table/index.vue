@@ -45,7 +45,7 @@
     <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
       highlight-current-row stripe @sort-change="handleSortChange" height="758">
       <el-table-column align="center" label="ID" width="70">
-        <!-- 声明一个作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
+        <!-- 作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
           <!-- $index 是 ElementUI 提供的一个属性，用于获取当前表格行的行号 -->
           {{ scope.$index + 1 }}
@@ -57,6 +57,7 @@
       <el-table-column label="姓名" prop="name" sortable="custom" align="center" />
       <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
 
+      <!-- 定义goToDetail能够通过车型去特定测评 -->
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click.stop="goToDetail(scope.row)">
@@ -64,6 +65,7 @@
         </template>
       </el-table-column>
 
+      <!-- 通过goToDetail能够通过考核项目去特定测评 -->
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click="goToDetail(scope.row)">
@@ -71,12 +73,14 @@
         </template>
       </el-table-column>
 
+      <!-- 转换器考核结果 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
           {{ formatAssessmentResult(scope.row.assessment_result) }}
         </template>
       </el-table-column>
 
+      <!-- 操作列 定义了部分编辑 PATCH 和单例删除 DELETE -->
       <el-table-column fixed="right" label="操作" width="120" align="center">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="editItem(scope.row)">
@@ -90,7 +94,7 @@
 
     </el-table>
 
-    <!-- 添加flexbox -->
+    <!-- 为分页器添加FlexBox 能够居中-->
     <div class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
         :page-sizes="[12, 30, 50, 100, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
@@ -102,8 +106,8 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem } from '@/api/table' // 假设这个文件在 '@/api/table' 路径下
-import dayjs from 'dayjs'
+import { getList, updateItem, deleteItem } from '@/api/table' // 导入获取数据的API
+import dayjs from 'dayjs' // 导入日期处理库
 
 export default {
   data() {
@@ -117,7 +121,7 @@ export default {
         prop: '',
         order: ''
       },
-      // 设置dateRange的初始值，其中起始日期为2023-10-10
+      // 设置dateRange的初始测评日期，其中起始日期为2023-10-10
       dateRange: [new Date(2023, 9, 10), undefined], // JavaScript中月份是从0开始的，所以10月是9
       editDialogVisible: false, // 控制编辑对话框的显示
       editForm: {}, // 存储正在编辑的行的数据
@@ -157,6 +161,7 @@ export default {
         this.listLoading = false; // 请求出错也要确保停止加载状态
       });
     },
+
     /**
      * 根据考核结果的数值转换为对应的文本
      * @param {Number} value 考核结果的数值。预期值为 0 到 3。
@@ -262,18 +267,18 @@ export default {
       // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
       this.$store.commit('table/setCurrentDetail', item);
       // 根据item中的assessment_detail_url提取ID
-      // 例如http://127.0.0.1:8000/api/assessment-10a02/2706/
+      // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
       // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
-      // 取这个数组的倒数第二个元素，即 2706
+      // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
       const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
-      // 再导航到详情页面
+      // 再利用路由器导航到详情页面
       this.$router.push(`/table/detail/${id}`);
     },
   }
 }
 </script>
 
-<!-- 该网页样式 -->
+<!-- 网页样式 -->
 <style scoped>
 .custom-dialog {
   margin-top: -70px;
