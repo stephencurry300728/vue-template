@@ -41,8 +41,8 @@
       </el-date-picker>
     </div>
 
-    <el-table v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit highlight-current-row stripe
-      @sort-change="handleSortChange" height="756">
+    <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit highlight-current-row stripe
+      @sort-change="handleSortChange" height="758" >
       <el-table-column align="center" label="ID" width="70">
         <!-- 声明一个作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
@@ -244,7 +244,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .custom-dialog {
   margin-top: -70px;
@@ -261,6 +261,33 @@ export default {
   /* 与日期范围选择器的间距 */
 }
 
+.el-table th {
+  background-color: #f2f2f2;
+  /* 背景色 */
+  color: #333;
+  /* 字体颜色 */
+  font-weight: bold;
+  /* 字体加粗 */
+  line-height: normal;
+  /* 行高 */
+  border-bottom: 2px solid #e8e8e8;
+  /* 底部边框 */
+}
+
+.custom-table .el-table__header-wrapper th {
+  background-color: #f2f2f2 !important;
+  color: #333 !important;
+  font-weight: bold !important;
+  line-height: normal !important;
+  border-bottom: 2px solid #e8e8e8 !important;
+}
+
+.el-table__fixed-right-patch {
+    position: absolute;
+    top: -1px;
+    right: 0;
+    background-color: #ffffff00 !important; /* 设置为透明 */
+}
 .date-picker-offset {
   padding-left: 50px;
   /* 推动日期选择器向右边移动 */
@@ -275,5 +302,4 @@ export default {
   /* 垂直居中 (如果需要) */
   margin-top: 20px;
   /* 与上方表格的间距 */
-}
-</style>
+}</style>
