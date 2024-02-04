@@ -6,7 +6,6 @@
                 :label="typeof value === 'object' ? value.label : value" align="center"
                 :fixed="typeof value === 'object' && value.fixed ? value.fixed : false" :formatter="combinedFormatter">
             </el-table-column>
-
         </el-table>
     </div>
 </template>
@@ -48,16 +47,16 @@ export default {
                     'work_certificate_number': '工作证号',
                     'train_model': '列车型号',
                     'assessment_item': '评估项目',
+                    // 以评估结果作为固定列，便于查看测评
                     'assessment_result': { label: '评估结果', fixed: 'left' },
                 };
             }
-            // 根据 detailData 动态添加字段，排除 assessment_base 和 id
+            // 根据 detailData 动态添加字段，且排除 assessment_base 和 id 这两个字段
             if (this.detailData.length > 0) {
                 Object.keys(this.detailData[0]).forEach(key => {
                     if (key !== 'assessment_base' && key !== 'id') {
                         // 以字段名作为 label，实际使用时可根据需求进行映射或翻译
-                        // columns[key] = key;
-                        const label = fieldLabelMappings[key] || key; // 使用映射表或回退到字段名
+                        const label = fieldLabelMappings[key] || key; // 使用自定义的映射表回退到字段名，需与后端models约定的字段名一致
                         columns[key] = { label: label, sortable: true };
                     }
                 });
@@ -67,7 +66,7 @@ export default {
         tableData() {
             // 假设只有一行detailData，结合currentDetail展示
             const combinedData = [{ ...this.currentDetail, ...this.detailData[0] }];
-            // 处理空值
+            // 处理测评中的空值
             combinedData.forEach(row => {
                 Object.keys(row).forEach(key => {
                     if (row[key] === null || row[key] === '') {
@@ -80,8 +79,7 @@ export default {
     },
 
     methods: {
-        // 评估结果的格式化方法
-        // 评估结果的格式化函数
+        // 评估结果的格式化
         assessmentResultFormatter(value) {
             switch (value) {
                 case 3: return '优秀';
@@ -90,7 +88,7 @@ export default {
                 default: return '未知'; // 为了安全起见，添加一个默认返回值
             }
         },
-        // 通用格式化函数
+        // 将数据库传来的时间 格式化为 mm:ss.S
         generalFormatter(value) {
             const timeRegex = /^\d{2}:\d{2}:\d{2}\.\d+$/;
             if (timeRegex.test(value)) {
@@ -100,7 +98,7 @@ export default {
             // 对于其他类型的值，直接返回原值
             return value;
         },
-        // 组合格式化函数
+        // 两个函数组合
         combinedFormatter(row, column, cellValue) {
             // 根据列的属性（即column.property）决定使用哪个格式化逻辑
             if (column.property === 'assessment_result') {
