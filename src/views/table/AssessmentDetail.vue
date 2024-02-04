@@ -7,12 +7,11 @@
 
 <script>
 import { mapState } from 'vuex';
-import { getDetailByUrl } from '@/api/table'
+import { getDetailByUrl } from '@/api/table';
 
 export default {
     computed: {
-        // 从Vuex获取detailUrl状态
-        ...mapState('table', ['detailUrl']),
+        ...mapState('table', ['currentDetail']),
     },
     data() {
         return {
@@ -20,12 +19,9 @@ export default {
         };
     },
     created() {
-        this.loadDetail();
-    },
-    methods: {
-        loadDetail() {
-            // 直接使用从Vuex获取的detailUrl
-            const url = this.detailUrl;
+        if (this.currentDetail) {
+            // 引入Vuex中的全部数据 currentDetail，获取里面详情页的 URL
+            const url = this.currentDetail.assessment_detail_url;
             getDetailByUrl(url).then(response => {
                 console.log(response);
                 this.detailData = response.data;
@@ -33,8 +29,7 @@ export default {
                 console.error("Error fetching detail data:", error);
             });
         }
-    }
+    },
 };
 </script>
-
 <style></style>

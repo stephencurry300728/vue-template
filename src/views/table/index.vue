@@ -58,14 +58,14 @@
 
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span class="link-like" @click.stop="goToDetail(scope.row.assessment_detail_url)">
+          <span class="link-like" @click.stop="goToDetail(scope.row)">
             {{ scope.row.train_model }}</span>
         </template>
       </el-table-column>
 
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span class="link-like" @click="goToDetail(scope.row.assessment_detail_url)">
+          <span class="link-like" @click="goToDetail(scope.row)">
             {{ scope.row.assessment_item }}</span>
         </template>
       </el-table-column>
@@ -123,22 +123,12 @@ export default {
     }
   },
 
-  // 在生命周期组件创建时获取数据
+  // 在组件创建时就获取数据
   created() {
     this.fetchData();
   },
 
   methods: {
-
-    // 传递id和assessment_detail_url到详情页/table/detail/${id}
-    goToDetail(url) {
-      const id = url.split('/').slice(-2, -1)[0]; // 提取ID
-      // 使用Vuex mutation来设置detailUrl状态
-      this.$store.commit('table/setDetailUrl', url);
-      // 然后导航到详情页面，此时不需要通过查询参数传递url
-      this.$router.push(`/table/detail/${id}`);
-    },
-
     // 获取数据并分页和排序
     fetchData() {
       this.listLoading = true;
@@ -166,12 +156,10 @@ export default {
         this.listLoading = false; // 请求出错也要确保停止加载状态
       });
     },
-
     /**
-     * 根据考核结果的数值转换为对应的文本描述。
-     * 
+     * 根据考核结果的数值转换为对应的文本
      * @param {Number} value 考核结果的数值。预期值为 0 到 3。
-     * @return {String} 返回考核结果的文本描述。可能的返回值包括"优秀"、"合格"、"不合格"、"其他"。
+     * @return {String} 返回考核结果的文本。可能的返回值包括"优秀"、"合格"、"不合格"、"其他"。
      */
     formatAssessmentResult(value) {
       switch (value) {
@@ -185,6 +173,7 @@ export default {
           return '其他';
       }
     },
+
     // 日期范围选择器的值发生变化时触发
     onDateRangeChange(value) {
       // fetchData将处理是否包含日期范围的逻辑
@@ -202,6 +191,7 @@ export default {
         this.sort.prop = prop;
         this.sort.order = order === 'ascending' ? 'asc' : 'desc';
       }
+      // 重新获取数据
       this.fetchData();
     },
 
@@ -220,16 +210,16 @@ export default {
     // 点击编辑特定行并弹出对话框
     editItem(row) {
       this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
-      this.editDialogVisible = true;
+      this.editDialogVisible = true; // 打开遮罩层对话框
     },
 
-    // 具体执行更新 PATCH 特定行
+    // 具体执行部分更新 PATCH 特定行
     saveEdit() {
       const id = this.editForm.id;
       updateItem(id, this.editForm)
         .then(() => {
-          this.editDialogVisible = false; // 关闭对话框
-          this.fetchData(); // 重新加载数据
+          this.editDialogVisible = false; // 更新完毕后自动关闭对话框
+          this.fetchData(); // 重新加载更新后的数据
           this.$message.success('更新成功');
         })
         .catch(error => {
@@ -263,6 +253,20 @@ export default {
           message: '已取消删除'
         });
       });
+    },
+
+    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
+    // 这个参数 item 是 row.scope 即当前行的完整数据
+    goToDetail(item) {
+      // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
+      this.$store.commit('table/setCurrentDetail', item);
+      // 根据item中的assessment_detail_url提取ID
+      // 例如http://127.0.0.1:8000/api/assessment-10a02/2706/
+      // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
+      // 取这个数组的倒数第二个元素，即 2706
+      const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
+      // 再导航到详情页面
+      this.$router.push(`/table/detail/${id}`);
     },
   }
 }

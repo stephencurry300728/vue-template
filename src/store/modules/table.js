@@ -1,16 +1,15 @@
 export default {
     namespaced: true, // 启用命名空间
 
-    // 模块的状态
     state: {
-        detailUrl: '' // 用于存储详情页的URL
+        // 用于存储当前选中的项的详细数据
+        currentDetail: null, 
     },
 
-    // 修改状态的方法
     mutations: {
-        // 设置详情页URL的mutation
-        setDetailUrl(state, url) {
-            state.detailUrl = url;
-        }
+        // 赋值当前选中的项的详细数据
+        setCurrentDetail(state, detail) {
+            state.currentDetail = detail;
+        },
     },
 };
