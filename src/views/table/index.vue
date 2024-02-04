@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
 
+    <!-- 编辑数据的遮盖对话框 -->
     <el-dialog title="编辑数据" :visible.sync="editDialogVisible" align="center" class="custom-dialog">
       <el-form :model="editForm" class="compact-form">
         <el-form-item label="记录日期">
@@ -92,7 +93,7 @@
     <!-- 添加flexbox -->
     <div class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-        :page-sizes="[12, 30, 50, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="[12, 30, 50, 100, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
         :total="total">
       </el-pagination>
     </div>
@@ -272,12 +273,8 @@ export default {
 }
 </script>
 
-<style>
-.link-like {
-  cursor: pointer;
-}
-
-/* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
+<!-- 该网页样式 -->
+<style scoped>
 .custom-dialog {
   margin-top: -70px;
   /* 根据需要调整对话框的垂直位置 */
@@ -288,6 +285,50 @@ export default {
   /* 减少表单项之间的垂直间距 */
 }
 
+.link-like {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0 2px;
+  border: 1px solid #409EFF;
+  /* 使用Element UI的默认蓝色作为边框颜色 */
+  color: #409EFF;
+  border-radius: 4px;
+  /* 圆角边框 */
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 14px;
+  /* 调整字体大小 */
+  background-color: #fff;
+  /* 初始背景颜色 */
+}
+
+.link-like:hover {
+  background-color: #409EFF;
+  /* 鼠标悬停时背景颜色变化 */
+  color: #fff;
+  /* 鼠标悬停时文字颜色变为白色 */
+}
+
+.date-picker-offset {
+  padding-left: 50px;
+  /* 推动日期选择器向右边移动 */
+}
+
+.pagination-container {
+  display: flex;
+  /* 启用 Flexbox 布局 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 (如果需要) */
+  margin-top: 20px;
+  /* 与上方表格的间距 */
+}
+</style>
+
+<!-- 全局样式 -->
+<style>
+/* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .el-table {
   margin-top: 0px;
   /* 与日期范围选择器的间距 */
@@ -320,21 +361,5 @@ export default {
   right: 0;
   background-color: #ffffff00 !important;
   /* 设置为透明 */
-}
-
-.date-picker-offset {
-  padding-left: 50px;
-  /* 推动日期选择器向右边移动 */
-}
-
-.pagination-container {
-  display: flex;
-  /* 启用 Flexbox 布局 */
-  justify-content: center;
-  /* 水平居中 */
-  align-items: center;
-  /* 垂直居中 (如果需要) */
-  margin-top: 20px;
-  /* 与上方表格的间距 */
 }
 </style>
