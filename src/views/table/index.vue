@@ -280,6 +280,11 @@ export default {
 
 <!-- 网页样式 -->
 <style scoped>
+.app-container {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  /* 与浏览器窗口的间距 */
+}
 .custom-dialog {
   margin-top: -70px;
   /* 根据需要调整对话框的垂直位置 */
@@ -315,6 +320,7 @@ export default {
 }
 
 .date-picker-offset {
+  margin: 0;
   padding-left: 50px;
   /* 推动日期选择器向右边移动 */
 }
