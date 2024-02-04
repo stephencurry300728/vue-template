@@ -15,7 +15,7 @@
       <!-- trigger	属性触发click下拉的行为 -->
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="require('@/assets/avatar.jpeg')" class="user-avatar">
+          <img :src="require('@/assets/avatar.png')" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
         <!-- 通过组件slot来设置下拉触发的元素，并通过具名slot为dropdown 来设置下拉式菜单
