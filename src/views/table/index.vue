@@ -3,6 +3,9 @@
 
     <el-dialog title="编辑数据" :visible.sync="editDialogVisible" align="center" class="custom-dialog">
       <el-form :model="editForm" class="compact-form">
+        <el-form-item label="记录日期">
+          <el-input v-model="editForm.record_date" disabled></el-input>
+        </el-form-item>
         <el-form-item label="乘务班组">
           <el-input v-model="editForm.crew_group"></el-input>
         </el-form-item>
@@ -12,10 +15,6 @@
         <el-form-item label="工作证号">
           <el-input v-model="editForm.work_certificate_number"></el-input>
         </el-form-item>
-        <!-- 不可编辑的字段展示 -->
-        <el-form-item label="记录日期">
-          <el-input v-model="editForm.record_date" disabled></el-input>
-        </el-form-item>
         <el-form-item label="车型">
           <el-input v-model="editForm.train_model" disabled></el-input>
         </el-form-item>
@@ -23,7 +22,7 @@
           <el-input v-model="editForm.assessment_item" disabled></el-input>
         </el-form-item>
         <el-form-item label="考核结果">
-          <el-input v-model="editForm.assessment_result" disabled></el-input>
+          <el-input :value="formatAssessmentResult(editForm.assessment_result)" readonly></el-input>
         </el-form-item>
         <el-form-item label="文件来源">
           <el-input v-model="editForm.file_name" disabled></el-input>
@@ -57,7 +56,11 @@
       <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center" />
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center" />
-      <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center" />
+      <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
+        <template slot-scope="scope">
+          {{ formatAssessmentResult(scope.row.assessment_result) }}
+        </template>
+      </el-table-column>
 
       <el-table-column fixed="right" label="操作" width="120" align="center">
         <template slot-scope="scope">
@@ -140,7 +143,25 @@ export default {
       });
     },
 
-      // 日期范围选择器的值发生变化时触发
+    /**
+     * 根据考核结果的数值转换为对应的文本描述。
+     * 
+     * @param {Number} value 考核结果的数值。预期值为 0 到 3。
+     * @return {String} 返回考核结果的文本描述。可能的返回值包括"优秀"、"合格"、"不合格"、"其他"。
+     */
+    formatAssessmentResult(value) {
+      switch (value) {
+        case 3:
+          return '优秀';
+        case 2:
+          return '合格';
+        case 1:
+          return '不合格';
+        default:
+          return '其他';
+      }
+    },
+    // 日期范围选择器的值发生变化时触发
     onDateRangeChange(value) {
       // fetchData将处理是否包含日期范围的逻辑
       this.fetchData();
