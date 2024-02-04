@@ -12,5 +12,12 @@ module.exports = {
    * @type {boolean} true | false
    * @description 侧边栏是否显示logo
    */
-  sidebarLogo: false
+  sidebarLogo: false,
+
+  /**
+   * @type {boolean} true | false
+   * @description 导航栏下面的tagsView是否显示
+   */
+  tagsView: true, // tagsView显隐控制
+
 }

@@ -78,7 +78,19 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
-
+  // 重定向
+  {
+    path: '/redirect',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/redirect/:path*',
+        component: () => import('@/views/redirect/index')
+      }
+    ]
+  },
+  
   {
     path: '/upload',
     component: Layout,
@@ -111,20 +123,6 @@ export const constantRoutes = [
       }
     ]
   },
-
-  // {
-  //   path: '/details/:id', // 使用动态路由匹配人员的ID
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: '', // 默认子路由
-  //       name: 'AssessmentDetail',
-  //       component: () => import('@/views/table/AssessmentDetail'),
-  //       meta: { title: '详细信息', icon: 'el-icon-info' },
-  //       hidden: true // 该路由不会在侧边栏出现
-  //     }
-  //   ]
-  // },
 
   {
     path: '/example',
