@@ -38,12 +38,14 @@
     <!-- 外部容器用于定位日期选择器 -->
     <div class="date-picker-offset">
       <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
-        start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange">
-      </el-date-picker>
+        start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
     </div>
 
+    <!-- 表格组件 -->
     <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
-      highlight-current-row stripe @sort-change="handleSortChange" height="758">
+      highlight-current-row stripe @sort-change="handleSortChange" height="758"
+      :default-sort="{ prop: sort.prop, order: sort.order }">
+      <!-- 表的内容 -->
       <el-table-column align="center" label="ID" width="70">
         <!-- 作用域插槽 scope 是一个对象，能够访问与表格的每一行相关的数据和方法-->
         <template slot-scope="scope">
@@ -57,7 +59,7 @@
       <el-table-column label="姓名" prop="name" sortable="custom" align="center" />
       <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
 
-      <!-- 定义goToDetail能够通过车型去特定测评 -->
+      <!-- 定义 goToDetail 能够通过车型去特定的测评数据 -->
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click.stop="goToDetail(scope.row)">
@@ -65,7 +67,7 @@
         </template>
       </el-table-column>
 
-      <!-- 通过goToDetail能够通过考核项目去特定测评 -->
+      <!-- 通过goToDetail能够通过考核项目去特定的测评数据 -->
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click="goToDetail(scope.row)">
@@ -73,7 +75,7 @@
         </template>
       </el-table-column>
 
-      <!-- 转换器考核结果 -->
+      <!-- 转换考核结果 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
           {{ formatAssessmentResult(scope.row.assessment_result) }}
@@ -106,67 +108,68 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem } from '@/api/table' // 导入获取数据的API
+import {getList, updateItem, deleteItem} from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 
 export default {
   data() {
     return {
-      list: [],
-      listLoading: true,
-      total: 0,
-      currentPage: 1,
-      pageSize: 12,
+      list: [], // 存储表格数据
+      listLoading: true, // 控制表格加载状态，默认为true
+      total: 0,  // 总共数据
+      currentPage: 1,  // 当前页码
+      pageSize: 12, // 每页大小
       sort: {
-        prop: '',
-        order: ''
+        prop: '', // 排序的字段
+        order: '' // 排序方式 ascending为升序，descending为降序,
       },
-      // 设置dateRange的初始测评日期，其中起始日期为2023-10-10
-      dateRange: [new Date(2023, 9, 10), undefined], // JavaScript中月份是从0开始的，所以10月是9
-      editDialogVisible: false, // 控制编辑对话框的显示
-      editForm: {}, // 存储正在编辑的行的数据
-    }
+      dateRange: [new Date(2023, 9, 10), undefined], // 日期范围选择器的值
+      editDialogVisible: false, // 编辑对话框的显示状态
+      editForm: {}, // 编辑表单的数据
+    };
   },
-
-  // 在组件创建时就获取数据
   created() {
+    this.restoreStateFromRouteQuery();
     this.fetchData();
   },
-
+  watch: {
+    '$route.query': {
+      handler: 'restoreStateFromRouteQuery',
+      immediate: true,
+    },
+  },
   methods: {
-    // 获取数据并分页和排序
     fetchData() {
+      // 开启表格加载
       this.listLoading = true;
-      // 初始化请求参数
+      // 根据this.sort.order的值来决定排序参数的值
+      // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
+      const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
+      // 带着请求参数调用API
       const params = {
-        page: this.currentPage,
-        page_size: this.pageSize,
-        ordering: this.sort.order === 'asc' ? this.sort.prop : `-${this.sort.prop}`,
+        page: this.currentPage, // 传递给API的页码
+        page_size: this.pageSize, // 传递给API的每页大小
+        ordering: ordering, // 传递给API的排序字段
+        start_date: '', // 起始日期，默认为空字符串
+        end_date: '', // 终止日期，默认为空字符串
       };
 
-      // 检查dateRange是否有两个日期，如果有，则添加到请求参数
-      if (this.dateRange && this.dateRange.length === 2) {
-        params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
-        params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
-      } // 如果dateRange为空或不完整，不添加日期范围参数，即请求全部数据
+      // 如果日期范围非空，则更新 params 并使用dayjs库来格式化日期
+      if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
+      if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
 
-      // 打印请求参数
-      // console.log("Fetching data with params---------------:", params);
-      getList(params).then(response => {
-        this.total = response.data.count;
-        this.list = response.data.results;
-        this.listLoading = false; // 成功获取数据后，停止加载状态
-      }).catch(error => {
-        console.error("There was a problem fetching the data:", error);
-        this.listLoading = false; // 请求出错也要确保停止加载状态
-      });
+      // 调用API 文件夹下的自定义 getList函数，并将params作为参数传入
+      getList(params)
+        .then(response => {
+          // 获取到请求后将数据赋值给list
+          this.list = response.data.results;
+          // 获取到请求后将总共数据赋值给total
+          this.total = response.data.count;
+        })
+        .finally(() => this.listLoading = false); // 停止加载
     },
 
-    /**
-     * 根据考核结果的数值转换为对应的文本
-     * @param {Number} value 考核结果的数值。预期值为 0 到 3。
-     * @return {String} 返回考核结果的文本。可能的返回值包括"优秀"、"合格"、"不合格"、"其他"。
-     */
+    // 转换考核结果呈现在表格中
     formatAssessmentResult(value) {
       switch (value) {
         case 3:
@@ -180,37 +183,77 @@ export default {
       }
     },
 
+    updateRouteQuery() {
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          page: this.currentPage,
+          pageSize: this.pageSize,
+          sortProp: this.sort.prop,
+          sortOrder: this.sort.order,
+          startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+          endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        }
+      });
+    },
+
     // 日期范围选择器的值发生变化时触发
     onDateRangeChange(value) {
-      // fetchData将处理是否包含日期范围的逻辑
-      this.fetchData();
-    },
-
-    // 排序变化时触发
-    handleSortChange({ prop, order }) {
-      // 检查是否是连续点击同一个列
-      if (this.sort.prop === prop) {
-        // 如果是，则根据当前的排序方向反转
-        this.sort.order = this.sort.order === 'asc' ? 'desc' : 'asc';
+      if (!value || value.length === 0 || (!value[0] && !value[1])) {
+        // 清空日期范围
+        this.dateRange = [undefined, undefined];
       } else {
-        // 如果不是，则重置排序属性和方向
-        this.sort.prop = prop;
-        this.sort.order = order === 'ascending' ? 'asc' : 'desc';
+        // 更新日期范围
+        this.dateRange = value;
       }
-      // 重新获取数据
-      this.fetchData();
+      this.currentPage = 1; // 重置到第一页
+      this.updateRouteQuery(); // 更新URL查询参数
     },
 
-    // 分页的当前页变化时触发
+    restoreStateFromRouteQuery() {
+      // 从this.$route.query中解构赋值
+      const {
+        page,
+        pageSize,
+        sortProp,
+        sortOrder,
+        startDate,
+        endDate
+      } = this.$route.query;
+      if (page) this.currentPage = parseInt(page);
+      if (pageSize) this.pageSize = parseInt(pageSize);
+      if (sortProp) this.sort.prop = sortProp;
+      if (sortOrder) this.sort.order = sortOrder === 'ascending' ? 'ascending' : 'descending';
+      if (startDate) this.dateRange[0] = new Date(startDate);
+      if (endDate) this.dateRange[1] = new Date(endDate);
+    },
+
+
+    handleSortChange({
+      prop,
+      order
+    }) {
+      if (this.sort.prop === prop) {
+        this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
+        if (this.sort.order === '') {
+          this.sort.prop = ''; // Remove sorting
+        }
+      } else {
+        this.sort.prop = prop;
+        this.sort.order = 'ascending';
+      }
+      this.updateRouteQuery();
+    },
+
+
     handleCurrentChange(val) {
-      this.currentPage = val
-      this.fetchData()
-    },
+      this.currentPage = val;
+      this.updateRouteQuery();
 
-    // 每页大小pagesize变化时触发
+    },
     handleSizeChange(val) {
-      this.pageSize = val
-      this.fetchData()
+      this.pageSize = val;
+      this.updateRouteQuery();
     },
 
     // 点击编辑特定行并弹出对话框
@@ -280,7 +323,6 @@ export default {
 
 <!-- 网页样式 -->
 <style scoped>
-
 .app-container {
   padding-top: 0px;
   padding-bottom: 0px;
@@ -339,8 +381,9 @@ export default {
 }
 </style>
 
-<!-- 全局样式 -->
 <style>
+< !-- 全局样式 -->
+
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .el-table {
   margin-top: 0px;
