@@ -131,16 +131,19 @@ export default {
       editForm: {}, // 编辑表单的数据
     };
   },
+
   created() {
     this.restoreStateFromRouteQuery();
     this.fetchData();
   },
+
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
       immediate: false,
     },
   },
+
   methods: {
     fetchData() {
       // 开启表格加载
@@ -191,11 +194,11 @@ export default {
     getAssessmentClass(value) {
       switch (value) {
         case 3:
-          return 'highlight-blue'; // 优秀
+          return 'highlight-excellent'; // 优秀
         case 2:
-          return 'highlight-green'; // 合格
+          return 'highlight-qualified'; // 合格
         case 1:
-          return 'highlight-red'; // 不合格
+          return 'highlight-Unqualified'; // 不合格
         default:
           return ''; // 其他情况不添加特殊样式
       }
@@ -360,7 +363,8 @@ export default {
   /* 与浏览器窗口的间距 */
 }
 
-.highlight-red {
+/* 不合格的样式 */
+.highlight-Unqualified {
   background-color: #ffebee;
   /* 浅红色背景 */
   color: #d32f2f;
@@ -379,7 +383,7 @@ export default {
 }
 
 /* 合格的样式 */
-.highlight-green {
+.highlight-qualified {
   background-color: #e8f5e9;
   /* 浅绿色背景 */
   color: #2e7d32;
@@ -394,7 +398,8 @@ export default {
 }
 
 /* 优秀的样式 */
-.highlight-blue {
+.highlight-excellent {
+  background-color: #eef1f1;
   /* 浅蓝色背景 */
   color: #000c0c;
   /* 深蓝色文本 */
