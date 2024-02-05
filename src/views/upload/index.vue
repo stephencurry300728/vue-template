@@ -34,20 +34,30 @@ export default {
             }
             return true;
         },
+
         // 调用API上传批量csv文件
         async uploadRequest(options) {
             NProgress.start(); // 开始显示进度条
+            let fileNameWithoutExtension = options.file.name.split('.').slice(0, -1).join('.'); // 提前定义，以便在catch块中使用
             try {
                 const response = await uploadFile(options.file);
-                let fileNameWithoutExtension = options.file.name.split('.').slice(0, -1).join('.');
-                this.$message.success(fileNameWithoutExtension + ' 文件上传成功！');
+                this.$message.success(`${fileNameWithoutExtension} 文件上传成功！`);
             } catch (error) {
                 console.error('Upload error:', error);
-                this.$message.error(fileNameWithoutExtension + '文件上传失败！');
+                this.$message.error(`${fileNameWithoutExtension} 文件上传失败！`);
+                // 可以在这里添加更多的错误处理逻辑，比如重试机制或提示用户检查文件格式等
             } finally {
                 NProgress.done(); // 完成后隐藏进度条
             }
         },
+
+        // 在处理文件上传后重置input的value
+        resetInput(inputElement) {
+            if (inputElement && inputElement.value) {
+                inputElement.value = ''; // 重置input，确保再次上传相同文件时change事件能触发
+            }
+        },
+
         // 触发文件选择
         triggerFileSelect() {
             this.$refs.fileInput.click();
@@ -56,10 +66,11 @@ export default {
         async handleFileUpload(event) {
             const files = event.target.files;
             for (const file of files) {
-                // 等待每个文件上传成功后，再进行下一个
                 await this.uploadRequest({ file });
             }
+            this.resetInput(event.target); // 重置文件输入
         },
+
         // 触发文件夹选择
         triggerFolderSelect() {
             this.$refs.folderInput.click();
@@ -69,16 +80,15 @@ export default {
             const files = event.target.files;
             for (const file of files) {
                 try {
-                    // 等待每个文件上传成功后，再进行下一个
                     console.log('Uploading file from folder:', file.name);
                     await this.uploadRequest({ file });
                 } catch (error) {
                     console.error(`Error uploading file ${file.name}:`, error);
-                    // 可以选择在这里停止进程，或者继续尝试上传剩下的文件
+                    // 错误处理逻辑，根据需要添加
                 }
             }
+            this.resetInput(event.target); // 重置文件夹输入，允许重新上传相同文件夹
         }
-
     }
 };
 </script>
