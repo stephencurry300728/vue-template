@@ -35,7 +35,7 @@
       </span>
     </el-dialog>
 
-    <!-- 外部容器放置筛选重置和按钮 -->
+    <!-- 外部容器放置重置按钮、日期选择器、选择框 -->
     <div class="filters-container">
       <!-- 按钮容器 -->
       <div class="reset-button-container">
@@ -49,10 +49,14 @@
       </div>
 
       <!-- 可清空的选择框 -->
-      <el-select v-model="selectedOption" clearable placeholder="请选择">
-        <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
-        </el-option>
-      </el-select>
+      <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
+        <el-select v-model="selectedOption" clearable placeholder="请选择"
+          style="width: 322px; height: 40px; font-size: 16px;">
+          <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
+          </el-option>
+        </el-select>
+
+      </div>
 
     </div>
 
@@ -90,7 +94,7 @@
         </template>
       </el-table-column>
 
-      <!-- 转换考核结果 -->
+      <!-- 转换考核结果并定制 优秀、合格、不合格的样式 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
           <span :class="getAssessmentClass(scope.row.assessment_result)" @click="goToDetail(scope.row)"
@@ -99,7 +103,6 @@
           </span>
         </template>
       </el-table-column>
-
 
       <!-- 操作列 定义了部分编辑 PATCH 和单例删除 DELETE -->
       <el-table-column fixed="right" label="操作" width="120" align="center">
@@ -115,7 +118,7 @@
 
     </el-table>
 
-    <!-- 为分页器添加FlexBox 能够居中-->
+    <!-- 为分页器添加 FlexBox 能够居中-->
     <div class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
         :page-sizes="[12, 30, 50, 100, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
@@ -150,17 +153,17 @@ export default {
     };
   },
 
-  // 组件创建时调用路由的查询参数和获取数据
-  // 组件创建时调用
+  // 组件创建时调用 LocalStorage 的查询参数并获取数据
   created() {
     this.restoreStateFromLocalStorage();
     this.fetchData();
   },
 
-  // 从localStorage恢复筛选条件的状态
+  // 从 LocalStorage 获取参数以恢复筛选条件的状态
   restoreStateFromLocalStorage() {
     const filters = JSON.parse(localStorage.getItem('tableFilters'));
     if (filters) {
+      // 如果 LocalStorage 中有筛选条件的状态，则恢复到当前组件的状态中
       this.currentPage = filters.page;
       this.pageSize = filters.pageSize;
       this.sort.prop = filters.sortProp;
@@ -170,14 +173,16 @@ export default {
         filters.endDate ? new Date(filters.endDate) : undefined,
       ];
       if (filters.trainModel && filters.assessmentItem) {
+        // 如果 LocalStorage 中有trainModel和assessmentItem的值，则进行拼接
         this.selectedOption = `${filters.trainModel}-${filters.assessmentItem}`;
       } else {
+        // 若缺少其中一个则清空selectedOption
         this.selectedOption = null;
       }
     }
   },
 
-  // 组件挂载时调用获取所有的train_model和assessment_item并赋值给选择框中
+  // 组件挂载时调用获取所有数据的train_model和assessment_item并赋值给选择框中
   mounted() {
     this.loadAllTrainAndAssessmentItems();
   },
@@ -199,7 +204,7 @@ export default {
   },
 
   methods: {
-    // 获取数据
+    // 获取数据，基本上每次都要调用
     fetchData() {
       // 开启表格加载
       this.listLoading = true;
@@ -240,6 +245,146 @@ export default {
         .finally(() => this.listLoading = false); // 停止加载
     },
 
+    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
+    updateFilters() {
+      const filters = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        sortProp: this.sort.prop,
+        sortOrder: this.sort.order,
+        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
+        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
+      };
+
+      localStorage.setItem('tableFilters', JSON.stringify(filters));
+    },
+
+    // 日期范围选择器的值发生变化时（输入或取消）触发
+    onDateRangeChange(value) {
+      // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
+      // 如果是则清空日期范围，否则更新日期范围
+      if (!value || value.length === 0 || (!value[0] && !value[1])) {
+        // 清空日期范围
+        this.dateRange = [undefined, undefined];
+      } else {
+        // 更新日期范围赋值给dateRange
+        this.dateRange = value;
+      }
+      this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页，防止出现空白页
+      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+    },
+
+    // 从 LocalStorage 获取参数以恢复表格过滤器的状态
+    restoreStateFromLocalStorage() {
+      // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
+      const defaultFilters = {
+        page: 1,
+        pageSize: 12,
+        sortProp: '',
+        sortOrder: '',
+        startDate: '',
+        endDate: '',
+        trainModel: '',
+        assessmentItem: '',
+      };
+
+      // 从本地存储中获取名为 tableFilters 的项
+      // 如果该项存在，它会被解析为一个 JavaScript 对象并赋值给 filters 变量
+      // 如果该项不存在，filters 变量将被赋予 defaultFilters 的值
+      const filters = JSON.parse(localStorage.getItem('tableFilters')) || defaultFilters;
+
+      // 将 filters 对象中的值赋给当前 Vue 实例的相应属性
+      this.currentPage = filters.page;
+      this.pageSize = filters.pageSize;
+      this.sort.prop = filters.sortProp;
+      this.sort.order = filters.sortOrder;
+      this.dateRange = [
+        filters.startDate ? new Date(filters.startDate) : new Date(2023, 9, 10), // 指定默认日期
+        filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
+      ];
+      // 如果 filters.trainModel 和 filters.assessmentItem 都存在，它们会被连接成一个字符串并赋给 this.selectedOption
+      // 如果它们中的任何一个不存在，this.selectedOption 将被赋值为 null
+      this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
+    },
+
+    // 处理排序改变
+    handleSortChange({
+      prop,
+      order
+    }) {
+      // 当前排序的属性是否等于传入的属性
+      if (this.sort.prop === prop) {
+        // 如果是，则切换排序顺序
+        this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
+        // 清空了排序顺序，那么也需要清空排序的属性
+        if (this.sort.order === '') {
+          this.sort.prop = ''; // Remove sorting
+        }
+      } else {
+        // 如果不是，则更新排序的属性和排序的顺序
+        this.sort.prop = prop;
+        // this.sort.order = 'ascending';
+        this.sort.order = order;
+      }
+      // 更新 URL 的查询参数，将新的排序属性和排序顺序保存在 URL 中
+      this.updateFilters();
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+    },
+
+    // 分页器的页码改变时触发
+    handleCurrentChange(val) {
+      this.currentPage = val; // 更新当前页码
+      this.updateFilters(); // 更新URL查询参数到 LocalStorage
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+    },
+
+    // 分页器的每页大小改变时触发
+    handleSizeChange(val) {
+      this.pageSize = val; // 更新当前的每页大小
+      this.updateFilters(); // 更新URL查询参数到 LocalStorage
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+
+    },
+
+    // 左上角按钮重置筛选条件
+    resetFilters() {
+      this.dateRange = [undefined, undefined];
+      this.currentPage = 1;
+      this.pageSize = 12;
+      this.sort = { prop: '', order: '' };
+      this.selectedOption = null;
+      // 更新 LocalStorage 参数均设置为空
+      this.updateFilters();
+      // 重新获取数据
+      this.fetchData();
+    },
+
+    // Select框中加载数据库中所有数据的 train_model 和 assessment_item
+    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
+    loadAllTrainAndAssessmentItems() {
+      fetchAllTrainAndAssessment().then(response => {
+        // 对获取到的数据按 train_model 进行升序排序
+        const sortedData = response.data.sort((a, b) => {
+          // 使用 localeCompare 进行字符串比较，以实现车型的升序排列
+          return a.train_model.localeCompare(b.train_model);
+        });
+
+        // 将排序后的数据映射到 combinedOptions
+        this.combinedOptions = sortedData.map(item => ({
+          label: `${item.train_model} - ${item.assessment_item}`,
+          value: `${item.train_model}-${item.assessment_item}`,
+        }));
+      }).catch(error => {
+        console.error("获取数据失败：", error);
+      });
+    },
+
+    /*
+    * 以下是一些辅助函数
+    */
     // 转换考核结果呈现在表格中
     formatAssessmentResult(value) {
       switch (value) {
@@ -267,130 +412,7 @@ export default {
           return ''; // 其他情况不添加特殊样式
       }
     },
-
-    // 更新筛选条件到localStorage
-    updateFilters() {
-      const filters = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        sortProp: this.sort.prop,
-        sortOrder: this.sort.order,
-        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
-        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
-      };
-
-      localStorage.setItem('tableFilters', JSON.stringify(filters));
-    },
-
-    // 日期范围选择器的值发生变化时（输入和取消）触发
-    onDateRangeChange(value) {
-      // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
-      // 如果是则清空日期范围，否则更新日期范围
-      if (!value || value.length === 0 || (!value[0] && !value[1])) {
-        // 清空日期范围
-        this.dateRange = [undefined, undefined];
-      } else {
-        // 更新日期范围赋值给dateRange
-        this.dateRange = value;
-      }
-      this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页
-      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
-      this.fetchData(); // 根据新的筛选条件重新获取数据
-    },
-
-    // 从当前路由的查询参数中恢复状态
-    restoreStateFromLocalStorage() {
-      const defaultFilters = {
-        page: 1,
-        pageSize: 12,
-        sortProp: '',
-        sortOrder: '',
-        startDate: '',
-        endDate: '',
-        trainModel: '',
-        assessmentItem: '',
-      };
-
-      const filters = JSON.parse(localStorage.getItem('tableFilters')) || defaultFilters;
-
-      this.currentPage = filters.page;
-      this.pageSize = filters.pageSize;
-      this.sort.prop = filters.sortProp;
-      this.sort.order = filters.sortOrder;
-      this.dateRange = [
-        filters.startDate ? new Date(filters.startDate) : new Date(2023, 9, 10), // 默认起始日期或指定默认日期
-        filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
-      ];
-      this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
-    },
-
-    // 处理排序改变
-    handleSortChange({
-      prop,
-      order
-    }) {
-      // 当前排序的属性是否等于传入的属性
-      if (this.sort.prop === prop) {
-        // 如果是，则切换排序顺序
-        this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
-        // 清空了排序顺序，那么也需要清空排序的属性
-        if (this.sort.order === '') {
-          this.sort.prop = ''; // Remove sorting
-        }
-      } else {
-        // 如果不是，则更新排序的属性和排序的顺序
-        this.sort.prop = prop;
-        // this.sort.order = 'ascending';
-        this.sort.order = order;
-      }
-      // 更新 URL 的查询参数,将新的排序属性和排序顺序保存在 URL 中
-      this.updateFilters();
-      this.fetchData(); // 根据新的筛选条件重新获取数据
-    },
-
-    // 分页器的页码改变时触发
-    handleCurrentChange(val) {
-      this.currentPage = val;
-      this.updateFilters();
-      this.fetchData(); // 根据新的筛选条件重新获取数据
-    },
-
-    // 分页器的每页大小改变时触发
-    handleSizeChange(val) {
-      this.pageSize = val;
-      this.updateFilters();
-      this.fetchData(); // 根据新的筛选条件重新获取数据
-
-    },
-
-    // 左上角按钮重置筛选条件
-    resetFilters() {
-      this.dateRange = [undefined, undefined];
-      this.currentPage = 1;
-      this.pageSize = 12;
-      this.sort = { prop: '', order: '' };
-      this.selectedOption = null;
-      // 更新localStorage
-      this.updateFilters();
-      // 重新获取数据
-      this.fetchData();
-    },
-
-    // Select框中加载数据所有的train_model和assessment_item
-    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
-    loadAllTrainAndAssessmentItems() {
-      fetchAllTrainAndAssessment().then(response => {
-        this.combinedOptions = response.data.map(item => ({
-          label: `${item.train_model} - ${item.assessment_item}`,
-          value: `${item.train_model}-${item.assessment_item}`,
-        }));
-      }).catch(error => {
-        console.error("获取数据失败：", error);
-      });
-    },
-
+    
     // 点击编辑特定行并弹出对话框
     editItem(row) {
       this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
@@ -558,6 +580,11 @@ export default {
   margin: 0;
   padding-left: 0px;
   /* 推动日期选择器向右边移动 */
+}
+
+.select-offset {
+  margin-left: 630px;
+  /* 调整左边距以向右移动选择框 */
 }
 
 .pagination-container {
