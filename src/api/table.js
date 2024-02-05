@@ -44,7 +44,7 @@ export function getDetailByUrl(fullUrl) {
 }
 
 // 新增获取所有train_model和assessment_item的方法
-export function fetchAllTrainAndAssessmentItems() {
+export function fetchAllTrainAndAssessment() {
   return request({
     url: '/assessment-base/all-train-and-assessment/', // 根据实际的url路径调整
     method: 'get',

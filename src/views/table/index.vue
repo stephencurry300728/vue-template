@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem, fetchAllTrainAndAssessmentItems } from '@/api/table' // 导入获取数据的API
+import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 
 export default {
@@ -164,7 +164,15 @@ export default {
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
-      immediate: false,
+      immediate: true,
+      deep: true,
+    },
+    // 监听 selectedOption 的变化
+    selectedOption(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
+        this.updateRouteQuery(); // 更新URL查询参数
+      }
     },
   },
 
@@ -190,7 +198,16 @@ export default {
       if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
       if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
 
-      // 调用API 文件夹下的自定义 getList函数，并将 params 作为参数传入
+      // 分解selectedOption以适应后端接口
+      if (this.selectedOption) {
+        // 例如 selectedOption 为 '10A02-逃生门收放'，则分解为 ['10A02', '逃生门收放']
+        // 并将其作为train_model和assessment_item的值传递给API的params
+        const [trainModel, assessmentItem] = this.selectedOption.split('-');
+        params.train_model = trainModel;
+        params.assessment_item = assessmentItem;
+      }
+
+      // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
       getList(params)
         .then(response => {
           // 获取到请求后将数据赋值给list
@@ -230,9 +247,10 @@ export default {
     },
     /*
     根据当前页码、页面大小、排序属性、排序顺序以及日期范围来更新当前路由的查询参数
-    当用户在浏览器中刷新页面或者复制并粘贴URL时，这些参数的值就会被保留下来
+    使得当用户在浏览器中刷新页面或者复制并粘贴URL时，参数的值会被保留下来，实现历史记录的效果
     */
     updateRouteQuery() {
+      const [trainModel, assessmentItem] = this.selectedOption ? this.selectedOption.split('-') : [null, null];
       this.$router.push({
         query: {
           ...this.$route.query, //
@@ -242,6 +260,8 @@ export default {
           sortOrder: this.sort.order,
           startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
           endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+          trainModel: trainModel || '', 
+          assessmentItem: assessmentItem || '', 
         }
       });
     },
@@ -270,7 +290,9 @@ export default {
         sortProp,
         sortOrder,
         startDate,
-        endDate
+        endDate,
+        trainModel,
+        assessmentItem,
       } = this.$route.query;
       if (page) this.currentPage = parseInt(page);
       if (pageSize) this.pageSize = parseInt(pageSize);
@@ -278,6 +300,11 @@ export default {
       if (sortOrder) this.sort.order = sortOrder === 'ascending' ? 'ascending' : 'descending';
       if (startDate) this.dateRange[0] = new Date(startDate);
       if (endDate) this.dateRange[1] = new Date(endDate);
+      if (trainModel && assessmentItem) {
+        this.selectedOption = `${trainModel}-${assessmentItem}`; // 重新组合这两个值为 selectedOption
+      } else {
+        this.selectedOption = null; // 如果URL中没有这两个参数，清空 selectedOption
+      }
     },
 
     // 处理排序改变
@@ -315,7 +342,7 @@ export default {
       this.updateRouteQuery();
     },
 
-    // 重置筛选条件
+    // 左上角按钮重置筛选条件
     resetFilters() {
       this.dateRange = [undefined, undefined];
       this.currentPage = 1;
@@ -326,9 +353,10 @@ export default {
       this.$router.push({ path: this.$route.path });
     },
 
-    // 获取所有的train_model和assessment_item
+    // Select框中加载数据所有的train_model和assessment_item
+    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
     loadAllTrainAndAssessmentItems() {
-      fetchAllTrainAndAssessmentItems().then(response => {
+      fetchAllTrainAndAssessment().then(response => {
         this.combinedOptions = response.data.map(item => ({
           label: `${item.train_model} - ${item.assessment_item}`,
           value: `${item.train_model}-${item.assessment_item}`,
@@ -386,7 +414,7 @@ export default {
       });
     },
 
-    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
+    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
     // 这个参数 item 是 row.scope 即当前行的完整数据
     goToDetail(item) {
       // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
