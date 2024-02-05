@@ -523,7 +523,7 @@ export default {
 /* 优秀的样式 */
 .highlight-excellent {
   background-color: #f3e4e4;
-  color: #000808;
+  color: #045a5a;
   /* 深蓝色文本 */
   padding: 2px 8px;
   margin: 0 2px;
