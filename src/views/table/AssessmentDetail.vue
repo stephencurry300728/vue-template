@@ -5,9 +5,15 @@
             <el-table-column v-for="(value, key) in columns" :key="key" :prop="key"
                 :label="typeof value === 'object' ? value.label : value" align="center"
                 :fixed="typeof value === 'object' && value.fixed ? value.fixed : false"
-                :min-width="typeof value === 'object' && value.minWidth ? value.minWidth : '120'"
-                :formatter="combinedFormatter">
+                :min-width="typeof value === 'object' && value.minWidth ? value.minWidth : '120'">
+                <template v-slot="scope">
+                    <!-- 使用 combinedFormatter 方法格式化内容 -->
+                    <div :class="{ 'highlight-red': scope.row[key] === '未测评' }">
+                        {{ combinedFormatter(scope.row, scope.column, scope.row[key]) }}
+                    </div>
+                </template>
             </el-table-column>
+
 
         </el-table>
     </div>
@@ -121,4 +127,15 @@ export default {
 .app-container {
     padding: 20px;
 }
+
+.highlight-red {
+    background-color: #ffebee; /* 浅红色背景 */
+    color: #d32f2f; /* 深红色文本，以确保对比度和可读性 */
+    padding: 4px 4px; /* 添加一些内边距 */
+    border-radius: 4px; /* 圆角边框 */
+    border: 1px solid #f44336; /* 红色边框 */
+    font-weight: bold; /* 加粗字体增加突出效果 */
+    text-align: center; /* 文本居中显示 */
+}
+
 </style>

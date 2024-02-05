@@ -135,7 +135,7 @@ export default {
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
-      immediate: true,
+      immediate: false,
     },
   },
   methods: {
@@ -144,6 +144,7 @@ export default {
       this.listLoading = true;
       // 根据this.sort.order的值来决定排序参数的值
       // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
+      // 用来和后端接口 ordering 适配
       const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
       // 带着请求参数调用API
       const params = {
@@ -158,7 +159,7 @@ export default {
       if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
       if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
 
-      // 调用API 文件夹下的自定义 getList函数，并将params作为参数传入
+      // 调用API 文件夹下的自定义 getList函数，并将 params 作为参数传入
       getList(params)
         .then(response => {
           // 获取到请求后将数据赋值给list
@@ -183,10 +184,14 @@ export default {
       }
     },
 
+    /*
+    根据当前页码、页面大小、排序属性、排序顺序以及日期范围来更新当前路由的查询参数
+    当用户在浏览器中刷新页面或者复制并粘贴URL时，这些参数的值就会被保留下来
+      */
     updateRouteQuery() {
       this.$router.push({
         query: {
-          ...this.$route.query,
+          ...this.$route.query, //
           page: this.currentPage,
           pageSize: this.pageSize,
           sortProp: this.sort.prop,
@@ -197,19 +202,22 @@ export default {
       });
     },
 
-    // 日期范围选择器的值发生变化时触发
+    // 日期范围选择器的值发生变化时（输入和取消）触发
     onDateRangeChange(value) {
+      // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
+      // 如果是则清空日期范围，否则更新日期范围
       if (!value || value.length === 0 || (!value[0] && !value[1])) {
         // 清空日期范围
         this.dateRange = [undefined, undefined];
       } else {
-        // 更新日期范围
+        // 更新日期范围赋值给dateRange
         this.dateRange = value;
       }
-      this.currentPage = 1; // 重置到第一页
-      this.updateRouteQuery(); // 更新URL查询参数
+      this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页
+      this.updateRouteQuery(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
     },
 
+    // 从当前路由的查询参数中恢复状态
     restoreStateFromRouteQuery() {
       // 从this.$route.query中解构赋值
       const {
@@ -245,12 +253,13 @@ export default {
       this.updateRouteQuery();
     },
 
-
+    // 分页器的页码改变时触发
     handleCurrentChange(val) {
       this.currentPage = val;
       this.updateRouteQuery();
-
     },
+
+    // 分页器的每页大小改变时触发
     handleSizeChange(val) {
       this.pageSize = val;
       this.updateRouteQuery();
@@ -321,7 +330,7 @@ export default {
 }
 </script>
 
-<!-- 网页样式 -->
+<!-- 网页局部样式 -->
 <style scoped>
 .app-container {
   padding-top: 0px;
@@ -381,6 +390,7 @@ export default {
 }
 </style>
 
+<!-- 网页全局样式 -->
 <style>
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .el-table {
