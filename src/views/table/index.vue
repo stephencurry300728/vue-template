@@ -93,7 +93,8 @@
       <!-- 转换考核结果 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span :class="getAssessmentClass(scope.row.assessment_result)">
+          <span :class="getAssessmentClass(scope.row.assessment_result)" @click="goToDetail(scope.row)"
+            style="cursor: pointer;">
             {{ formatAssessmentResult(scope.row.assessment_result) }}
           </span>
         </template>
@@ -500,8 +501,7 @@ export default {
 /* 优秀的样式 */
 .highlight-excellent {
   background-color: #f3e4e4;
-  /* 浅蓝色背景 */
-  color: #000c0c;
+  color: #000808;
   /* 深蓝色文本 */
   padding: 2px 8px;
   margin: 0 2px;
