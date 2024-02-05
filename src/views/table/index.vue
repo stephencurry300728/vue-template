@@ -64,7 +64,7 @@
       <!-- 可清空的选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" clearable placeholder="请选择科目"
-          style="width: 322px; height: 40px; font-size: 16px;">
+          style="width: 222px; height: 40px; font-size: 16px;">
           <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
           </el-option>
         </el-select>
@@ -626,9 +626,12 @@ export default {
   padding-left: 0px;
   /* 推动日期选择器向右边移动 */
 }
-
-.select-offset {
+.select-container{
   margin-left: 630px;
+  /* 调整左边距以向右移动选择框 */  
+}
+.select-offset {
+  margin-left: 0px;
   /* 调整左边距以向右移动选择框 */
 }
 
