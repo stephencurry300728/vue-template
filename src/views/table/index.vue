@@ -50,7 +50,9 @@
 
       <!-- 线路选择框 -->
       <div class="select-container">
-        <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;" @change="onLineChange">
+        <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;"
+          @change="handleLineSelection">
+
           <el-option label="1号线" value="1"></el-option>
           <el-option label="5号线" value="5"></el-option>
           <el-option label="9号线" value="9"></el-option>
@@ -159,7 +161,8 @@ export default {
       editDialogVisible: false, // 编辑对话框的显示状态
       editForm: {}, // 编辑表单的数据
       selectedOption: null, // 用于存储选中的选项
-      combinedOptions: [], // 从API获取的train_model和assessment_item的组合      
+      combinedOptions: [], // 从API获取的train_model和assessment_item的组合
+      selectedTrainModelPrefix: '', // 新增属性      
     };
   },
 
@@ -169,28 +172,6 @@ export default {
     this.fetchData();
   },
 
-  // 从 LocalStorage 获取参数以恢复筛选条件的状态
-  restoreStateFromLocalStorage() {
-    const filters = JSON.parse(localStorage.getItem('tableFilters'));
-    if (filters) {
-      // 如果 LocalStorage 中有筛选条件的状态，则恢复到当前组件的状态中
-      this.currentPage = filters.page;
-      this.pageSize = filters.pageSize;
-      this.sort.prop = filters.sortProp;
-      this.sort.order = filters.sortOrder;
-      this.dateRange = [
-        filters.startDate ? new Date(filters.startDate) : undefined,
-        filters.endDate ? new Date(filters.endDate) : undefined,
-      ];
-      if (filters.trainModel && filters.assessmentItem) {
-        // 如果 LocalStorage 中有trainModel和assessmentItem的值，则进行拼接
-        this.selectedOption = `${filters.trainModel}-${filters.assessmentItem}`;
-      } else {
-        // 若缺少其中一个则清空selectedOption
-        this.selectedOption = null;
-      }
-    }
-  },
 
   // 组件挂载时调用获取所有数据的train_model和assessment_item并赋值给选择框中
   mounted() {
@@ -208,6 +189,12 @@ export default {
     selectedOption(newVal, oldVal) {
       if (newVal !== oldVal) {
         this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
+        this.updateFilters(); // 更新URL查询参数
+      }
+    },
+    selectedLine(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.fetchData();
         this.updateFilters(); // 更新URL查询参数
       }
     },
@@ -235,10 +222,16 @@ export default {
       if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
       if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
 
-      // 分解selectedOption以适应后端接口
+      // 检查是否有选中的线路，并将其加入请求参数
+      if (this.selectedLine) {
+        const prefix = this.selectedLine === '1' ? '01' : this.selectedLine === '5' ? '05' : this.selectedLine === '9' ? '09' : this.selectedLine;
+        if (prefix) {
+          params.train_model_line = `${prefix}%`; // 使用一个新的参数来代表线路筛选
+        }
+      }
+
+      // 检查是否有选中的科目，并将其加入请求参数
       if (this.selectedOption) {
-        // 例如 selectedOption 为 '10A02-逃生门收放'，则分解为 ['10A02', '逃生门收放']
-        // 并将其作为train_model和assessment_item的值传递给API的params
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
         params.train_model = trainModel;
         params.assessment_item = assessmentItem;
@@ -247,12 +240,27 @@ export default {
       // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
       getList(params)
         .then(response => {
-          // 获取到请求后将数据赋值给list
-          this.list = response.data.results;
-          // 获取到请求后将总共数据赋值给total
-          this.total = response.data.count;
+          // 检查数据是否为空
+          if (!response.data.results.length && this.currentPage > 1) {
+            this.currentPage = 1;
+            this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
+          } else {
+            this.list = response.data.results;
+            this.total = response.data.count;
+            this.listLoading = false;
+          }
         })
-        .finally(() => this.listLoading = false); // 停止加载
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          this.listLoading = false;
+          // 根据实际情况处理错误，例如显示用户友好的错误信息
+          if (this.currentPage > 1) {
+            this.currentPage = 1;
+            this.fetchData();
+          } else {
+            // 可能需要在这里处理错误，例如显示错误信息
+          }
+        });
     },
 
     // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
@@ -266,6 +274,8 @@ export default {
         endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
         trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
         assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
+        selectedLine: this.selectedLine, // 保存选中的线路
+        selectedTrainModelPrefix: this.selectedTrainModelPrefix, // 保存选中的线路前缀
       };
 
       // 将 filters 对象保存到 LocalStorage 中
@@ -319,6 +329,29 @@ export default {
       // 如果 filters.trainModel 和 filters.assessmentItem 都存在，它们会被连接成一个字符串并赋给 this.selectedOption
       // 如果它们中的任何一个不存在，this.selectedOption 将被赋值为 null
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
+      this.selectedLine = filters.selectedLine; // 恢复选中的线路
+      this.selectedTrainModelPrefix = filters.selectedTrainModelPrefix; // 恢复选中的线路前缀
+    },
+
+    handleLineSelection() {
+      // 根据 selectedLine 的值设置 selectedTrainModelPrefix
+      switch (this.selectedLine) {
+        case '1':
+          this.selectedTrainModelPrefix = '01';
+          break;
+        case '5':
+          this.selectedTrainModelPrefix = '05';
+          break;
+        case '9':
+          this.selectedTrainModelPrefix = '09';
+          break;
+        case '10':
+          this.selectedTrainModelPrefix = '10';
+          break;
+        default:
+          this.selectedTrainModelPrefix = ''; // 对于 "所有线路" 的情况，我们不设置前缀
+      }
+      this.fetchData(); // 更新数据
     },
 
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
@@ -340,7 +373,7 @@ export default {
         console.error("获取数据失败：", error);
       });
     },
-    
+
     // 左上角按钮重置筛选条件    
     resetFilters() {
       this.dateRange = [undefined, undefined];
@@ -348,6 +381,8 @@ export default {
       this.pageSize = 12;
       this.sort = { prop: '', order: '' };
       this.selectedOption = null;
+      this.selectedLine = ''; // 清空选中的线路
+      this.selectedTrainModelPrefix = ''; // 清空选中的线路前缀
       // 更新 LocalStorage 参数均设置为空
       this.updateFilters();
       // 重新获取数据
@@ -394,6 +429,7 @@ export default {
       this.updateFilters(); // 更新URL查询参数到 LocalStorage
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
+
     // 转换考核结果呈现在表格中
     formatAssessmentResult(value) {
       switch (value) {
