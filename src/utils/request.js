@@ -49,11 +49,12 @@ service.interceptors.response.use(
   error => {
     // 响应错误处理
     console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    // 注释掉或移除下面的 Message 调用，以停止显示错误弹窗
+    // Message({
+    //   message: error.message,
+    //   type: 'error',
+    //   duration: 5 * 1000
+    // })
     return Promise.reject(error)
   }
 )
