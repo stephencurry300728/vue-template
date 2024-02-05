@@ -521,8 +521,8 @@ export default {
 
 /* 优秀的样式 */
 .highlight-excellent {
-  background-color: #f3e4e4;
-  color: #045a5a;
+  background-color: #f7f0f0;
+  color: #000707;
   /* 深蓝色文本 */
   padding: 2px 8px;
   margin: 0 2px;
