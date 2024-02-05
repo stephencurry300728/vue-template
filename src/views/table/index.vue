@@ -349,19 +349,6 @@ export default {
 
     },
 
-    // 左上角按钮重置筛选条件
-    resetFilters() {
-      this.dateRange = [undefined, undefined];
-      this.currentPage = 1;
-      this.pageSize = 12;
-      this.sort = { prop: '', order: '' };
-      this.selectedOption = null;
-      // 更新 LocalStorage 参数均设置为空
-      this.updateFilters();
-      // 重新获取数据
-      this.fetchData();
-    },
-
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
     // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
     loadAllTrainAndAssessmentItems() {
@@ -382,6 +369,18 @@ export default {
       });
     },
 
+    // 左上角按钮重置筛选条件
+    resetFilters() {
+      this.dateRange = [undefined, undefined];
+      this.currentPage = 1;
+      this.pageSize = 12;
+      this.sort = { prop: '', order: '' };
+      this.selectedOption = null;
+      // 更新 LocalStorage 参数均设置为空
+      this.updateFilters();
+      // 重新获取数据
+      this.fetchData();
+    },
     /*
     * 以下是一些辅助函数
     */
@@ -412,7 +411,7 @@ export default {
           return ''; // 其他情况不添加特殊样式
       }
     },
-    
+
     // 点击编辑特定行并弹出对话框
     editItem(row) {
       this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
