@@ -50,9 +50,10 @@
 
       <!-- 可清空的选择框 -->
       <el-select v-model="selectedOption" clearable placeholder="请选择">
-        <el-option v-for="option in combinedOptions" :key="option" :label="option.label" :value="option.value">
+        <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
         </el-option>
       </el-select>
+
     </div>
 
     <!-- 表格组件 -->
@@ -148,13 +149,18 @@ export default {
     };
   },
 
+  // 组件创建时调用路由的查询参数和获取数据
   created() {
     this.restoreStateFromRouteQuery();
     this.fetchData();
   },
+
+  // 组件挂载时调用获取所有的train_model和assessment_item并赋值给选择框中
   mounted() {
     this.loadAllTrainAndAssessmentItems();
   },
+
+  // 监听路由的查询参数的变化
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
@@ -162,18 +168,8 @@ export default {
     },
   },
 
-  computed: {
-    combinedOptions() {
-      const uniqueOptions = new Set(); // 使用 Set 来避免重复的组合
-      this.list.forEach(item => {
-        const combination = `${item.train_model} - ${item.assessment_item}`;
-        uniqueOptions.add(combination);
-      });
-      return Array.from(uniqueOptions); // 将 Set 转换回数组
-    }
-  },
-
   methods: {
+    // 获取数据
     fetchData() {
       // 开启表格加载
       this.listLoading = true;
@@ -235,7 +231,7 @@ export default {
     /*
     根据当前页码、页面大小、排序属性、排序顺序以及日期范围来更新当前路由的查询参数
     当用户在浏览器中刷新页面或者复制并粘贴URL时，这些参数的值就会被保留下来
-      */
+    */
     updateRouteQuery() {
       this.$router.push({
         query: {
@@ -341,67 +337,68 @@ export default {
         console.error("获取数据失败：", error);
       });
     },
-  },
-  // 点击编辑特定行并弹出对话框
-  editItem(row) {
-    this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
-    this.editDialogVisible = true; // 打开遮罩层对话框
-  },
 
-  // 具体执行部分更新 PATCH 特定行
-  saveEdit() {
-    const id = this.editForm.id;
-    updateItem(id, this.editForm)
-      .then(() => {
-        this.editDialogVisible = false; // 更新完毕后自动关闭对话框
-        this.fetchData(); // 重新加载更新后的数据
-        this.$message.success('更新成功');
-      })
-      .catch(error => {
-        console.error("更新失败:", error);
-        this.$message.error('更新失败');
-      });
-  },
+    // 点击编辑特定行并弹出对话框
+    editItem(row) {
+      this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
+      this.editDialogVisible = true; // 打开遮罩层对话框
+    },
 
-  // 具体删除 DELETE 特定行
-  deleteItem(row) {
-    this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(() => {
-      // 用户确认删除，调用 API 删除数据
-      deleteItem(row.id).then(() => {
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+    // 具体执行部分更新 PATCH 特定行
+    saveEdit() {
+      const id = this.editForm.id;
+      updateItem(id, this.editForm)
+        .then(() => {
+          this.editDialogVisible = false; // 更新完毕后自动关闭对话框
+          this.fetchData(); // 重新加载更新后的数据
+          this.$message.success('更新成功');
+        })
+        .catch(error => {
+          console.error("更新失败:", error);
+          this.$message.error('更新失败');
         });
-        // 刷新列表，重新获取删除后数据
-        this.fetchData();
-      }).catch(error => {
-        this.$message.error('删除失败');
-      })
-    }).catch(() => {
-      // 用户取消删除
-      this.$message({
-        type: 'info',
-        message: '已取消删除'
-      });
-    });
-  },
+    },
 
-  // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
-  // 这个参数 item 是 row.scope 即当前行的完整数据
-  goToDetail(item) {
-    // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
-    this.$store.commit('table/setCurrentDetail', item);
-    // 根据item中的assessment_detail_url提取ID
-    // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
-    // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
-    // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
-    const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
-    // 再利用路由器导航到详情页面
-    this.$router.push(`/table/detail/${id}`);
+    // 具体删除 DELETE 特定行
+    deleteItem(row) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 用户确认删除，调用 API 删除数据
+        deleteItem(row.id).then(() => {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+          // 刷新列表，重新获取删除后数据
+          this.fetchData();
+        }).catch(error => {
+          this.$message.error('删除失败');
+        })
+      }).catch(() => {
+        // 用户取消删除
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+
+    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
+    // 这个参数 item 是 row.scope 即当前行的完整数据
+    goToDetail(item) {
+      // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
+      this.$store.commit('table/setCurrentDetail', item);
+      // 根据item中的assessment_detail_url提取ID
+      // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
+      // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
+      // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
+      const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
+      // 再利用路由器导航到详情页面
+      this.$router.push(`/table/detail/${id}`);
+    },
   },
 }
 </script>
