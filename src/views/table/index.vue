@@ -48,6 +48,17 @@
           start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
       </div>
 
+      <!-- 线路选择框 -->
+      <div class="select-container">
+        <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;" @change="onLineChange">
+          <el-option label="1号线" value="1"></el-option>
+          <el-option label="5号线" value="5"></el-option>
+          <el-option label="9号线" value="9"></el-option>
+          <el-option label="10号线" value="10"></el-option>
+          <el-option label="所有线路" value=""></el-option>
+        </el-select>
+      </div>
+
       <!-- 可清空的选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" clearable placeholder="请选择科目"
@@ -310,6 +321,42 @@ export default {
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
     },
 
+    // Select框中加载数据库中所有数据的 train_model 和 assessment_item
+    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
+    loadAllTrainAndAssessmentItems() {
+      fetchAllTrainAndAssessment().then(response => {
+        // 对获取到的数据按 train_model 进行升序排序
+        const sortedData = response.data.sort((a, b) => {
+          // 使用 localeCompare 进行字符串比较，以实现车型的升序排列
+          return a.train_model.localeCompare(b.train_model);
+        });
+
+        // 将排序后的数据映射到 combinedOptions
+        this.combinedOptions = sortedData.map(item => ({
+          label: `${item.train_model} - ${item.assessment_item}`,
+          value: `${item.train_model}-${item.assessment_item}`,
+        }));
+      }).catch(error => {
+        console.error("获取数据失败：", error);
+      });
+    },
+    
+    // 左上角按钮重置筛选条件    
+    resetFilters() {
+      this.dateRange = [undefined, undefined];
+      this.currentPage = 1;
+      this.pageSize = 12;
+      this.sort = { prop: '', order: '' };
+      this.selectedOption = null;
+      // 更新 LocalStorage 参数均设置为空
+      this.updateFilters();
+      // 重新获取数据
+      this.fetchData();
+    },
+
+    /*
+    * 以下是一些辅助函数
+    */
     // 处理排序改变
     handleSortChange({
       prop,
@@ -347,42 +394,6 @@ export default {
       this.updateFilters(); // 更新URL查询参数到 LocalStorage
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
-
-    // Select框中加载数据库中所有数据的 train_model 和 assessment_item
-    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
-    loadAllTrainAndAssessmentItems() {
-      fetchAllTrainAndAssessment().then(response => {
-        // 对获取到的数据按 train_model 进行升序排序
-        const sortedData = response.data.sort((a, b) => {
-          // 使用 localeCompare 进行字符串比较，以实现车型的升序排列
-          return a.train_model.localeCompare(b.train_model);
-        });
-
-        // 将排序后的数据映射到 combinedOptions
-        this.combinedOptions = sortedData.map(item => ({
-          label: `${item.train_model} - ${item.assessment_item}`,
-          value: `${item.train_model}-${item.assessment_item}`,
-        }));
-      }).catch(error => {
-        console.error("获取数据失败：", error);
-      });
-    },
-
-    // 左上角按钮重置筛选条件
-    resetFilters() {
-      this.dateRange = [undefined, undefined];
-      this.currentPage = 1;
-      this.pageSize = 12;
-      this.sort = { prop: '', order: '' };
-      this.selectedOption = null;
-      // 更新 LocalStorage 参数均设置为空
-      this.updateFilters();
-      // 重新获取数据
-      this.fetchData();
-    },
-    /*
-    * 以下是一些辅助函数
-    */
     // 转换考核结果呈现在表格中
     formatAssessmentResult(value) {
       switch (value) {
