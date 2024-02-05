@@ -382,8 +382,6 @@ export default {
 </style>
 
 <style>
-< !-- 全局样式 -->
-
 /* 如果是在 .vue 文件的 <style> 中添加，考虑使用 scoped 属性或者根据实际情况决定 */
 .el-table {
   margin-top: 0px;
