@@ -150,9 +150,30 @@ export default {
   },
 
   // 组件创建时调用路由的查询参数和获取数据
+  // 组件创建时调用
   created() {
-    this.restoreStateFromRouteQuery();
+    this.restoreStateFromLocalStorage();
     this.fetchData();
+  },
+
+  // 从localStorage恢复筛选条件的状态
+  restoreStateFromLocalStorage() {
+    const filters = JSON.parse(localStorage.getItem('tableFilters'));
+    if (filters) {
+      this.currentPage = filters.page;
+      this.pageSize = filters.pageSize;
+      this.sort.prop = filters.sortProp;
+      this.sort.order = filters.sortOrder;
+      this.dateRange = [
+        filters.startDate ? new Date(filters.startDate) : undefined,
+        filters.endDate ? new Date(filters.endDate) : undefined,
+      ];
+      if (filters.trainModel && filters.assessmentItem) {
+        this.selectedOption = `${filters.trainModel}-${filters.assessmentItem}`;
+      } else {
+        this.selectedOption = null;
+      }
+    }
   },
 
   // 组件挂载时调用获取所有的train_model和assessment_item并赋值给选择框中
@@ -171,7 +192,7 @@ export default {
     selectedOption(newVal, oldVal) {
       if (newVal !== oldVal) {
         this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
-        this.updateRouteQuery(); // 更新URL查询参数
+        this.updateFilters(); // 更新URL查询参数
       }
     },
   },
@@ -245,25 +266,21 @@ export default {
           return ''; // 其他情况不添加特殊样式
       }
     },
-    /*
-    根据当前页码、页面大小、排序属性、排序顺序以及日期范围来更新当前路由的查询参数
-    使得当用户在浏览器中刷新页面或者复制并粘贴URL时，参数的值会被保留下来，实现历史记录的效果
-    */
-    updateRouteQuery() {
-      const [trainModel, assessmentItem] = this.selectedOption ? this.selectedOption.split('-') : [null, null];
-      this.$router.push({
-        query: {
-          ...this.$route.query, //
-          page: this.currentPage,
-          pageSize: this.pageSize,
-          sortProp: this.sort.prop,
-          sortOrder: this.sort.order,
-          startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-          endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-          trainModel: trainModel || '', 
-          assessmentItem: assessmentItem || '', 
-        }
-      });
+
+    // 更新筛选条件到localStorage
+    updateFilters() {
+      const filters = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        sortProp: this.sort.prop,
+        sortOrder: this.sort.order,
+        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
+        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
+      };
+
+      localStorage.setItem('tableFilters', JSON.stringify(filters));
     },
 
     // 日期范围选择器的值发生变化时（输入和取消）触发
@@ -278,33 +295,34 @@ export default {
         this.dateRange = value;
       }
       this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页
-      this.updateRouteQuery(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
+      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
+      this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
     // 从当前路由的查询参数中恢复状态
-    restoreStateFromRouteQuery() {
-      // 从this.$route.query中解构赋值
-      const {
-        page,
-        pageSize,
-        sortProp,
-        sortOrder,
-        startDate,
-        endDate,
-        trainModel,
-        assessmentItem,
-      } = this.$route.query;
-      if (page) this.currentPage = parseInt(page);
-      if (pageSize) this.pageSize = parseInt(pageSize);
-      if (sortProp) this.sort.prop = sortProp;
-      if (sortOrder) this.sort.order = sortOrder === 'ascending' ? 'ascending' : 'descending';
-      if (startDate) this.dateRange[0] = new Date(startDate);
-      if (endDate) this.dateRange[1] = new Date(endDate);
-      if (trainModel && assessmentItem) {
-        this.selectedOption = `${trainModel}-${assessmentItem}`; // 重新组合这两个值为 selectedOption
-      } else {
-        this.selectedOption = null; // 如果URL中没有这两个参数，清空 selectedOption
-      }
+    restoreStateFromLocalStorage() {
+      const defaultFilters = {
+        page: 1,
+        pageSize: 12,
+        sortProp: '',
+        sortOrder: '',
+        startDate: '',
+        endDate: '',
+        trainModel: '',
+        assessmentItem: '',
+      };
+
+      const filters = JSON.parse(localStorage.getItem('tableFilters')) || defaultFilters;
+
+      this.currentPage = filters.page;
+      this.pageSize = filters.pageSize;
+      this.sort.prop = filters.sortProp;
+      this.sort.order = filters.sortOrder;
+      this.dateRange = [
+        filters.startDate ? new Date(filters.startDate) : new Date(2023, 9, 10), // 默认起始日期或指定默认日期
+        filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
+      ];
+      this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
     },
 
     // 处理排序改变
@@ -327,19 +345,23 @@ export default {
         this.sort.order = order;
       }
       // 更新 URL 的查询参数,将新的排序属性和排序顺序保存在 URL 中
-      this.updateRouteQuery();
+      this.updateFilters();
+      this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
     // 分页器的页码改变时触发
     handleCurrentChange(val) {
       this.currentPage = val;
-      this.updateRouteQuery();
+      this.updateFilters();
+      this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
     // 分页器的每页大小改变时触发
     handleSizeChange(val) {
       this.pageSize = val;
-      this.updateRouteQuery();
+      this.updateFilters();
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+
     },
 
     // 左上角按钮重置筛选条件
@@ -348,9 +370,11 @@ export default {
       this.currentPage = 1;
       this.pageSize = 12;
       this.sort = { prop: '', order: '' };
-
-      // 更新路由，移除所有query参数
-      this.$router.push({ path: this.$route.path });
+      this.selectedOption = null;
+      // 更新localStorage
+      this.updateFilters();
+      // 重新获取数据
+      this.fetchData();
     },
 
     // Select框中加载数据所有的train_model和assessment_item
