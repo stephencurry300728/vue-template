@@ -35,7 +35,7 @@
       </span>
     </el-dialog>
 
-    <!-- 新的外部容器 -->
+    <!-- 外部容器放置筛选重置和按钮 -->
     <div class="filters-container">
       <!-- 按钮容器 -->
       <div class="reset-button-container">
@@ -47,7 +47,14 @@
         <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
           start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
       </div>
+
+      <!-- 可清空的选择框 -->
+      <el-select v-model="selectedOption" clearable placeholder="请选择">
+        <el-option v-for="option in combinedOptions" :key="option" :label="option.label" :value="option.value">
+        </el-option>
+      </el-select>
     </div>
+
     <!-- 表格组件 -->
     <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
       highlight-current-row stripe @sort-change="handleSortChange" height="758"
@@ -118,7 +125,7 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem } from '@/api/table' // 导入获取数据的API
+import { getList, updateItem, deleteItem, fetchAllTrainAndAssessmentItems } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 
 export default {
@@ -136,6 +143,8 @@ export default {
       dateRange: [new Date(2023, 9, 10), undefined], // 日期范围选择器的值
       editDialogVisible: false, // 编辑对话框的显示状态
       editForm: {}, // 编辑表单的数据
+      selectedOption: null, // 用于存储选中的选项
+      combinedOptions: [], // 从API获取的train_model和assessment_item的组合      
     };
   },
 
@@ -143,12 +152,25 @@ export default {
     this.restoreStateFromRouteQuery();
     this.fetchData();
   },
-
+  mounted() {
+    this.loadAllTrainAndAssessmentItems();
+  },
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
       immediate: false,
     },
+  },
+
+  computed: {
+    combinedOptions() {
+      const uniqueOptions = new Set(); // 使用 Set 来避免重复的组合
+      this.list.forEach(item => {
+        const combination = `${item.train_model} - ${item.assessment_item}`;
+        uniqueOptions.add(combination);
+      });
+      return Array.from(uniqueOptions); // 将 Set 转换回数组
+    }
   },
 
   methods: {
@@ -296,8 +318,9 @@ export default {
       this.pageSize = val;
       this.updateRouteQuery();
     },
+
+    // 重置筛选条件
     resetFilters() {
-      // 重置筛选条件
       this.dateRange = [undefined, undefined];
       this.currentPage = 1;
       this.pageSize = 12;
@@ -306,68 +329,80 @@ export default {
       // 更新路由，移除所有query参数
       this.$router.push({ path: this.$route.path });
     },
-    // 点击编辑特定行并弹出对话框
-    editItem(row) {
-      this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
-      this.editDialogVisible = true; // 打开遮罩层对话框
-    },
 
-    // 具体执行部分更新 PATCH 特定行
-    saveEdit() {
-      const id = this.editForm.id;
-      updateItem(id, this.editForm)
-        .then(() => {
-          this.editDialogVisible = false; // 更新完毕后自动关闭对话框
-          this.fetchData(); // 重新加载更新后的数据
-          this.$message.success('更新成功');
-        })
-        .catch(error => {
-          console.error("更新失败:", error);
-          this.$message.error('更新失败');
-        });
-    },
-
-    // 具体删除 DELETE 特定行
-    deleteItem(row) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 用户确认删除，调用 API 删除数据
-        deleteItem(row.id).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-          // 刷新列表，重新获取删除后数据
-          this.fetchData();
-        }).catch(error => {
-          this.$message.error('删除失败');
-        })
-      }).catch(() => {
-        // 用户取消删除
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
+    // 获取所有的train_model和assessment_item
+    loadAllTrainAndAssessmentItems() {
+      fetchAllTrainAndAssessmentItems().then(response => {
+        this.combinedOptions = response.data.map(item => ({
+          label: `${item.train_model} - ${item.assessment_item}`,
+          value: `${item.train_model}-${item.assessment_item}`,
+        }));
+      }).catch(error => {
+        console.error("获取数据失败：", error);
       });
     },
+  },
+  // 点击编辑特定行并弹出对话框
+  editItem(row) {
+    this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
+    this.editDialogVisible = true; // 打开遮罩层对话框
+  },
 
-    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
-    // 这个参数 item 是 row.scope 即当前行的完整数据
-    goToDetail(item) {
-      // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
-      this.$store.commit('table/setCurrentDetail', item);
-      // 根据item中的assessment_detail_url提取ID
-      // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
-      // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
-      // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
-      const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
-      // 再利用路由器导航到详情页面
-      this.$router.push(`/table/detail/${id}`);
-    },
-  }
+  // 具体执行部分更新 PATCH 特定行
+  saveEdit() {
+    const id = this.editForm.id;
+    updateItem(id, this.editForm)
+      .then(() => {
+        this.editDialogVisible = false; // 更新完毕后自动关闭对话框
+        this.fetchData(); // 重新加载更新后的数据
+        this.$message.success('更新成功');
+      })
+      .catch(error => {
+        console.error("更新失败:", error);
+        this.$message.error('更新失败');
+      });
+  },
+
+  // 具体删除 DELETE 特定行
+  deleteItem(row) {
+    this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      // 用户确认删除，调用 API 删除数据
+      deleteItem(row.id).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+        // 刷新列表，重新获取删除后数据
+        this.fetchData();
+      }).catch(error => {
+        this.$message.error('删除失败');
+      })
+    }).catch(() => {
+      // 用户取消删除
+      this.$message({
+        type: 'info',
+        message: '已取消删除'
+      });
+    });
+  },
+
+  // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id}
+  // 这个参数 item 是 row.scope 即当前行的完整数据
+  goToDetail(item) {
+    // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
+    this.$store.commit('table/setCurrentDetail', item);
+    // 根据item中的assessment_detail_url提取ID
+    // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
+    // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
+    // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
+    const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
+    // 再利用路由器导航到详情页面
+    this.$router.push(`/table/detail/${id}`);
+  },
 }
 </script>
 
@@ -469,6 +504,7 @@ export default {
   gap: 10px;
   /* 在子项之间设置间隔 */
 }
+
 .date-picker-offset {
   margin: 0;
   padding-left: 0px;
