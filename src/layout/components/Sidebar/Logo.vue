@@ -24,7 +24,7 @@ export default {
   },
   data() {
     return {
-      title: '测评管理系统',
+      title: '测评分析系统',
       logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
     }
   }
@@ -59,6 +59,7 @@ export default {
       height: 32px;
       vertical-align: middle;
       margin-right: 12px;
+      margin-left: -55px; /* 普通状态下向左移动 */
     }
 
     & .sidebar-title {
@@ -76,6 +77,7 @@ export default {
   &.collapse {
     .sidebar-logo {
       margin-right: 0px;
+      margin-left: 0; /* 或设置为一个适当的正值，确保logo在视觉上保持在合适的位置 */
     }
   }
 }

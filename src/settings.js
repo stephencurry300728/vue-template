@@ -12,7 +12,7 @@ module.exports = {
    * @type {boolean} true | false
    * @description 侧边栏是否显示logo
    */
-  sidebarLogo: false,
+  sidebarLogo: true,
 
   /**
    * @type {boolean} true | false
