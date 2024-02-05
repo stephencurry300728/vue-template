@@ -37,11 +37,6 @@
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
         @click.native.prevent="handleLogin">登录</el-button>
 
-      <div class="tips">
-        <span style="margin-right:20px;">用户名：admin</span>
-        <span> 密码：任何密码都行</span>
-      </div>
-
     </el-form>
   </div>
 </template>
