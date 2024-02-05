@@ -78,9 +78,12 @@
       <!-- 转换考核结果 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
-          {{ formatAssessmentResult(scope.row.assessment_result) }}
+          <span :class="getAssessmentClass(scope.row.assessment_result)">
+            {{ formatAssessmentResult(scope.row.assessment_result) }}
+          </span>
         </template>
       </el-table-column>
+
 
       <!-- 操作列 定义了部分编辑 PATCH 和单例删除 DELETE -->
       <el-table-column fixed="right" label="操作" width="120" align="center">
@@ -108,7 +111,7 @@
 </template>
 
 <script>
-import {getList, updateItem, deleteItem} from '@/api/table' // 导入获取数据的API
+import { getList, updateItem, deleteItem } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 
 export default {
@@ -184,6 +187,19 @@ export default {
       }
     },
 
+    // 根据考核结果返回不同的样式
+    getAssessmentClass(value) {
+      switch (value) {
+        case 3:
+          return 'highlight-blue'; // 优秀
+        case 2:
+          return 'highlight-green'; // 合格
+        case 1:
+          return 'highlight-red'; // 不合格
+        default:
+          return ''; // 其他情况不添加特殊样式
+      }
+    },
     /*
     根据当前页码、页面大小、排序属性、排序顺序以及日期范围来更新当前路由的查询参数
     当用户在浏览器中刷新页面或者复制并粘贴URL时，这些参数的值就会被保留下来
@@ -236,20 +252,26 @@ export default {
       if (endDate) this.dateRange[1] = new Date(endDate);
     },
 
-
+    // 处理排序改变
     handleSortChange({
       prop,
       order
     }) {
+      // 当前排序的属性是否等于传入的属性
       if (this.sort.prop === prop) {
+        // 如果是，则切换排序顺序
         this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
+        // 清空了排序顺序，那么也需要清空排序的属性
         if (this.sort.order === '') {
           this.sort.prop = ''; // Remove sorting
         }
       } else {
+        // 如果不是，则更新排序的属性和排序的顺序
         this.sort.prop = prop;
-        this.sort.order = 'ascending';
+        // this.sort.order = 'ascending';
+        this.sort.order = order;
       }
+      // 更新 URL 的查询参数,将新的排序属性和排序顺序保存在 URL 中
       this.updateRouteQuery();
     },
 
@@ -336,6 +358,53 @@ export default {
   padding-top: 0px;
   padding-bottom: 0px;
   /* 与浏览器窗口的间距 */
+}
+
+.highlight-red {
+  background-color: #ffebee;
+  /* 浅红色背景 */
+  color: #d32f2f;
+  /* 深红色文本，以确保对比度和可读性 */
+  padding: 2px 8px;
+  margin: 0 2px;
+  /* 添加一些内边距 */
+  border-radius: 4px;
+  /* 圆角边框 */
+  border: 1px solid #f44336;
+  /* 红色边框 */
+  font-weight: bold;
+  /* 加粗字体增加突出效果 */
+  text-align: center;
+  /* 文本居中显示 */
+}
+
+/* 合格的样式 */
+.highlight-green {
+  background-color: #e8f5e9;
+  /* 浅绿色背景 */
+  color: #2e7d32;
+  /* 深绿色文本 */
+  padding: 2px 8px;
+  margin: 0 2px;
+  border-radius: 4px;
+  border: 1px solid #4caf50;
+  /* 绿色边框 */
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 优秀的样式 */
+.highlight-blue {
+  /* 浅蓝色背景 */
+  color: #000c0c;
+  /* 深蓝色文本 */
+  padding: 2px 8px;
+  margin: 0 2px;
+  border-radius: 4px;
+  border: 1px solid #0a000e;
+  /* 蓝色边框 */
+  font-weight: bold;
+  text-align: center;
 }
 
 .custom-dialog {
