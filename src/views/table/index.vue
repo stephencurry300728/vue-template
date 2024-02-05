@@ -35,12 +35,19 @@
       </span>
     </el-dialog>
 
-    <!-- 外部容器用于定位日期选择器 -->
-    <div class="date-picker-offset">
-      <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
-        start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
-    </div>
+    <!-- 新的外部容器 -->
+    <div class="filters-container">
+      <!-- 按钮容器 -->
+      <div class="reset-button-container">
+        <el-button @click="resetFilters" type="primary" size="small">重置</el-button>
+      </div>
 
+      <!-- 日期选择器容器 -->
+      <div class="date-picker-offset">
+        <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
+          start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
+      </div>
+    </div>
     <!-- 表格组件 -->
     <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
       highlight-current-row stripe @sort-change="handleSortChange" height="758"
@@ -289,7 +296,16 @@ export default {
       this.pageSize = val;
       this.updateRouteQuery();
     },
+    resetFilters() {
+      // 重置筛选条件
+      this.dateRange = [undefined, undefined];
+      this.currentPage = 1;
+      this.pageSize = 12;
+      this.sort = { prop: '', order: '' };
 
+      // 更新路由，移除所有query参数
+      this.$router.push({ path: this.$route.path });
+    },
     // 点击编辑特定行并弹出对话框
     editItem(row) {
       this.editForm = Object.assign({}, row); // 使用 Object.assign 防止直接修改数据
@@ -399,7 +415,7 @@ export default {
 
 /* 优秀的样式 */
 .highlight-excellent {
-  background-color: #eef1f1;
+  background-color: #f3e4e4;
   /* 浅蓝色背景 */
   color: #000c0c;
   /* 深蓝色文本 */
@@ -446,9 +462,16 @@ export default {
   /* 鼠标悬停时文字颜色变为白色 */
 }
 
+.filters-container {
+  display: flex;
+  align-items: center;
+  /* 确保子项垂直居中对齐 */
+  gap: 10px;
+  /* 在子项之间设置间隔 */
+}
 .date-picker-offset {
   margin: 0;
-  padding-left: 50px;
+  padding-left: 0px;
   /* 推动日期选择器向右边移动 */
 }
 
