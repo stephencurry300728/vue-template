@@ -50,14 +50,13 @@
 
       <!-- 可清空的选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
-        <el-select v-model="selectedOption" clearable placeholder="请选择"
+        <el-select v-model="selectedOption" clearable placeholder="请选择科目"
           style="width: 322px; height: 40px; font-size: 16px;">
           <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
           </el-option>
         </el-select>
 
       </div>
-
     </div>
 
     <!-- 表格组件 -->
@@ -258,6 +257,7 @@ export default {
         assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
       };
 
+      // 将 filters 对象保存到 LocalStorage 中
       localStorage.setItem('tableFilters', JSON.stringify(filters));
     },
 
@@ -346,7 +346,6 @@ export default {
       this.pageSize = val; // 更新当前的每页大小
       this.updateFilters(); // 更新URL查询参数到 LocalStorage
       this.fetchData(); // 根据新的筛选条件重新获取数据
-
     },
 
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
