@@ -2,6 +2,7 @@
     <div class="app-container">
         <el-table class="custom-table" v-loading="listLoading" :data="tableData" element-loading-text="拼命加载中" border fit
             highlight-current-row stripe table-layout="fixed">
+            
             <el-table-column v-for="(value, key) in columns" :key="key" :prop="key"
                 :label="typeof value === 'object' ? value.label : value" align="center"
                 :fixed="typeof value === 'object' && value.fixed ? value.fixed : false"
@@ -13,7 +14,6 @@
                     </div>
                 </template>
             </el-table-column>
-
 
         </el-table>
     </div>
