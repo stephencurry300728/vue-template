@@ -49,7 +49,6 @@
       </div>
 
       <!-- 线路选择框 -->
-      <!-- 线路选择框 -->
       <div class="select-container">
         <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;" @change="fetchData">
           <el-option label="1号线" value="01"></el-option>
@@ -223,12 +222,12 @@ export default {
       if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
       if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
 
-      // 检查是否有选中的线路，并将其加入请求参数
+      // 检查是否有选中的线路，并将 train_model_line 加入请求参数 params
       if (this.selectedLine) {
-        params.train_model_line = `${this.selectedLine}%`; // 直接使用 selectedLine 的值
+        params.train_model_line = this.selectedLine;
       }
 
-      // 检查是否有选中的科目，并将其加入请求参数
+      // 检查是否有选中的科目，解耦train_model assessment_item 加入请求参数
       if (this.selectedOption) {
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
         params.train_model = trainModel;
@@ -238,11 +237,14 @@ export default {
       // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
       getList(params)
         .then(response => {
-          // 检查数据是否为空
+          // 检查 response.data.results 是否为空。
+          // 如果为空并且当前页码 this.currentPage 大于 1，那么将当前页码设置为 1，并再次调用获取数据
           if (!response.data.results.length && this.currentPage > 1) {
             this.currentPage = 1;
             this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
           } else {
+            // 如果 response.data.results 不为空，那么将其赋值给 this.list
+            // 将 response.data.count 赋值给 this.total
             this.list = response.data.results;
             this.total = response.data.count;
             this.listLoading = false;
@@ -270,9 +272,9 @@ export default {
         sortOrder: this.sort.order,
         startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
         endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
-        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
         selectedLine: this.selectedLine, // 保存选中的线路
+        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '', // 拆分value保存选中的车型
+        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '', // 拆分value保存选中的考核项目
       };
 
       // 将 filters 对象保存到 LocalStorage 中
@@ -324,10 +326,10 @@ export default {
         filters.startDate ? new Date(filters.startDate) : new Date(2023, 9, 10), // 指定默认日期
         filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
       ];
+      this.selectedLine = filters.selectedLine; // 恢复选中的线路
       // 如果 filters.trainModel 和 filters.assessmentItem 都存在，它们会被连接成一个字符串并赋给 this.selectedOption
       // 如果它们中的任何一个不存在，this.selectedOption 将被赋值为 null
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
-      this.selectedLine = filters.selectedLine; // 恢复选中的线路
     },
 
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
@@ -356,8 +358,8 @@ export default {
       this.currentPage = 1;
       this.pageSize = 12;
       this.sort = { prop: '', order: '' };
-      this.selectedOption = null;
       this.selectedLine = ''; // 清空选中的线路
+      this.selectedOption = null;
       // 更新 LocalStorage 参数均设置为空
       this.updateFilters();
       // 重新获取数据
