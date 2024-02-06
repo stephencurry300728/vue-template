@@ -159,6 +159,7 @@ export default {
       dateRange: [new Date(2023, 9, 10), undefined], // 日期范围选择器的值
       editDialogVisible: false, // 编辑对话框的显示状态
       editForm: {}, // 编辑表单的数据
+      selectedLine: '', // 用于存储线路，默认空值为全部线路
       selectedOption: null, // 用于存储选中的选项
       combinedOptions: [], // 从API获取的train_model和assessment_item的组合   
     };
@@ -358,7 +359,7 @@ export default {
       this.currentPage = 1;
       this.pageSize = 12;
       this.sort = { prop: '', order: '' };
-      this.selectedLine = ''; // 清空选中的线路
+      this.selectedLine = ''; // 清空选中的线路，默认为全部线路
       this.selectedOption = null;
       // 更新 LocalStorage 参数均设置为空
       this.updateFilters();
