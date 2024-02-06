@@ -45,7 +45,7 @@
       <!-- 日期选择器 -->
       <div class="date-picker-offset">
         <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
-          start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
+          start-placeholder="开始日期" end-placeholder="结束日期" @change="onDateRangeChange" />
       </div>
 
       <!-- 线路选择框 -->
@@ -293,7 +293,10 @@ export default {
           } else {
             // 可能需要在这里处理错误，例如显示错误信息
           }
-        });
+        })
+        .finally(() => {
+          this.listLoading = false;
+        }); 
     },
 
     // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
