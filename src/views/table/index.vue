@@ -185,16 +185,18 @@ export default {
       immediate: true,
       deep: true,
     },
-    // 监听 selectedOption 的变化
-    selectedOption(newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
-        this.updateFilters(); // 更新URL查询参数
-      }
-    },
+    // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
         this.fetchData();
+        this.updateFilters(); // 更新URL查询参数
+      }
+    },
+
+    // 监听 科目 选项框的变化
+    selectedOption(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
         this.updateFilters(); // 更新URL查询参数
       }
     },
@@ -298,6 +300,27 @@ export default {
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
+    handleLineSelection() {
+      // 根据 selectedLine 的值设置 selectedTrainModelPrefix
+      switch (this.selectedLine) {
+        case '1':
+          this.selectedTrainModelPrefix = '01';
+          break;
+        case '5':
+          this.selectedTrainModelPrefix = '05';
+          break;
+        case '9':
+          this.selectedTrainModelPrefix = '09';
+          break;
+        case '10':
+          this.selectedTrainModelPrefix = '10';
+          break;
+        default:
+          this.selectedTrainModelPrefix = ''; // 对于 "所有线路" 的情况，我们不设置前缀
+      }
+      this.fetchData(); // 更新数据
+    },
+
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     restoreStateFromLocalStorage() {
       // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
@@ -310,6 +333,8 @@ export default {
         endDate: '',
         trainModel: '',
         assessmentItem: '',
+        selectedLine: '', 
+        selectedTrainModelPrefix: '',
       };
 
       // 从本地存储中获取名为 tableFilters 的项
@@ -331,27 +356,6 @@ export default {
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
       this.selectedLine = filters.selectedLine; // 恢复选中的线路
       this.selectedTrainModelPrefix = filters.selectedTrainModelPrefix; // 恢复选中的线路前缀
-    },
-
-    handleLineSelection() {
-      // 根据 selectedLine 的值设置 selectedTrainModelPrefix
-      switch (this.selectedLine) {
-        case '1':
-          this.selectedTrainModelPrefix = '01';
-          break;
-        case '5':
-          this.selectedTrainModelPrefix = '05';
-          break;
-        case '9':
-          this.selectedTrainModelPrefix = '09';
-          break;
-        case '10':
-          this.selectedTrainModelPrefix = '10';
-          break;
-        default:
-          this.selectedTrainModelPrefix = ''; // 对于 "所有线路" 的情况，我们不设置前缀
-      }
-      this.fetchData(); // 更新数据
     },
 
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
@@ -376,7 +380,7 @@ export default {
 
     // 左上角按钮重置筛选条件    
     resetFilters() {
-      this.dateRange = [undefined, undefined];
+      this.dateRange = [new Date(2023, 9, 10), undefined];
       this.currentPage = 1;
       this.pageSize = 12;
       this.sort = { prop: '', order: '' };
