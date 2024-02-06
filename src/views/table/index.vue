@@ -186,13 +186,9 @@ export default {
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
+        this.selectedOption = null; // 线路变更时，清空 科 目选择器的值, 重新获取数据
         this.fetchData();
         this.updateFilters(); // 更新URL查询参数
-
-        // 当选择"所有线路"时，清除科目选择框中的内容
-        if (newVal === '') {
-          this.selectedOption = null;
-        }
       }
     },
 
