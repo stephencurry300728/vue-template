@@ -59,7 +59,6 @@
         </el-select>
       </div>
 
-
       <!-- 可清空的选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" clearable placeholder="请选择科目"
@@ -170,7 +169,6 @@ export default {
     this.restoreStateFromLocalStorage();
     this.fetchData();
   },
-
 
   // 组件挂载时调用获取所有数据的train_model和assessment_item并赋值给选择框中
   mounted() {
