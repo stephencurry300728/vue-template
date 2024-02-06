@@ -570,13 +570,13 @@ export default {
 
 /* 优秀的样式 */
 .highlight-excellent {
-  background-color: #f7f0f0;
-  color: #000707;
+  background-color: #f1dddd;
+  color: #845788;
   /* 深蓝色文本 */
   padding: 2px 8px;
   margin: 0 2px;
   border-radius: 4px;
-  border: 1px solid #0a000e;
+  border: 1px solid #e88fee;
   /* 蓝色边框 */
   font-weight: bold;
   text-align: center;
