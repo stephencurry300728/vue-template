@@ -221,7 +221,6 @@ export default {
   methods: {
     // 获取数据，基本上每次都要调用
     fetchData() {
-      console.log("Fetching data with current filters:", this.selectedLine, this.dateRange, this.selectedOption);
       // 开启表格加载
       this.listLoading = true;
       // 根据this.sort.order的值来决定排序参数的值
