@@ -132,7 +132,7 @@
     <!-- 为分页器添加 FlexBox 能够居中-->
     <div class="pagination-container">
       <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-        :page-sizes="[12, 30, 50, 100, total]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+        :page-sizes="computedPageSizes" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
         :total="total">
       </el-pagination>
     </div>
@@ -199,7 +199,7 @@ export default {
         this.updateFilters(); // 更新URL查询参数
       }
     },
-    
+
   },
 
   computed: {
@@ -215,6 +215,21 @@ export default {
         // 过滤 combinedOptions 来只包含与选定线路匹配的选项
         return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
       }
+    },
+
+    computedPageSizes() {
+      // 预设的分页大小选项
+      const baseSizes = [12, 30, 50, 100];
+      // 如果总数小于最小的预设分页大小，只显示总数
+      if (this.total < baseSizes[0]) {
+        return [this.total];
+      }
+      // 如果总数大于最大的预设分页大小，或不等于任何预设的分页大小，则添加到数组中
+      if (this.total > baseSizes[baseSizes.length - 1] || !baseSizes.includes(this.total)) {
+        return [...baseSizes, this.total];
+      }
+      // 默认情况下返回预设分页大小
+      return baseSizes;
     },
   },
 
