@@ -75,8 +75,9 @@ export default {
                 default: return key;
             }
         },
+
         assessmentResultFormatter(value) {
-            // 已给出的方法，对应的转换逻辑
+            // 转换评估结果的值为更易读的文本
             switch (value) {
                 case 3: return '优秀';
                 case 2: return '合格';
@@ -84,10 +85,11 @@ export default {
                 default: return '未知';
             }
         },
+
         convertAdditionalData(additional_data) {
             // 将additional_data转换为数组形式
             return Object.entries(additional_data).map(([key, value]) => ({
-                key, // 这里可以选择是否需要对key进行格式化
+                key, 
                 value
             }));
         }
