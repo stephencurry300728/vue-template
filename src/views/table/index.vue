@@ -61,7 +61,7 @@
 
       <!-- 科目选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
-        <el-select v-model="selectedOption" clearable placeholder="请选择科目"
+        <el-select v-model="selectedOption" :disabled="isSubjectDisabled" clearable placeholder="请选择科目"
           style="width: 222px; height: 40px; font-size: 16px;">
           <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
           </el-option>
@@ -196,6 +196,12 @@ export default {
         this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
         this.updateFilters(); // 更新URL查询参数
       }
+    },
+  },
+
+  computed: {
+    isSubjectDisabled() {
+      return this.selectedLine === '';
     },
   },
 
