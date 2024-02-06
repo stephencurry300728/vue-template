@@ -49,17 +49,17 @@
       </div>
 
       <!-- 线路选择框 -->
+      <!-- 线路选择框 -->
       <div class="select-container">
-        <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;"
-          @change="handleLineSelection">
-
-          <el-option label="1号线" value="1"></el-option>
-          <el-option label="5号线" value="5"></el-option>
-          <el-option label="9号线" value="9"></el-option>
+        <el-select v-model="selectedLine" clearable placeholder="请选择线路" style="width: 150px;" @change="fetchData">
+          <el-option label="1号线" value="01"></el-option>
+          <el-option label="5号线" value="05"></el-option>
+          <el-option label="9号线" value="09"></el-option>
           <el-option label="10号线" value="10"></el-option>
           <el-option label="所有线路" value=""></el-option>
         </el-select>
       </div>
+
 
       <!-- 可清空的选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
@@ -161,8 +161,7 @@ export default {
       editDialogVisible: false, // 编辑对话框的显示状态
       editForm: {}, // 编辑表单的数据
       selectedOption: null, // 用于存储选中的选项
-      combinedOptions: [], // 从API获取的train_model和assessment_item的组合
-      selectedTrainModelPrefix: '', // 新增属性      
+      combinedOptions: [], // 从API获取的train_model和assessment_item的组合   
     };
   },
 
@@ -226,10 +225,7 @@ export default {
 
       // 检查是否有选中的线路，并将其加入请求参数
       if (this.selectedLine) {
-        const prefix = this.selectedLine === '1' ? '01' : this.selectedLine === '5' ? '05' : this.selectedLine === '9' ? '09' : this.selectedLine;
-        if (prefix) {
-          params.train_model_line = `${prefix}%`; // 使用一个新的参数来代表线路筛选
-        }
+        params.train_model_line = `${this.selectedLine}%`; // 直接使用 selectedLine 的值
       }
 
       // 检查是否有选中的科目，并将其加入请求参数
@@ -277,7 +273,6 @@ export default {
         trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
         assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
         selectedLine: this.selectedLine, // 保存选中的线路
-        selectedTrainModelPrefix: this.selectedTrainModelPrefix, // 保存选中的线路前缀
       };
 
       // 将 filters 对象保存到 LocalStorage 中
@@ -300,27 +295,6 @@ export default {
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
-    handleLineSelection() {
-      // 根据 selectedLine 的值设置 selectedTrainModelPrefix
-      switch (this.selectedLine) {
-        case '1':
-          this.selectedTrainModelPrefix = '01';
-          break;
-        case '5':
-          this.selectedTrainModelPrefix = '05';
-          break;
-        case '9':
-          this.selectedTrainModelPrefix = '09';
-          break;
-        case '10':
-          this.selectedTrainModelPrefix = '10';
-          break;
-        default:
-          this.selectedTrainModelPrefix = ''; // 对于 "所有线路" 的情况，我们不设置前缀
-      }
-      this.fetchData(); // 更新数据
-    },
-
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     restoreStateFromLocalStorage() {
       // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
@@ -333,8 +307,7 @@ export default {
         endDate: '',
         trainModel: '',
         assessmentItem: '',
-        selectedLine: '', 
-        selectedTrainModelPrefix: '',
+        selectedLine: '',
       };
 
       // 从本地存储中获取名为 tableFilters 的项
@@ -355,7 +328,6 @@ export default {
       // 如果它们中的任何一个不存在，this.selectedOption 将被赋值为 null
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
       this.selectedLine = filters.selectedLine; // 恢复选中的线路
-      this.selectedTrainModelPrefix = filters.selectedTrainModelPrefix; // 恢复选中的线路前缀
     },
 
     // Select框中加载数据库中所有数据的 train_model 和 assessment_item
@@ -386,7 +358,6 @@ export default {
       this.sort = { prop: '', order: '' };
       this.selectedOption = null;
       this.selectedLine = ''; // 清空选中的线路
-      this.selectedTrainModelPrefix = ''; // 清空选中的线路前缀
       // 更新 LocalStorage 参数均设置为空
       this.updateFilters();
       // 重新获取数据
@@ -630,10 +601,12 @@ export default {
   padding-left: 0px;
   /* 推动日期选择器向右边移动 */
 }
-.select-container{
+
+.select-container {
   margin-left: 630px;
-  /* 调整左边距以向右移动选择框 */  
+  /* 调整左边距以向右移动选择框 */
 }
+
 .select-offset {
   margin-left: 0px;
   /* 调整左边距以向右移动选择框 */
