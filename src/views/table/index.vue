@@ -188,6 +188,11 @@ export default {
       if (newVal !== oldVal) {
         this.fetchData();
         this.updateFilters(); // 更新URL查询参数
+
+        // 当选择"所有线路"时，清除科目选择框中的内容
+        if (newVal === '') {
+          this.selectedOption = null;
+        }
       }
     },
 
@@ -204,6 +209,8 @@ export default {
         const linePrefix = newVal.substring(0, 2); // 获取车型前两位作为线路前缀
         // 更新线路选择
         this.selectedLine = linePrefix === '01' ? '01' : linePrefix === '05' ? '05' : linePrefix === '09' ? '09' : linePrefix === '10' ? '10' : '';
+        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData() 方法
+        this.updateFilters(); // 更新URL查询参数
       }
     },
   },
