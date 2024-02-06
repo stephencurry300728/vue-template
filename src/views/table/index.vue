@@ -143,6 +143,7 @@
 <script>
 import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
+import { debounce } from 'lodash'; // 引入debounce函数
 
 export default {
   data() {
@@ -167,6 +168,7 @@ export default {
 
   // 组件创建时调用 LocalStorage 的查询参数并获取数据
   created() {
+    this.fetchData = debounce(this.fetchData, 5); // 使用 debounce 包装 fetchData 方法，50ms 延迟
     this.restoreStateFromLocalStorage();
     this.fetchData();
   },
