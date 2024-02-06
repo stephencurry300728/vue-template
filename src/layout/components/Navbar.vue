@@ -31,7 +31,7 @@
           <!-- divided	表示在页面中显示分割线 -->
           <!-- native 修饰符表示监听的是原生 DOM 事件 -->
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">退出登录</span>
+            <span style="display:block;">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>

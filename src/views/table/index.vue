@@ -571,7 +571,7 @@ export default {
 /* 优秀的样式 */
 .highlight-excellent {
   background-color: #f1dddd;
-  color: #845788;
+  color: #aa75af;
   /* 深蓝色文本 */
   padding: 2px 8px;
   margin: 0 2px;
