@@ -63,8 +63,9 @@
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" :disabled="isSubjectDisabled" clearable placeholder="请选择科目"
           style="width: 222px; height: 40px; font-size: 16px;">
-          <el-option v-for="option in combinedOptions" :key="option.value" :label="option.label" :value="option.value">
-          </el-option>
+          <el-option v-for="option in filteredOptions" :key="option.value" :label="option.label"
+            :value="option.value"></el-option>
+
         </el-select>
 
       </div>
@@ -193,15 +194,33 @@ export default {
     // 监听 科目 选项框的变化
     selectedOption(newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData 方法
+        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData() 方法
         this.updateFilters(); // 更新URL查询参数
+      }
+    },
+
+    selectedOption(newVal) {
+      if (newVal && newVal.length >= 2) {
+        const linePrefix = newVal.substring(0, 2); // 获取车型前两位作为线路前缀
+        // 更新线路选择
+        this.selectedLine = linePrefix === '01' ? '01' : linePrefix === '05' ? '05' : linePrefix === '09' ? '09' : linePrefix === '10' ? '10' : '';
       }
     },
   },
 
   computed: {
+    // 计算属性，若选择所有线路时该选项无法选择
     isSubjectDisabled() {
       return this.selectedLine === '';
+    },
+
+    filteredOptions() {
+      if (this.selectedLine === '') {
+        return []; // 如果没有选择线路，返回空数组
+      } else {
+        // 过滤 combinedOptions 来只包含与选定线路匹配的选项
+        return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
+      }
     },
   },
 
