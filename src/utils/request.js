@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
+// import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
@@ -42,7 +42,6 @@ service.interceptors.response.use(
   // 拿到响应后的处理逻辑并赋值给 response
   response => {
     // 这个response是从后端返回的所有api的响应数据
-    console.log(response)
     const res = response
     return res
   },
