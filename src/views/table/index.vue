@@ -59,7 +59,7 @@
         </el-select>
       </div>
 
-      <!-- 可清空的选择框 -->
+      <!-- 科目选择框 -->
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" clearable placeholder="请选择科目"
           style="width: 222px; height: 40px; font-size: 16px;">
