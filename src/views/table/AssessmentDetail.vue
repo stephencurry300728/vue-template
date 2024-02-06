@@ -62,20 +62,6 @@ export default {
         }
     },
     methods: {
-        formatKey(key) {
-            // 这个方法根据实际需要来实现，比如将camelCase转换为正常文本
-            switch (key) {
-                case 'assessment_item': return '考核项目';
-                case 'assessment_result': return '评估结果';
-                case 'crew_group': return '乘务组';
-                case 'name': return '姓名';
-                case 'record_date': return '记录日期';
-                case 'train_model': return '车型';
-                case 'work_certificate_number': return '工作证号';
-                default: return key;
-            }
-        },
-
         assessmentResultFormatter(value) {
             // 转换评估结果的值为更易读的文本
             switch (value) {
