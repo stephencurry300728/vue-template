@@ -42,7 +42,7 @@
         <el-button @click="resetFilters" type="primary" size="small">重置</el-button>
       </div>
 
-      <!-- 日期选择器容器 -->
+      <!-- 日期选择器 -->
       <div class="date-picker-offset">
         <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
           start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
@@ -180,8 +180,8 @@ export default {
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
-      immediate: true,
-      deep: true,
+      immediate: false,
+      deep: false,
     },
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
@@ -234,6 +234,7 @@ export default {
   methods: {
     // 获取数据，基本上每次都要调用
     fetchData() {
+      console.log("Fetching data with current filters:", this.selectedLine, this.dateRange, this.selectedOption);
       // 开启表格加载
       this.listLoading = true;
       // 根据this.sort.order的值来决定排序参数的值
