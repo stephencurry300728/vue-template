@@ -356,7 +356,7 @@ export default {
       this.sort.prop = filters.sortProp;
       this.sort.order = filters.sortOrder;
       this.dateRange = [
-        filters.startDate ? new Date(filters.startDate) : new Date(2023, 9, 10), // 指定默认日期
+        filters.startDate ? new Date(filters.startDate) : undefined, // 指定默认日期
         filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
       ];
       this.selectedLine = filters.selectedLine; // 恢复选中的线路
@@ -518,17 +518,10 @@ export default {
 
     // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
     // 这个参数 item 是 row.scope 即当前行的完整数据
-    goToDetail(item) {
-      // 指定行的完整数据，包含了该id的所有信息，由于没有逻辑处理和api获取 直接 commit 传递到Vuex
-      this.$store.commit('table/setCurrentDetail', item);
-      // 根据item中的assessment_detail_url提取ID
-      // 例如 http://127.0.0.1:8000/api/assessment-10a02/2706/
-      // 按照 / 分割后的数组为 ["http:", "", "127.0.0.1:8000", "api", "assessment-10a02", "2706", ""]
-      // 取这个数组的倒数第二个元素，即 2706 并作为id传递到详情页
-      const id = item.assessment_detail_url.split('/').slice(-2, -1)[0];
-      // 再利用路由器导航到详情页面
-      this.$router.push(`/table/detail/${id}`);
-    },
+    goToDetail(rowData) {
+          this.$store.dispatch('table/updateDetailData', rowData); // 注意使用命名空间
+          this.$router.push({ name: 'Detail' }); // 使用正确的路由名称
+        },
   },
 }
 </script>

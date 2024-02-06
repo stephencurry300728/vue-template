@@ -31,18 +31,6 @@ export function deleteItem(id) {
   })
 }
 
-// 定义根据完整URL获取详细信息的API方法
-export function getDetailByUrl(fullUrl) {
-  // 去除完整API基础路径，只保留相对路径
-  let relativeUrl = fullUrl.replace('http://127.0.0.1:8000/api', '');
-
-  // 使用封装后的request模块进行GET请求
-  return request({
-    url: relativeUrl, // 直接使用处理后的相对URL
-    method: 'get',
-  });
-}
-
 // 新增获取所有train_model和assessment_item的方法
 export function fetchAllTrainAndAssessment() {
   return request({
