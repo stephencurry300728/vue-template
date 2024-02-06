@@ -272,6 +272,7 @@ export default {
       // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
       getList(params)
         .then(response => {
+          console.log("获取数据成功:", response);
           // 检查 response.data.results 是否为空。
           // 如果为空并且当前页码 this.currentPage 大于 1，那么将当前页码设置为 1，并再次调用获取数据
           if (!response.data.results.length && this.currentPage > 1) {
