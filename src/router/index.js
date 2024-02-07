@@ -120,6 +120,13 @@ export const constantRoutes = [
         component: () => import('@/views/table/AssessmentDetail'),
         meta: { title: '详细信息', icon: 'el-icon-info' },
         hidden: true // 该路由不会在侧边栏出现
+      },
+      {
+        path: 'training',
+        name: 'TrainingAnalysis',
+        component: () => import('@/views/table/TrainingAnalysis'),
+        meta: { title: '训练分析', icon: 'el-icon-s-data' },
+        hidden: true // 该路由不会在侧边栏出现
       }
     ]
   },

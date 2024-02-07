@@ -314,8 +314,10 @@ export default {
 
       analyzeTrainingData(params)
         .then(response => {
-          // 处理响应数据，例如显示分析结果
-          console.log("培训概况分析数据:", response);
+          // 将数据保存到 Vuex 中
+          this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
+          // 跳转到分析页面，假设路由名称为 'TrainingAnalysis'
+          this.$router.push({ name: 'TrainingAnalysis' });
         })
         .catch(error => {
           console.error("培训概况分析请求失败:", error);
