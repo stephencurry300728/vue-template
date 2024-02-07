@@ -2,7 +2,7 @@
     <div class="upload-container">
         <!-- 文件上传拖拽区域 -->
         <el-upload class="upload-demo" :multiple="true" :before-upload="beforeUpload" :http-request="uploadRequest"
-            :show-file-list="false" drag>
+            :show-file-list="false" drag action="/upload-assessment/">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div slot="tip" class="el-upload__tip">*只能上传csv文件*</div>
