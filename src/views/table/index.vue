@@ -70,7 +70,7 @@
 
       <!-- 培训概况分析按钮 -->
       <div class="analysis-button-container">
-        <el-button @click="analyzeTrainingOverview" type="danger" size="small">培训概况分析</el-button>
+        <el-button @click="analyzeTrainingOverview" type="danger" size="big" style="width: 150px ;">培训概况分析</el-button>
       </div>
 
     </div>
