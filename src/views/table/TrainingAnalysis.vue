@@ -2,7 +2,7 @@
     <div class="container">
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
             <div class="text-center">
-                {{ processedData.lineNames }} 共计参加
+                <span class="training-line"> {{ processedData.lineNames }}</span> 共计参加
                 <span class="training-items">{{ processedData.trainingItems }}</span> 培训人数为:
                 <span class="total-count">{{ processedData.totalCount }}</span>人 合格率:
                 <span class="pass-rate">{{ processedData.passRate }}%</span>
@@ -29,9 +29,7 @@
 import { mapState } from 'vuex';
 
 export default {
-    data() {
-        return {}
-    },
+    name: 'TrainingAnalysis',
     computed: {
         ...mapState('table', [
             'trainingAnalysisData',
@@ -62,6 +60,7 @@ export default {
 
             return { lineNames, totalCount, passRate, trainingItems };
         },
+
         tableData() {
             if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0) {
                 return [];
@@ -91,10 +90,6 @@ export default {
             }));
         },
     },
-
-    methods: {},
-    created() { },
-    mounted() { }
 }
 </script>
 
@@ -112,6 +107,7 @@ export default {
     margin-bottom: 20px;
 }
 
+.training-line,
 .training-items,
 .total-count,
 .pass-rate {
