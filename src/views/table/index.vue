@@ -45,7 +45,7 @@
       <!-- 日期选择器 -->
       <div class="date-picker-offset">
         <el-date-picker v-model="dateRange" type="daterange" style="width: 250px;" range-separator="至"
-          start-placeholder="开始日期" end-placeholder="结束日期" @change="onDateRangeChange" />
+          start-placeholder="开始日期" end-placeholder="结束日期" @input="onDateRangeChange" @change="onDateRangeChange" />
       </div>
 
       <!-- 线路选择框 -->
@@ -254,8 +254,8 @@ export default {
         pageSize: this.pageSize,
         sortProp: this.sort.prop,
         sortOrder: this.sort.order === 'descending' ? 'descending' : 'ascending',
-        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
         selectedLine: this.selectedLine
       };
 
@@ -284,42 +284,38 @@ export default {
     },
 
     // 获取数据，基本上每次都要调用
-    fetchData() {
-      // 开启表格加载
-      this.listLoading = true;
-      const params = this.buildQueryParams(); // 构建像后端传递的请求参数
+    async fetchData() {
+      try {
+        // 开启表格加载
+        this.listLoading = true;
+        const params = this.buildQueryParams(); // 构建像后端传递的请求参数
 
-      // 调用API 文件夹下的自定义 getList 函数，并将所有的 params 作为参数传入
-      getList(params)
-        .then(response => {
-          console.log("获取分页数据成功:", response);
-          // 检查 response.data.results 是否为空。
-          // 如果为空并且当前页码 this.currentPage 大于 1，那么将当前页码设置为 1，并再次调用获取数据
-          if (!response.data.results.length && this.currentPage > 1) {
-            this.currentPage = 1;
-            this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
-          } else {
-            // 如果 response.data.results 不为空，那么将其赋值给 this.list
-            // 将 response.data.count 赋值给 this.total
-            this.list = response.data.results;
-            this.total = response.data.count;
-            this.listLoading = false;
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching data:", error);
-          this.listLoading = false;
-          // 根据实际情况处理错误，例如显示用户友好的错误信息
-          if (this.currentPage > 1) {
-            this.currentPage = 1;
-            this.fetchData();
-          } else {
-            // 可能需要在这里处理错误，例如显示错误信息
-          }
-        })
-        .finally(() => {
-          this.listLoading = false;
-        });
+        // 使用 await 直接等待 getList 函数的结果
+        const response = await getList(params);
+        console.log("获取分页数据成功:", response);
+
+        // 检查 response.data.results 是否为空
+        if (!response.data.results.length && this.currentPage > 1) {
+          this.currentPage = 1;
+          await this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
+        } else {
+          // 如果 response.data.results 不为空，那么将其赋值给 this.list
+          // 将 response.data.count 赋值给 this.total
+          this.list = response.data.results;
+          this.total = response.data.count;
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // 根据实际情况处理错误
+        if (this.currentPage > 1) {
+          this.currentPage = 1;
+          await this.fetchData();
+        } else {
+          // 可能需要在这里处理错误，例如显示错误信息
+        }
+      } finally {
+        this.listLoading = false; // 确保在数据加载完成后关闭加载状态
+      }
     },
 
     // 分析培训概况
