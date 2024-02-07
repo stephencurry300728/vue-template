@@ -14,15 +14,9 @@
         </el-card>
       </el-col>
       <!-- 添加箱线图的容器 -->
-      <el-col :span="12">
-        <el-card>
-          <div id="boxplot-chart" style="height: 300px;"></div> <!-- 箱线图容器 -->
-        </el-card>
-      </el-col>
-      <!-- 为未来的图表预留位置 -->
-      <el-col :span="12">
-        <el-card>
-          <div style="height: 300px;">其他图表占位</div>
+      <el-col :span="24">
+        <el-card style="margin-top: 20px;">
+          <div id="barplot-chart" style="height: 420px;"></div> <!-- 箱线图容器 -->
         </el-card>
       </el-col>
     </el-row>
@@ -47,7 +41,6 @@ export default {
     this.$nextTick(() => {
       this.initPieChart()
       this.initBarChart()
-      this.initBoxplotChart()
     })
   },
   methods: {
@@ -59,7 +52,7 @@ export default {
       this.initBarChart()
     },
 
-    // 数据处理方法：转换数据为饼状图所需的格式
+    // 转换数据为饼状图所需的格式
     processPieChartData() {
       const resultDistribution = {}
       this.allTrainingData.forEach(data => {
@@ -112,6 +105,7 @@ export default {
       pieChart.setOption(option)
     },
 
+    // 柱状图
     processBarChartData() {
       const groupResults = {};
       this.allTrainingData.forEach(({ crew_group, assessment_result }) => {
@@ -169,63 +163,8 @@ export default {
       barChart.setOption(option);
     },
 
-
-
-    processBoxplotData() {
-      const dataMap = {}; // 存储每种车型在特定考核项目上的数据
-      this.allTrainingData.forEach(({ train_model, assessment_item, additional_data }) => {
-        const time = additional_data['整体用时']; // 获取整体用时
-        if (!dataMap[train_model]) dataMap[train_model] = [];
-        dataMap[train_model].push(this.parseTime(time)); // 将时间转换为数值并存储
-      });
-
-      // 转换数据为箱线图格式
-      const seriesData = Object.entries(dataMap).map(([model, values]) => {
-        return [model, ...echarts.dataTool.prepareBoxplotData([values]).boxData[0]];
-      });
-
-      return seriesData.sort((a, b) => a[1] - b[1]); // 根据最小值排序
-    },
-    parseTime(timeStr) {
-      // 将时间字符串“HH:MM:SS”转换为秒
-      const parts = timeStr.split(':');
-      return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
-    },
-    initBoxplotChart() {
-      const chart = echarts.init(document.getElementById('boxplot-chart'));
-      const option = {
-        title: {
-          text: '整体用时箱线图',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'item',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        xAxis: {
-          type: 'category',
-          data: this.processBoxplotData().map(item => item[0]), // 车型名称
-          axisLabel: { rotate: 45 } // 标签倾斜，避免重叠
-        },
-        yAxis: {
-          type: 'value',
-          name: '时间（秒）'
-        },
-        series: [
-          {
-            name: '整体用时',
-            type: 'boxplot',
-            data: this.processBoxplotData().map(item => item.slice(1)) // 箱线图数据
-          }
-        ]
-      };
-      chart.setOption(option);
-    },
-
+    
   }
-
 }
 
 </script>
@@ -233,7 +172,7 @@ export default {
 <style lang="scss" scoped>
 .dashboard {
   &-container {
-    margin: 10px;
+    margin: 20px;
   }
 
   &-text {
