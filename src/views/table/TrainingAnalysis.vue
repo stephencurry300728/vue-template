@@ -7,10 +7,20 @@
                 <span class="total-count">{{ processedData.totalCount }}</span>人 合格率:
                 <span class="pass-rate">{{ processedData.passRate }}%</span>
             </div>
+            <div>
+                <el-table :data="tableData" fit element-loading-text="拼命加载中" border stripe>
+                    <el-table-column prop="crew_group" label="班组" width="180" align="center"></el-table-column>
+                    <el-table-column prop="count" label="人数" align="center"></el-table-column>
+                    <el-table-column prop="excellent" label="优秀" align="center"></el-table-column>
+                    <el-table-column prop="qualified" label="合格" align="center"></el-table-column>
+                    <el-table-column prop="unqualified" label="不合格" align="center"></el-table-column>
+                </el-table>
+            </div>
         </el-card>
         <div v-else class="no-data">
             无培训数据
         </div>
+
     </div>
 </template>
 
@@ -52,6 +62,34 @@ export default {
 
             return { lineNames, totalCount, passRate, trainingItems };
         },
+        tableData() {
+            if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0) {
+                return [];
+            }
+
+            const groupStats = this.trainingAnalysisData.reduce((acc, item) => {
+                if (!acc[item.crew_group]) {
+                    acc[item.crew_group] = { count: 0, excellent: 0, qualified: 0, unqualified: 0 };
+                }
+                acc[item.crew_group].count++;
+                if (item.assessment_result === 3) {
+                    acc[item.crew_group].excellent++;
+                } else if (item.assessment_result === 2) {
+                    acc[item.crew_group].qualified++;
+                } else if (item.assessment_result === 1) {
+                    acc[item.crew_group].unqualified++;
+                }
+                return acc;
+            }, {});
+
+            return Object.keys(groupStats).map(group => ({
+                crew_group: group,
+                count: groupStats[group].count,
+                excellent: `${groupStats[group].excellent} (${((groupStats[group].excellent / groupStats[group].count) * 100).toFixed(2)}%)`,
+                qualified: `${groupStats[group].qualified} (${((groupStats[group].qualified / groupStats[group].count) * 100).toFixed(2)}%)`,
+                unqualified: `${groupStats[group].unqualified} (${((groupStats[group].unqualified / groupStats[group].count) * 100).toFixed(2)}%)`,
+            }));
+        },
     },
 
     methods: {},
@@ -71,6 +109,7 @@ export default {
     text-align: center;
     font-size: 16px;
     color: #333;
+    margin-bottom: 20px;
 }
 
 .training-items,
@@ -84,6 +123,10 @@ export default {
     color: #999;
     text-align: center;
     padding: 20px;
+}
+
+.table-card {
+    margin-top: 20px;
 }
 </style>
 
