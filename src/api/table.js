@@ -39,8 +39,9 @@ export function fetchAllTrainAndAssessment() {
   });
 }
 
-// 新增封装 analyzeTrainingOverview 的请求
-export function analyzeTrainingData(params) {
+
+// 由于后端处理了允许无参数的 GET 请求，故该函数可以请求所有不分页的数据
+export function AllTrainingData(params) {
   return request({
     url: '/assessment-base/unpaged-data/',
     method: 'get',

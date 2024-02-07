@@ -145,7 +145,7 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment, analyzeTrainingData } from '@/api/table' // 导入获取数据的API
+import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment, AllTrainingData } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 import { debounce } from 'lodash'; // 引入debounce函数，用于减少重复的API请求
 
@@ -326,8 +326,8 @@ export default {
     analyzeTrainingOverview() {
       const params = this.buildQueryParams(); // 构建请求参数
 
-      // 调用API 文件夹下的自定义 analyzeTrainingData 函数，并将所有的 params 作为参数传入
-      analyzeTrainingData(params)
+      // 调用API 文件夹下的自定义 AllTrainingData 函数，并将所有的 params 作为参数传入
+      AllTrainingData(params)
         .then(response => {
           // 将筛选后的数据保存到 Vuex 中，以便在 TrainingAnalysis.vue 中使用
           this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
