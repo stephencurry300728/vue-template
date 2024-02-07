@@ -172,7 +172,7 @@ export default {
 
   // 组件创建时调用 LocalStorage 的查询参数并获取数据
   created() {
-    this.fetchData = debounce(this.fetchData, 5); // 使用 debounce 包装 fetchData 方法，50ms 延迟
+    this.fetchData = debounce(this.fetchData, 5); // 使用 debounce 包装 fetchData 方法，5ms 延迟
     this.restoreStateFromLocalStorage();
     this.fetchData();
   },
@@ -192,7 +192,7 @@ export default {
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.selectedOption = null; // 线路变更时，清空 科 目选择器的值, 重新获取数据
+        this.selectedOption = null; // 线路变更时，清空 科目 选择器的值, 并重新获取数据
         this.fetchData();
         this.updateFilters(); // 更新URL查询参数
       }
@@ -201,7 +201,7 @@ export default {
     // 监听 科目 选项框的变化
     selectedOption(newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.fetchData(); // 当 selectedOption 更新时重新调用 fetchData() 方法
+        this.fetchData(); // 当 科目 选项框更新时重新调用 fetchData() 方法
         this.updateFilters(); // 更新URL查询参数
       }
     },
@@ -209,20 +209,22 @@ export default {
   },
 
   computed: {
-    // 计算属性，若选择所有线路时该选项无法选择
+    // 若选择所有线路时 科目 无法选择
     isSubjectDisabled() {
       return this.selectedLine === '';
     },
 
+    // 若选择所有线路时 科目 为空
     filteredOptions() {
       if (this.selectedLine === '') {
-        return []; // 如果没有选择线路，返回空数组
+        return []; // 且数据返回空数组
       } else {
-        // 过滤 combinedOptions 来只包含与选定线路匹配的选项
+        // 过滤 combinedOptions 来只包含与选定线路匹配的选项，即以选定线路开头的选项
         return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
       }
     },
 
+    // 计算分页大小的选项
     computedPageSizes() {
       // 预设的分页大小选项
       let baseSizes = [12, 30, 50, 100];
@@ -230,12 +232,12 @@ export default {
       // 移除所有大于当前总数 `total` 的分页大小选项
       baseSizes = baseSizes.filter(size => size <= this.total);
 
-      // 添加一个等于 `total` 的分页大小选项，如果它还不在列表中
+      // 添加一个等于 `total` 的分页大小选项，如果它还不在baseSizes列表中
       if (baseSizes.indexOf(this.total) === -1) {
         baseSizes.push(this.total);
       }
 
-      // 对更新后的分页大小选项进行排序，确保顺序正确
+      // 对更新后的分页大小选项进行排序，确保分页大小选项的顺序是正确的
       baseSizes.sort((a, b) => a - b);
 
       // 返回更新后的分页大小选项
@@ -244,6 +246,7 @@ export default {
   },
 
   methods: {
+    // 获取公共参数
     getCommonParams() {
       const params = {
         page: this.currentPage,
@@ -255,6 +258,7 @@ export default {
         selectedLine: this.selectedLine
       };
 
+      // 如果选中了科目，将其拆分并添加到 params 中
       if (this.selectedOption) {
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
         params.trainModel = trainModel; // 注意这里的键名和updateFilters中保存的键名保持一致
@@ -264,7 +268,7 @@ export default {
       return params;
     },
 
-    // 构建筛选的请求参数
+    // 构建用以筛选的请求参数
     buildQueryParams() {
       const commonParams = this.getCommonParams();
       const ordering = commonParams.sortOrder === 'descending' ? `-${commonParams.sortProp}` : commonParams.sortProp;
@@ -334,7 +338,7 @@ export default {
         });
     },
 
-    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存筛选的历史记录
+    // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存历史记录
     updateFilters() {
       const commonParams = this.getCommonParams();
 
@@ -401,8 +405,8 @@ export default {
       this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
     },
 
-    // Select框中加载数据库中所有数据的 train_model 和 assessment_item
-    // 调用 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
+    // 科目选择框中加载数据库中所有数据的 train_model 和 assessment_item
+    // 调用API文件夹下 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
     loadAllTrainAndAssessmentItems() {
       fetchAllTrainAndAssessment().then(response => {
         // 对获取到的数据按 train_model 进行升序排序
