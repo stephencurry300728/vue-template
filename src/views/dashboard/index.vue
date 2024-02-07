@@ -74,16 +74,21 @@ export default {
         }))
       }))
     },
+    // 转换考核结果为中文
     resultName(key) {
       const names = { '1': '不合格', '2': '合格', '3': '优秀' }
       return names[key]
     },
+    // 饼状图
     initPieChart() {
       const pieChart = echarts.init(document.getElementById('pie-chart'))
       const option = {
         title: {
           text: '考核结果饼状图',
-          left: 'center' // 标题居中
+          left: 'center', // 标题居中
+          textStyle: {
+            fontSize: 20 // 设置字体大小为20
+          }
         },
         tooltip: {
           trigger: 'item'
@@ -107,7 +112,7 @@ export default {
       pieChart.setOption(option)
     },
 
-    // 柱状图
+    // 竖柱状图
     processBarChartData() {
       const groupResults = {};
       this.allTrainingData.forEach(({ crew_group, assessment_result }) => {
@@ -146,7 +151,10 @@ export default {
       const option = {
         title: {
           text: '各乘务班组考核结果',
-          left: 'center' // 标题居中
+          left: 'center', // 标题居中
+          textStyle: {
+            fontSize: 20 // 设置字体大小为20
+          }
         },
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: {
@@ -160,12 +168,13 @@ export default {
           axisLabel: { interval: 0, rotate: 45 } // 使所有标签显示并倾斜
         },
         yAxis: { type: 'value' },
+        color: ['#EE6666', '#91CC75', '#5470C6'], // 红、绿、蓝配色
         series: series
       };
       barChart.setOption(option);
     },
 
-    // 新增：处理数据，准备横向条形图的数据
+    // 处理横向柱状图数据
     processBarplotData() {
       const groupedResults = this.allTrainingData.reduce((acc, item) => {
         const line = item.train_model.substring(0, 2); // 获取前两位作为线路编号
@@ -188,23 +197,32 @@ export default {
       const seriesData = categories.map(category => ({
         name: category,
         type: 'bar',
+        barWidth: '50%', // 设置柱子的宽度为类别宽度的50%
         data: Object.keys(groupedResults).map(line => groupedResults[line][category]),
         stack: '总分'
       }));
 
       return { seriesData, categories: Object.keys(groupedResults).map(line => `线路${line}`) };
     },
-    // 新增：初始化横向条形图
+    // 横向柱状图
     initBarplotChart() {
       const { seriesData, categories } = this.processBarplotData();
       const barplotChart = echarts.init(document.getElementById('barplot-chart'));
       const option = {
+        title: {
+          text: '各线路考核结果',
+          left: 'center', // 标题居中
+          textStyle: {
+            fontSize: 20 // 设置字体大小为20
+          }
+        },
         tooltip: {
           trigger: 'axis',
           axisPointer: { type: 'shadow' }
         },
         legend: {
-          data: ['不合格', '合格', '优秀']
+          data: ['不合格', '合格', '优秀'],
+          left: 'left',
         },
         grid: {
           left: '3%',
@@ -219,6 +237,7 @@ export default {
           type: 'category',
           data: categories
         },
+        color: ['#EE6666', '#91CC75', '#5470C6'], // 红、绿、蓝配色
         series: seriesData
       };
       barplotChart.setOption(option);
