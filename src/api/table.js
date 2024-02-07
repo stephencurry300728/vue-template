@@ -42,7 +42,7 @@ export function fetchAllTrainAndAssessment() {
 // 新增封装 analyzeTrainingOverview 的请求
 export function analyzeTrainingData(params) {
   return request({
-    url: '/assessment-base/unpaged-filter-data/',
+    url: '/assessment-base/unpaged-data/',
     method: 'get',
     params
   });
