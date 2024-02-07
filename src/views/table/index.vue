@@ -319,20 +319,22 @@ export default {
     },
 
     // 分析培训概况
-    analyzeTrainingOverview() {
-      const params = this.buildQueryParams(); // 构建请求参数
+    async analyzeTrainingOverview() {
+      try {
+        const params = this.buildQueryParams(); // 构建请求参数
 
-      // 调用API 文件夹下的自定义 AllTrainingData 函数，并将所有的 params 作为参数传入
-      AllTrainingData(params)
-        .then(response => {
-          // 将筛选后的数据保存到 Vuex 中，以便在 TrainingAnalysis.vue 中使用
-          this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
-          // 跳转到分析页面
-          this.$router.push({ name: 'TrainingAnalysis' });
-        })
-        .catch(error => {
-          console.error("培训概况分析请求失败:", error);
-        });
+        // 使用 await 等待 AllTrainingData 函数的结果
+        const response = await AllTrainingData(params);
+
+        // 将筛选后的数据保存到 Vuex 中，以便在 TrainingAnalysis.vue 中使用
+        this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
+
+        // 跳转到分析页面
+        this.$router.push({ name: 'TrainingAnalysis' });
+      } catch (error) {
+        console.error("培训概况分析请求失败:", error);
+        // 在这里可以处理错误，例如显示一个错误消息
+      }
     },
 
     // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存历史记录
@@ -404,8 +406,11 @@ export default {
 
     // 科目选择框中加载数据库中所有数据的 train_model 和 assessment_item
     // 调用API文件夹下 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
-    loadAllTrainAndAssessmentItems() {
-      fetchAllTrainAndAssessment().then(response => {
+    async loadAllTrainAndAssessmentItems() {
+      try {
+        // 使用 await 等待 fetchAllTrainAndAssessment 函数的结果
+        const response = await fetchAllTrainAndAssessment();
+
         // 对获取到的数据按 train_model 进行升序排序
         const sortedData = response.data.sort((a, b) => {
           // 使用 localeCompare 进行字符串比较，以实现车型的升序排列
@@ -417,9 +422,10 @@ export default {
           label: `${item.train_model} - ${item.assessment_item}`,
           value: `${item.train_model}-${item.assessment_item}`,
         }));
-      }).catch(error => {
+      } catch (error) {
         console.error("获取数据失败：", error);
-      });
+        // 在这里可以处理错误，例如显示一个错误消息
+      }
     },
 
     // 左上角按钮重置筛选条件    
@@ -513,45 +519,50 @@ export default {
     },
 
     // 具体执行部分更新 PATCH 特定行
-    saveEdit() {
-      const id = this.editForm.id;
-      updateItem(id, this.editForm)
-        .then(() => {
-          this.editDialogVisible = false; // 更新完毕后自动关闭对话框
-          this.fetchData(); // 重新加载更新后的数据
-          this.$message.success('更新成功');
-        })
-        .catch(error => {
-          console.error("更新失败:", error);
-          this.$message.error('更新失败');
-        });
+    async saveEdit() {
+      try {
+        const id = this.editForm.id;
+        // 使用 await 等待 updateItem 函数的结果
+        await updateItem(id, this.editForm);
+        this.editDialogVisible = false; // 更新完毕后自动关闭对话框
+        await this.fetchData(); // 重新加载更新后的数据
+        this.$message.success('更新成功');
+      } catch (error) {
+        console.error("更新失败:", error);
+        this.$message.error('更新失败');
+      }
     },
 
     // 具体删除 DELETE 特定行
-    deleteItem(row) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 用户确认删除，调用 API 删除数据
-        deleteItem(row.id).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-          // 刷新列表，重新获取删除后数据
-          this.fetchData();
-        }).catch(error => {
-          this.$message.error('删除失败');
-        })
-      }).catch(() => {
-        // 用户取消删除
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
+    async deleteItem(row) {
+      try {
+        // 显示确认对话框
+        await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         });
-      });
+        // 用户确认删除，调用 API 删除数据
+        await deleteItem(row.id);
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        });
+        // 刷新列表，重新获取删除后的数据
+        await this.fetchData();
+      } catch (error) {
+        // 捕获 $confirm 的取消操作以及 deleteItem 的错误
+        if (error && error !== 'cancel') {
+          // 检查错误是否因为用户取消操作而产生
+          this.$message.error('删除失败');
+        } else if (error === 'cancel') {
+          // 用户取消删除
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        }
+      }
     },
 
     // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
