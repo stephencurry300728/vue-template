@@ -244,30 +244,38 @@ export default {
   },
 
   methods: {
-    // 构建筛选的请求参数
-    buildQueryParams() {
+    getCommonParams() {
       const params = {
         page: this.currentPage,
-        page_size: this.pageSize,
-        // 根据this.sort.order的值来决定排序参数的值
-        // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
-        // 用来和后端接口 ordering 适配
-        ordering: this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop,
-        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        pageSize: this.pageSize,
+        sortProp: this.sort.prop,
+        sortOrder: this.sort.order === 'descending' ? 'descending' : 'ascending',
+        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        selectedLine: this.selectedLine
       };
-
-      if (this.selectedLine) {
-        params.train_model_line = this.selectedLine;
-      }
 
       if (this.selectedOption) {
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
-        params.train_model = trainModel;
-        params.assessment_item = assessmentItem;
+        params.trainModel = trainModel; // 注意这里的键名和updateFilters中保存的键名保持一致
+        params.assessmentItem = assessmentItem; // 同上
       }
 
       return params;
+    },
+
+    // 构建筛选的请求参数
+    buildQueryParams() {
+      const commonParams = this.getCommonParams();
+      const ordering = commonParams.sortOrder === 'descending' ? `-${commonParams.sortProp}` : commonParams.sortProp;
+
+      return {
+        ...commonParams,
+        ordering,
+        train_model_line: commonParams.selectedLine,
+        train_model: commonParams.trainModel,
+        assessment_item: commonParams.assessmentItem
+      };
     },
 
     // 获取数据，基本上每次都要调用
@@ -328,19 +336,17 @@ export default {
 
     // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存筛选的历史记录
     updateFilters() {
+      const commonParams = this.getCommonParams();
+
       const filters = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        sortProp: this.sort.prop,
-        sortOrder: this.sort.order,
-        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-        selectedLine: this.selectedLine, // 保存选中的线路
-        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '', // 拆分value保存选中的车型
-        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '', // 拆分value保存选中的考核项目
+        ...commonParams,
+        sortProp: commonParams.sortProp,
+        sortOrder: commonParams.sortOrder,
+        selectedLine: commonParams.selectedLine,
+        trainModel: commonParams.trainModel,
+        assessmentItem: commonParams.assessmentItem
       };
 
-      // 将 filters 对象保存到 LocalStorage 中
       localStorage.setItem('tableFilters', JSON.stringify(filters));
     },
 
