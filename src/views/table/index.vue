@@ -244,11 +244,14 @@ export default {
   },
 
   methods: {
-    // 构建请求参数
+    // 构建筛选的请求参数
     buildQueryParams() {
       const params = {
         page: this.currentPage,
         page_size: this.pageSize,
+        // 根据this.sort.order的值来决定排序参数的值
+        // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
+        // 用来和后端接口 ordering 适配
         ordering: this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop,
         start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
         end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
@@ -271,12 +274,9 @@ export default {
     fetchData() {
       // 开启表格加载
       this.listLoading = true;
-      // 根据this.sort.order的值来决定排序参数的值
-      // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
-      // 用来和后端接口 ordering 适配
-      const params = this.buildQueryParams(); // 使用共用方法构建请求参数
+      const params = this.buildQueryParams(); // 构建像后端传递的请求参数
 
-      // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
+      // 调用API 文件夹下的自定义 getList 函数，并将所有的 params 作为参数传入
       getList(params)
         .then(response => {
           console.log("获取分页数据成功:", response);
@@ -309,14 +309,16 @@ export default {
         });
     },
 
+    // 分析培训概况
     analyzeTrainingOverview() {
-      const params = this.buildQueryParams(); // 使用共用方法构建请求参数
+      const params = this.buildQueryParams(); // 构建请求参数
 
+      // 调用API 文件夹下的自定义 analyzeTrainingData 函数，并将所有的 params 作为参数传入
       analyzeTrainingData(params)
         .then(response => {
-          // 将数据保存到 Vuex 中
+          // 将筛选后的数据保存到 Vuex 中，以便在 TrainingAnalysis.vue 中使用
           this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
-          // 跳转到分析页面，假设路由名称为 'TrainingAnalysis'
+          // 跳转到分析页面
           this.$router.push({ name: 'TrainingAnalysis' });
         })
         .catch(error => {
@@ -324,7 +326,7 @@ export default {
         });
     },
 
-    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
+    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存筛选的历史记录
     updateFilters() {
       const filters = {
         page: this.currentPage,

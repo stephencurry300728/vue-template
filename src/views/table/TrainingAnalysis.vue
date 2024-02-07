@@ -31,9 +31,11 @@ import { mapState } from 'vuex';
 export default {
     name: 'TrainingAnalysis',
     computed: {
+        // 从 store 中获取筛选后的培训数据
         ...mapState('table', [
             'trainingAnalysisData',
         ]),
+        // 处理培训数据
         processedData() {
             if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0) {
                 return { lineNames: '', totalCount: 0, passRate: 0, trainingItems: '' };
