@@ -143,7 +143,7 @@
 <script>
 import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
-import { debounce } from 'lodash'; // 引入debounce函数
+import { debounce } from 'lodash'; // 引入debounce函数，用于减少重复的API请求
 
 export default {
   data() {
@@ -221,16 +221,20 @@ export default {
 
     computedPageSizes() {
       // 预设的分页大小选项
-      const baseSizes = [12, 30, 50, 100];
-      // 如果总数小于最小的预设分页大小，只显示总数
-      if (this.total < baseSizes[0]) {
-        return [this.total];
+      let baseSizes = [12, 30, 50, 100];
+
+      // 移除所有大于当前总数 `total` 的分页大小选项
+      baseSizes = baseSizes.filter(size => size <= this.total);
+
+      // 添加一个等于 `total` 的分页大小选项，如果它还不在列表中
+      if (baseSizes.indexOf(this.total) === -1) {
+        baseSizes.push(this.total);
       }
-      // 如果总数大于最大的预设分页大小，或不等于任何预设的分页大小，则添加到数组中
-      if (this.total > baseSizes[baseSizes.length - 1] || !baseSizes.includes(this.total)) {
-        return [...baseSizes, this.total];
-      }
-      // 默认情况下返回预设分页大小
+
+      // 对更新后的分页大小选项进行排序，确保顺序正确
+      baseSizes.sort((a, b) => a - b);
+
+      // 返回更新后的分页大小选项
       return baseSizes;
     },
   },
@@ -299,7 +303,7 @@ export default {
         })
         .finally(() => {
           this.listLoading = false;
-        }); 
+        });
     },
 
     // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
@@ -525,9 +529,9 @@ export default {
     // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
     // 这个参数 item 是 row.scope 即当前行的完整数据
     goToDetail(rowData) {
-          this.$store.dispatch('table/updateDetailData', rowData); // 注意使用命名空间
-          this.$router.push({ name: 'Detail' }); // 使用正确的路由名称
-        },
+      this.$store.dispatch('table/updateDetailData', rowData); // 注意使用命名空间
+      this.$router.push({ name: 'Detail' }); // 使用正确的路由名称
+    },
   },
 }
 </script>
