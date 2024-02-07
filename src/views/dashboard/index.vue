@@ -41,6 +41,7 @@ export default {
     this.$nextTick(() => {
       this.initPieChart()
       this.initBarChart()
+      this.initBarplotChart() // 新增：初始化横向条形图
     })
   },
   methods: {
@@ -50,6 +51,7 @@ export default {
       // 数据加载后重新初始化图表
       this.initPieChart()
       this.initBarChart()
+      this.initBarplotChart() // 新增：初始化横向条形图
     },
 
     // 转换数据为饼状图所需的格式
@@ -163,7 +165,64 @@ export default {
       barChart.setOption(option);
     },
 
-    
+    // 新增：处理数据，准备横向条形图的数据
+    processBarplotData() {
+      const groupedResults = this.allTrainingData.reduce((acc, item) => {
+        const line = item.train_model.substring(0, 2); // 获取前两位作为线路编号
+        const result = item.assessment_result; // 考核结果
+
+        // 确保每条线路的数据结构，并使用中文标签
+        if (!acc[line]) {
+          acc[line] = { "不合格": 0, "合格": 0, "优秀": 0 };
+        }
+
+        // 根据考核结果增加对应的计数
+        if (result === 1) acc[line]["不合格"]++;
+        else if (result === 2) acc[line]["合格"]++;
+        else if (result === 3) acc[line]["优秀"]++;
+
+        return acc;
+      }, {});
+
+      const categories = ["不合格", "合格", "优秀"];
+      const seriesData = categories.map(category => ({
+        name: category,
+        type: 'bar',
+        data: Object.keys(groupedResults).map(line => groupedResults[line][category]),
+        stack: '总分'
+      }));
+
+      return { seriesData, categories: Object.keys(groupedResults).map(line => `线路${line}`) };
+    },
+    // 新增：初始化横向条形图
+    initBarplotChart() {
+      const { seriesData, categories } = this.processBarplotData();
+      const barplotChart = echarts.init(document.getElementById('barplot-chart'));
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        legend: {
+          data: ['不合格', '合格', '优秀']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'value'
+        },
+        yAxis: {
+          type: 'category',
+          data: categories
+        },
+        series: seriesData
+      };
+      barplotChart.setOption(option);
+    },
   }
 }
 
