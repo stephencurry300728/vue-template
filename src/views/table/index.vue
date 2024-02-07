@@ -247,75 +247,70 @@ export default {
   },
 
   methods: {
-    // 获取公共参数
-    getCommonParams() {
+    // 获取数据，基本上每次都要调用
+    fetchData() {
+      // 开启表格加载
+      this.listLoading = true;
+      // 根据this.sort.order的值来决定排序参数的值
+      // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
+      // 用来和后端接口 ordering 适配
+      const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
+      // 带着请求参数调用API
       const params = {
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        sortProp: this.sort.prop,
-        sortOrder: this.sort.order === 'descending' ? 'descending' : 'ascending',
-        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-        selectedLine: this.selectedLine
+        page: this.currentPage, // 传递给API的页码
+        page_size: this.pageSize, // 传递给API的每页大小
+        ordering: ordering, // 传递给API的排序字段
+        start_date: '', // 起始日期，默认为空字符串
+        end_date: '', // 终止日期，默认为空字符串
       };
 
-      // 如果选中了科目，将其拆分并添加到 params 中
+      // 如果日期范围非空，则更新 params 并使用dayjs库来格式化日期
+      if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
+      if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
+
+      // 检查是否有选中的线路，并将 train_model_line 加入请求参数 params
+      if (this.selectedLine) {
+        params.train_model_line = this.selectedLine;
+      }
+
+      // 检查是否有选中的科目，解耦train_model assessment_item 加入请求参数
       if (this.selectedOption) {
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
-        params.trainModel = trainModel; // 注意这里的键名和updateFilters中保存的键名保持一致
-        params.assessmentItem = assessmentItem; // 同上
+        params.train_model = trainModel;
+        params.assessment_item = assessmentItem;
       }
 
-      return params;
-    },
-
-    // 构建用以筛选的请求参数
-    buildQueryParams() {
-      const commonParams = this.getCommonParams();
-      const ordering = commonParams.sortOrder === 'descending' ? `-${commonParams.sortProp}` : commonParams.sortProp;
-
-      return {
-        ...commonParams,
-        ordering,
-        train_model_line: commonParams.selectedLine,
-        train_model: commonParams.trainModel,
-        assessment_item: commonParams.assessmentItem
-      };
-    },
-
-    // 获取数据，基本上每次都要调用
-    async fetchData() {
-      try {
-        // 开启表格加载
-        this.listLoading = true;
-        const params = this.buildQueryParams(); // 构建像后端传递的请求参数
-
-        // 使用 await 直接等待 getList 函数的结果
-        const response = await getList(params);
-        console.log("获取分页数据成功:", response);
-
-        // 检查 response.data.results 是否为空
-        if (!response.data.results.length && this.currentPage > 1) {
-          this.currentPage = 1;
-          await this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
-        } else {
-          // 如果 response.data.results 不为空，那么将其赋值给 this.list
-          // 将 response.data.count 赋值给 this.total
-          this.list = response.data.results;
-          this.total = response.data.count;
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        // 根据实际情况处理错误
-        if (this.currentPage > 1) {
-          this.currentPage = 1;
-          await this.fetchData();
-        } else {
-          // 可能需要在这里处理错误，例如显示错误信息
-        }
-      } finally {
-        this.listLoading = false; // 确保在数据加载完成后关闭加载状态
-      }
+      // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
+      getList(params)
+        .then(response => {
+          console.log("获取数据成功:", response);
+          // 检查 response.data.results 是否为空。
+          // 如果为空并且当前页码 this.currentPage 大于 1，那么将当前页码设置为 1，并再次调用获取数据
+          if (!response.data.results.length && this.currentPage > 1) {
+            this.currentPage = 1;
+            this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
+          } else {
+            // 如果 response.data.results 不为空，那么将其赋值给 this.list
+            // 将 response.data.count 赋值给 this.total
+            this.list = response.data.results;
+            this.total = response.data.count;
+            this.listLoading = false;
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching data:", error);
+          this.listLoading = false;
+          // 根据实际情况处理错误，例如显示用户友好的错误信息
+          if (this.currentPage > 1) {
+            this.currentPage = 1;
+            this.fetchData();
+          } else {
+            // 可能需要在这里处理错误，例如显示错误信息
+          }
+        })
+        .finally(() => {
+          this.listLoading = false;
+        }); 
     },
 
     // 分析培训概况
@@ -338,18 +333,21 @@ export default {
     },
 
     // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存历史记录
+    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
     updateFilters() {
-      const commonParams = this.getCommonParams();
-
       const filters = {
-        ...commonParams,
-        sortProp: commonParams.sortProp,
-        sortOrder: commonParams.sortOrder,
-        selectedLine: commonParams.selectedLine,
-        trainModel: commonParams.trainModel,
-        assessmentItem: commonParams.assessmentItem
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        sortProp: this.sort.prop,
+        sortOrder: this.sort.order,
+        startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        selectedLine: this.selectedLine, // 保存选中的线路
+        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '', // 拆分value保存选中的车型
+        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '', // 拆分value保存选中的考核项目
       };
 
+      // 将 filters 对象保存到 LocalStorage 中
       localStorage.setItem('tableFilters', JSON.stringify(filters));
     },
 
@@ -369,6 +367,7 @@ export default {
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
+    // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     restoreStateFromLocalStorage() {
       // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
