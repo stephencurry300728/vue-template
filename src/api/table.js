@@ -38,3 +38,12 @@ export function fetchAllTrainAndAssessment() {
     method: 'get',
   });
 }
+
+// 新增封装 analyzeTrainingOverview 的请求
+export function analyzeTrainingData(params) {
+  return request({
+    url: '/assessment-base/unpaged-filter-data/',
+    method: 'get',
+    params
+  });
+}

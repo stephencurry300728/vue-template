@@ -63,12 +63,16 @@
       <div class="select-container select-offset"> <!-- 添加新的类名用于调整样式 -->
         <el-select v-model="selectedOption" :disabled="isSubjectDisabled" clearable placeholder="请选择科目"
           style="width: 222px; height: 40px; font-size: 16px;">
-          <el-option v-for="option in filteredOptions" :key="option.value" :label="option.label"
-            :value="option.value"></el-option>
-
+          <el-option v-for="option in filteredOptions" :key="option.value" :label="option.label" :value="option.value">
+          </el-option>
         </el-select>
-
       </div>
+
+      <!-- 培训概况分析按钮 -->
+      <div class="analysis-button-container">
+        <el-button @click="analyzeTrainingOverview" type="danger" size="small">培训概况分析</el-button>
+      </div>
+
     </div>
 
     <!-- 表格组件 -->
@@ -141,7 +145,7 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment } from '@/api/table' // 导入获取数据的API
+import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment, analyzeTrainingData } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 import { debounce } from 'lodash'; // 引入debounce函数，用于减少重复的API请求
 
@@ -240,6 +244,28 @@ export default {
   },
 
   methods: {
+    buildQueryParams() {
+      const params = {
+        page: this.currentPage,
+        page_size: this.pageSize,
+        ordering: this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop,
+        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+      };
+
+      if (this.selectedLine) {
+        params.train_model_line = this.selectedLine;
+      }
+
+      if (this.selectedOption) {
+        const [trainModel, assessmentItem] = this.selectedOption.split('-');
+        params.train_model = trainModel;
+        params.assessment_item = assessmentItem;
+      }
+
+      return params;
+    },
+
     // 获取数据，基本上每次都要调用
     fetchData() {
       // 开启表格加载
@@ -247,31 +273,7 @@ export default {
       // 根据this.sort.order的值来决定排序参数的值
       // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
       // 用来和后端接口 ordering 适配
-      const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
-      // 带着请求参数调用API
-      const params = {
-        page: this.currentPage, // 传递给API的页码
-        page_size: this.pageSize, // 传递给API的每页大小
-        ordering: ordering, // 传递给API的排序字段
-        start_date: '', // 起始日期，默认为空字符串
-        end_date: '', // 终止日期，默认为空字符串
-      };
-
-      // 如果日期范围非空，则更新 params 并使用dayjs库来格式化日期
-      if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
-      if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
-
-      // 检查是否有选中的线路，并将 train_model_line 加入请求参数 params
-      if (this.selectedLine) {
-        params.train_model_line = this.selectedLine;
-      }
-
-      // 检查是否有选中的科目，解耦train_model assessment_item 加入请求参数
-      if (this.selectedOption) {
-        const [trainModel, assessmentItem] = this.selectedOption.split('-');
-        params.train_model = trainModel;
-        params.assessment_item = assessmentItem;
-      }
+      const params = this.buildQueryParams(); // 使用共用方法构建请求参数
 
       // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
       getList(params)
@@ -303,6 +305,19 @@ export default {
         })
         .finally(() => {
           this.listLoading = false;
+        });
+    },
+
+    analyzeTrainingOverview() {
+      const params = this.buildQueryParams(); // 使用共用方法构建请求参数
+
+      analyzeTrainingData(params)
+        .then(response => {
+          // 处理响应数据，例如显示分析结果
+          console.log("培训概况分析数据:", response);
+        })
+        .catch(error => {
+          console.error("培训概况分析请求失败:", error);
         });
     },
 
