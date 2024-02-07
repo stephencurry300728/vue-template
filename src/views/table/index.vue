@@ -244,6 +244,7 @@ export default {
   },
 
   methods: {
+    // 构建请求参数
     buildQueryParams() {
       const params = {
         page: this.currentPage,
