@@ -76,8 +76,8 @@
     </div>
 
     <!-- 表格组件 -->
-    <el-table class="custom-table" v-loading="listLoading" :data="list" element-loading-text="拼命加载中" border fit
-      highlight-current-row stripe @sort-change="handleSortChange" height="758"
+    <el-table class="custom-table" v-loading="listLoading" :key="tableKey" :data="list" element-loading-text="拼命加载中"
+      border fit highlight-current-row stripe @sort-change="handleSortChange" height="758"
       :default-sort="{ prop: sort.prop, order: sort.order }">
       <!-- 表的内容 -->
       <el-table-column align="center" label="ID" width="70">
@@ -157,6 +157,7 @@ export default {
       total: 0,  // 总共数据
       currentPage: 1,  // 当前页码
       pageSize: 12, // 每页大小
+      tableKey: 0, // 通过key的绑定来强制点击重置按钮的时候 Vue 重新渲染el-table组件
       sort: {
         prop: '', // 排序的字段
         order: '' // 排序方式 ascending为升序，descending为降序,
@@ -430,6 +431,7 @@ export default {
       this.dateRange = [new Date(2023, 9, 10), undefined];
       this.currentPage = 1;
       this.pageSize = 12;
+      this.tableKey += 1; // 重新渲染el-table
       this.sort = { prop: '', order: '' };
       this.selectedLine = ''; // 清空选中的线路，默认为全部线路
       this.selectedOption = null;
