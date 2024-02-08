@@ -320,48 +320,60 @@ export default {
         sortOrder: this.sort.order,
         startDate: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
         endDate: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
-        selectedLine: this.selectedLine, // 保存选中的线路
-        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '', // 拆分value保存选中的车型
-        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '', // 拆分value保存选中的考核项目
+        selectedLine: this.selectedLine,
+        trainModel: this.selectedOption ? this.selectedOption.split('-')[0] : '',
+        assessmentItem: this.selectedOption ? this.selectedOption.split('-')[1] : '',
       };
 
-      // 将 filters 对象保存到 LocalStorage 中
       localStorage.setItem('tableFilters', JSON.stringify(filters));
     },
 
+
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     restoreStateFromLocalStorage() {
-      // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
+      // 定义一个包含所有过滤器默认值的对象
       const defaultFilters = {
-        page: 1,
-        pageSize: 12,
-        sortProp: '',
-        sortOrder: '',
-        startDate: '',
-        endDate: '',
-        trainModel: '',
-        assessmentItem: '',
-        selectedLine: '',
+        page: 1, // 默认的页码
+        pageSize: 12, // 默认的每页记录数
+        sortProp: '', // 默认的排序属性
+        sortOrder: '', // 默认的排序顺序
+        startDate: '', // 默认的开始日期
+        endDate: '', // 默认的结束日期
+        selectedLine: '', // 默认选中的线路
+        trainModel: '', // 默认选中的车型
+        assessmentItem: '', // 默认选中的考核项目
       };
 
-      // 从本地存储中获取名为 tableFilters 的项
-      // 如果该项存在，它会被解析为一个 JavaScript 对象并赋值给 filters 变量
-      // 如果该项不存在，filters 变量将被赋予 defaultFilters 的值
+      // 尝试从LocalStorage中获取名为'tableFilters'的项，如果不存在，则使用defaultFilters对象
       const filters = JSON.parse(localStorage.getItem('tableFilters')) || defaultFilters;
 
-      // 将 filters 对象中的值赋给当前 Vue 实例的相应属性
-      this.currentPage = filters.page;
-      this.pageSize = filters.pageSize;
-      this.sort.prop = filters.sortProp;
-      this.sort.order = filters.sortOrder;
-      this.dateRange = [
-        filters.startDate ? new Date(filters.startDate) : undefined, // 指定默认日期
-        filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
-      ];
-      this.selectedLine = filters.selectedLine; // 恢复选中的线路
-      // 如果 filters.trainModel 和 filters.assessmentItem 都存在，它们会被连接成一个字符串并赋给 this.selectedOption
-      // 如果它们中的任何一个不存在，this.selectedOption 将被赋值为 null
-      this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
+      // 遍历defaultFilters对象的所有键
+      Object.keys(defaultFilters).forEach(key => {
+        // 获取当前键对应的值
+        const value = filters[key];
+        switch (key) {
+          // 如果当前键是'startDate'或'endDate'
+          case 'startDate':
+          case 'endDate':
+            // 根据键名决定是设置dateRange数组的第一个元素还是第二个元素
+            // 如果值存在，则将其转换为Date对象，否则设置为undefined
+            this.dateRange[key === 'startDate' ? 0 : 1] = value ? new Date(value) : undefined;
+            break;
+          // 如果当前键是'trainModel'或'assessmentItem'
+          case 'trainModel':
+          case 'assessmentItem':
+            // 只有当'trainModel'和'assessmentItem'都存在时，才将它们组合成一个字符串并赋值给this.selectedOption
+            // 否则，将this.selectedOption设置为null
+            if (value) {
+              this.selectedOption = filters.trainModel && filters.assessmentItem ? `${filters.trainModel}-${filters.assessmentItem}` : null;
+            }
+            break;
+          // 对于其他情况
+          default:
+            // 直接将值赋给当前实例的对应属性
+            this[key] = value;
+        }
+      });
     },
 
     // 科目选择框中加载数据库中所有数据的 train_model 和 assessment_item
@@ -402,13 +414,16 @@ export default {
       // 重新获取数据
       this.fetchData();
     },
-    
+
+    /*
+    * 以下是一些辅助函数
+    */
     // 日期范围选择器的值发生变化时（输入或取消）触发
     onDateRangeChange(value) {
       // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
       // 如果是则清空日期范围，否则更新日期范围
       if (!value || value.length === 0 || (!value[0] && !value[1])) {
-        // 清空日期范围
+        // 清空日期范围(点击叉叉时触发)
         this.dateRange = [undefined, undefined];
       } else {
         // 更新日期范围赋值给dateRange
@@ -418,9 +433,6 @@ export default {
       this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
-    /*
-    * 以下是一些辅助函数
-    */
     // 处理排序改变
     handleSortChange({
       prop,
