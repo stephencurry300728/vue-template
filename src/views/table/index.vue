@@ -369,6 +369,7 @@ export default {
     // 科目选择框中加载数据库中所有数据的 train_model 和 assessment_item
     // 调用API文件夹下 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
     // 解释下为什么不直接用获取的list数据，因为这里需要的是数据库中所有的train_model和assessment_item,而list数据是分页的数据
+    // 未来确定好了所有的车型和考核项目会将这个科目选择框写死，不再调用API，因为调用API做不到保存历史筛选记录
     async loadAllTrainAndAssessmentItems() {
       try {
         // 使用 await 等待 fetchAllTrainAndAssessment 函数的结果

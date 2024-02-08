@@ -39,8 +39,7 @@ export function fetchAllTrainAndAssessment() {
   });
 }
 
-
-// 由于后端处理了允许无参数的 GET 请求，故该函数可以请求所有不分页的数据
+// 由于后端处理了允许无参数的 GET 请求，故该函数可以请求所有不分页的数据，可以是所有的训练数据，也可以是筛选后的数据
 export function AllTrainingData(params) {
   return request({
     url: '/assessment-base/unpaged-data/',
