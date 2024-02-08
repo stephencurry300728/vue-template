@@ -183,12 +183,7 @@ export default {
     this.loadAllTrainAndAssessmentItems();
   },
 
-  // 监听路由的查询参数的变化
   watch: {
-    '$route.query': {
-      handler: 'restoreStateFromRouteQuery',
-    },
-
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
@@ -229,18 +224,14 @@ export default {
     computedPageSizes() {
       // 预设的分页大小选项
       let baseSizes = [12, 30, 50, 100];
-
       // 移除所有大于当前总数 `total` 的分页大小选项
       baseSizes = baseSizes.filter(size => size <= this.total);
-
       // 添加一个等于 `total` 的分页大小选项，如果它还不在baseSizes列表中
       if (baseSizes.indexOf(this.total) === -1) {
         baseSizes.push(this.total);
       }
-
       // 对更新后的分页大小选项进行排序，确保分页大小选项的顺序是正确的
       baseSizes.sort((a, b) => a - b);
-
       // 返回更新后的分页大小选项
       return baseSizes;
     },
