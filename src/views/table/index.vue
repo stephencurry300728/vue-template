@@ -187,9 +187,8 @@ export default {
   watch: {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
-      immediate: false,
-      deep: false,
     },
+    
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
@@ -388,7 +387,6 @@ export default {
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
-    // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
     restoreStateFromLocalStorage() {
       // 定义一个 defaultFilters 对象，该对象包含了所有过滤器的默认值
