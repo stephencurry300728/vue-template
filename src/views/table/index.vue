@@ -238,34 +238,41 @@ export default {
   },
 
   methods: {
+
     // 构建查询参数，减少代码冗余
+    // 其中包括当前页码、每页大小、排序、日期范围、选中的线路、选中的选项
+    // params 中变量的命名需要与后端API的参数名一致
     buildQueryParams() {
+      // 如果 this.sort.order 的值是 'descending'，那么 ordering 的值就会是 this.sort.prop 前面加上一个负号 -，表示降序排序
+      // 否则，ordering 的值就会是 this.sort.prop，表示升序排序
       const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
       const params = {
-        page: this.currentPage,
-        page_size: this.pageSize,
-        ordering: ordering,
-        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
-        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+        page: this.currentPage, // 从el-pagination组件获取当前页码
+        page_size: this.pageSize, // 从el-pagination组件获取每页大小
+        ordering: ordering, // 排序的字段和方式
+        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '', // 日期范围的开始日期并转换为数据库中的格式
+        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '', // 日期范围的结束日期并转换为数据库中的格式
       };
 
       if (this.selectedLine) {
+        // 如果选中了线路，就将选中的线路添加到查询参数中
         params.train_model_line = this.selectedLine;
       }
 
       if (this.selectedOption) {
+        // 从选中的选项中拆分出 train_model 和 assessment_item，并添加到查询参数中
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
         params.train_model = trainModel;
         params.assessment_item = assessmentItem;
       }
-
+      // 返回构建好的查询参数
       return params;
     },
 
     // 获取数据，基本上每次都要调用
     async fetchData() {
       this.listLoading = true;
-      const params = this.buildQueryParams(); // 使用buildQueryParams构建请求参数
+      const params = this.buildQueryParams(); // 调用buildQueryParams构建请求参数
 
       try {
         const response = await getList(params); // 等待异步请求完成
@@ -274,11 +281,13 @@ export default {
           this.currentPage = 1;
           await this.fetchData(); // 递归调用自己，但有终止条件，避免无限循环
         } else {
-          this.list = response.data.results;
-          this.total = response.data.count;
+          // 如果有数据，就更新 list 和 total
+          this.list = response.data.results; // 后端返回的表格数据
+          this.total = response.data.count;  // 后端返回的数据总数
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        // 处理用户在40多页，但是获取到了空数据的情况，直接跳转到第一页重新获取数据
         if (this.currentPage > 1) {
           this.currentPage = 1;
           await this.fetchData(); // 错误处理中尝试重新获取数据
@@ -289,12 +298,14 @@ export default {
       }
     },
 
-    // 跳转到分析培训概况
+    // 携带着筛选参数跳转到分析培训概况
     async analyzeTrainingOverview() {
       try {
         const params = this.buildQueryParams(); // 重用构建参数逻辑
         const response = await AllTrainingData(params);
+        // 将获取到的筛选数据存储到 Vuex 中
         this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
+        // 路由跳转到培训概况分析页面
         this.$router.push({ name: 'TrainingAnalysis' });
       } catch (error) {
         console.error("培训概况分析请求失败:", error);
@@ -302,7 +313,7 @@ export default {
       }
     },
 
-    // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存历史记录
+    // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存筛选的历史记录
     updateFilters() {
       const filters = {
         page: this.currentPage,
@@ -336,18 +347,18 @@ export default {
       };
 
       // 从本地存储中获取名为 tableFilters 的项
-      // 如果该项存在，它会被解析为一个 JavaScript 对象并赋值给 filters 变量
+      // 如果该项存在，它会被解析为一个对象并赋值给 filters 变量
       // 如果该项不存在，filters 变量将被赋予 defaultFilters 的值
       const filters = JSON.parse(localStorage.getItem('tableFilters')) || defaultFilters;
 
-      // 将 filters 对象中的值赋给当前 Vue 实例的相应属性
+      // 将 filters 对象中的值赋给当前 Vue 实例的相应属性（对应data中的数据）
       this.currentPage = filters.page;
       this.pageSize = filters.pageSize;
       this.sort.prop = filters.sortProp;
       this.sort.order = filters.sortOrder;
       this.dateRange = [
-        filters.startDate ? new Date(filters.startDate) : undefined, // 指定默认日期
-        filters.endDate ? new Date(filters.endDate) : undefined, // 默认结束日期
+        filters.startDate ? new Date(filters.startDate) : undefined,
+        filters.endDate ? new Date(filters.endDate) : undefined,
       ];
       this.selectedLine = filters.selectedLine; // 恢复选中的线路
       // 如果 filters.trainModel 和 filters.assessmentItem 都存在，它们会被连接成一个字符串并赋给 this.selectedOption
@@ -409,9 +420,10 @@ export default {
         this.dateRange = value;
       }
       this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页，防止出现空白页
-      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
+      this.updateFilters(); // 更新 Localstorage，这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
+    
     // 处理排序改变
     handleSortChange({
       prop,
@@ -419,7 +431,7 @@ export default {
     }) {
       // 当前排序的属性是否等于传入的属性
       if (this.sort.prop === prop) {
-        // 如果是，则切换排序顺序
+        // 如果是，则切换排序顺序，便于传递怕rams参数
         this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
         // 清空了排序顺序，那么也需要清空排序的属性
         if (this.sort.order === '') {
@@ -428,11 +440,10 @@ export default {
       } else {
         // 如果不是，则更新排序的属性和排序的顺序
         this.sort.prop = prop;
-        // this.sort.order = 'ascending';
         this.sort.order = order;
       }
       // 更新 URL 的查询参数，将新的排序属性和排序顺序保存在 URL 中
-      this.updateFilters();
+      this.updateFilters();// 更新URL查询参数到 LocalStorage
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
