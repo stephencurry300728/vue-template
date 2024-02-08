@@ -188,7 +188,7 @@ export default {
     '$route.query': {
       handler: 'restoreStateFromRouteQuery',
     },
-    
+
     // 监听 线路 选项框值的变化
     selectedLine(newVal, oldVal) {
       if (newVal !== oldVal) {
@@ -211,6 +211,7 @@ export default {
   computed: {
     // 若选择所有线路时 科目 无法选择
     isSubjectDisabled() {
+      // selectedLine 为空时（所有线路），返回 true，否则返回 false
       return this.selectedLine === '';
     },
 
@@ -246,76 +247,13 @@ export default {
   },
 
   methods: {
-    // 获取数据，基本上每次都要调用
-    fetchData() {
-      // 开启表格加载
-      this.listLoading = true;
-      // 根据this.sort.order的值来决定排序参数的值
-      // 如果this.sort.order的值为descending，则ordering的值为-this.sort.prop，否则为this.sort.prop
-      // 用来和后端接口 ordering 适配
-      const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
-      // 带着请求参数调用API
-      const params = {
-        page: this.currentPage, // 传递给API的页码
-        page_size: this.pageSize, // 传递给API的每页大小
-        ordering: ordering, // 传递给API的排序字段
-        start_date: '', // 起始日期，默认为空字符串
-        end_date: '', // 终止日期，默认为空字符串
-      };
-
-      // 如果日期范围非空，则更新 params 并使用dayjs库来格式化日期
-      if (this.dateRange[0]) params.start_date = dayjs(this.dateRange[0]).format('YYYY-MM-DD');
-      if (this.dateRange[1]) params.end_date = dayjs(this.dateRange[1]).format('YYYY-MM-DD');
-
-      // 检查是否有选中的线路，并将 train_model_line 加入请求参数 params
-      if (this.selectedLine) {
-        params.train_model_line = this.selectedLine;
-      }
-
-      // 检查是否有选中的科目，解耦train_model assessment_item 加入请求参数
-      if (this.selectedOption) {
-        const [trainModel, assessmentItem] = this.selectedOption.split('-');
-        params.train_model = trainModel;
-        params.assessment_item = assessmentItem;
-      }
-
-      // 调用API 文件夹下的自定义 getList函数，并将所有的 params 作为参数传入
-      getList(params)
-        .then(response => {
-          console.log("获取数据成功:", response);
-          // 检查 response.data.results 是否为空。
-          // 如果为空并且当前页码 this.currentPage 大于 1，那么将当前页码设置为 1，并再次调用获取数据
-          if (!response.data.results.length && this.currentPage > 1) {
-            this.currentPage = 1;
-            this.fetchData(); // 注意：此处已经是在第一页，因此不会无限递归
-          } else {
-            // 如果 response.data.results 不为空，那么将其赋值给 this.list
-            // 将 response.data.count 赋值给 this.total
-            this.list = response.data.results;
-            this.total = response.data.count;
-            this.listLoading = false;
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching data:", error);
-          this.listLoading = false;
-          // 根据实际情况处理错误，例如显示用户友好的错误信息
-          if (this.currentPage > 1) {
-            this.currentPage = 1;
-            this.fetchData();
-          } else {
-            // 可能需要在这里处理错误，例如显示错误信息
-          }
-        })
-        .finally(() => {
-          this.listLoading = false;
-        });
-    },
+    // 构建查询参数，减少代码冗余
     buildQueryParams() {
+      const ordering = this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop;
       const params = {
         page: this.currentPage,
         page_size: this.pageSize,
-        ordering: this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop,
+        ordering: ordering,
         start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
         end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
       };
@@ -333,27 +271,47 @@ export default {
       return params;
     },
 
-    // 分析培训概况
+    // 获取数据，基本上每次都要调用
+    async fetchData() {
+      this.listLoading = true;
+      const params = this.buildQueryParams(); // 使用buildQueryParams构建请求参数
+
+      try {
+        const response = await getList(params); // 等待异步请求完成
+        if (!response.data.results.length && this.currentPage > 1) {
+          // 如果当前页没有数据，且当前页码大于1
+          this.currentPage = 1;
+          await this.fetchData(); // 递归调用自己，但有终止条件，避免无限循环
+        } else {
+          this.list = response.data.results;
+          this.total = response.data.count;
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        if (this.currentPage > 1) {
+          this.currentPage = 1;
+          await this.fetchData(); // 错误处理中尝试重新获取数据
+        }
+        // 可以在这里添加更多的错误处理逻辑
+      } finally {
+        this.listLoading = false; // 确保在请求结束后，无论成功或失败，都会停止加载状态
+      }
+    },
+
+    // 跳转到分析培训概况
     async analyzeTrainingOverview() {
       try {
-        const params = this.buildQueryParams(); // 构建请求参数
-
-        // 使用 await 等待 AllTrainingData 函数的结果
+        const params = this.buildQueryParams(); // 重用构建参数逻辑
         const response = await AllTrainingData(params);
-
-        // 将筛选后的数据保存到 Vuex 中，以便在 TrainingAnalysis.vue 中使用
         this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
-
-        // 跳转到分析页面
         this.$router.push({ name: 'TrainingAnalysis' });
       } catch (error) {
         console.error("培训概况分析请求失败:", error);
-        // 在这里可以处理错误，例如显示一个错误消息
+        // 错误处理
       }
     },
 
     // 更新公共参数、筛选、排序的状态到 LocalStorage 做到保存历史记录
-    // 更新当前状态的页码和筛选条件到 LocalStorage 做到保存历史记录
     updateFilters() {
       const filters = {
         page: this.currentPage,
@@ -369,22 +327,6 @@ export default {
 
       // 将 filters 对象保存到 LocalStorage 中
       localStorage.setItem('tableFilters', JSON.stringify(filters));
-    },
-
-    // 日期范围选择器的值发生变化时（输入或取消）触发
-    onDateRangeChange(value) {
-      // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
-      // 如果是则清空日期范围，否则更新日期范围
-      if (!value || value.length === 0 || (!value[0] && !value[1])) {
-        // 清空日期范围
-        this.dateRange = [undefined, undefined];
-      } else {
-        // 更新日期范围赋值给dateRange
-        this.dateRange = value;
-      }
-      this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页，防止出现空白页
-      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
-      this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
     // 从 LocalStorage 获取参数以恢复表格过滤器的状态
@@ -460,7 +402,22 @@ export default {
       // 重新获取数据
       this.fetchData();
     },
-
+    
+    // 日期范围选择器的值发生变化时（输入或取消）触发
+    onDateRangeChange(value) {
+      // 检查日期范围是否为空或者长度为0以及 value 的第一个元素和第二个元素是否都不存在
+      // 如果是则清空日期范围，否则更新日期范围
+      if (!value || value.length === 0 || (!value[0] && !value[1])) {
+        // 清空日期范围
+        this.dateRange = [undefined, undefined];
+      } else {
+        // 更新日期范围赋值给dateRange
+        this.dateRange = value;
+      }
+      this.currentPage = 1; // 重置到第一页，改变日期范围可能会改变数据的总数，所以需要回到第一页，防止出现空白页
+      this.updateFilters(); // 更新URL查询参数，将新的日期范围和页码保存在 URL 中 这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
+      this.fetchData(); // 根据新的筛选条件重新获取数据
+    },
     /*
     * 以下是一些辅助函数
     */
