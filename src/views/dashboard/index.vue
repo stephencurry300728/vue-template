@@ -2,21 +2,23 @@
   <div class="dashboard-container">
     <!-- 使用 Element UI 的栅格布局来安排图表 -->
     <el-row :gutter="20">
-      <!-- 现有的图表布局 -->
       <el-col :span="12">
         <el-card>
-          <div id="pie-chart" style="height: 300px;"></div>
+          <div id="pie-chart" style="height: 340px;"></div>
         </el-card>
       </el-col>
       <el-col :span="12">
         <el-card>
+          <el-select v-model="selectedLine" placeholder="请选择线路" @change="onLineChange">
+            <el-option v-for="line in lineOptions" :key="line.value" :label="line.label" :value="line.value">
+            </el-option>
+          </el-select>
           <div id="bar-chart" style="height: 300px;"></div>
         </el-card>
       </el-col>
-      <!-- 添加箱线图的容器 -->
       <el-col :span="24">
         <el-card style="margin-top: 20px;">
-          <div id="barplot-chart" style="height: 420px;"></div> <!-- 箱线图容器 -->
+          <div id="barplot-chart" style="height: 380px;"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -31,8 +33,9 @@ export default {
   name: 'Dashboard',
   data() {
     return {
-      allTrainingData: []
-    }
+      allTrainingData: [],
+      selectedLine: '09', // 默认设置为9号线
+    };
   },
   created() {
     this.getAllTrainingData()
@@ -41,8 +44,33 @@ export default {
     this.$nextTick(() => {
       this.initPieChart()
       this.initBarChart()
-      this.initBarplotChart() // 新增：初始化横向条形图
+      this.initBarplotChart()
     })
+  },
+  watch: {
+    selectedLine(newVal, oldVal) {
+      if (!this.lineOptions.some(option => option.value === newVal)) {
+        this.selectedLine = oldVal; // 如果新值不在选项中，则保持旧值
+      } else {
+        this.initBarChart(); // 当线路改变且有效时，重新初始化柱状图
+      }
+    }
+  },
+  computed: {
+    // 动态生成线路选项
+    lineOptions() {
+      // 仅当allTrainingData不为空时才计算线路选项
+      if (this.allTrainingData && this.allTrainingData.length > 0) {
+        const linesSet = new Set(this.allTrainingData.map(item => item.train_model.substring(0, 2)));
+        const options = Array.from(linesSet).map(line => ({
+          label: `${line}号线`,
+          value: line,
+        }));
+        // 可以在这里对options进行排序
+        return options;
+      }
+      return []; // 如果没有数据，返回空数组
+    },
   },
   methods: {
     async getAllTrainingData() {
@@ -51,7 +79,7 @@ export default {
       // 数据加载后重新初始化图表
       this.initPieChart()
       this.initBarChart()
-      this.initBarplotChart() // 新增：初始化横向条形图
+      this.initBarplotChart()
     },
 
     // 转换数据为饼状图所需的格式
@@ -114,17 +142,15 @@ export default {
 
     // 竖柱状图
     processBarChartData() {
-      const groupResults = {};
-      this.allTrainingData.forEach(({ crew_group, assessment_result }) => {
-        // 合并特定的乘务班组名称
-        if (['乘务高峰组', '高峰组', '乘务高峰'].includes(crew_group)) {
-          crew_group = '乘务高峰组';
-        }
+      // 根据选择的线路过滤数据
+      const filteredData = this.allTrainingData.filter(({ train_model }) => train_model.substring(0, 2) === this.selectedLine);
 
+      const groupResults = {};
+      filteredData.forEach(({ crew_group, assessment_result }) => {
+        // 这里假设crew_group和assessment_result字段与之前相同
         if (!groupResults[crew_group]) {
-          groupResults[crew_group] = { '1': 0, '2': 0, '3': 0, };
+          groupResults[crew_group] = { '1': 0, '2': 0, '3': 0 };
         }
-        assessment_result = assessment_result || 'null';
         groupResults[crew_group][assessment_result]++;
       });
 
@@ -133,7 +159,7 @@ export default {
           group,
           total: Object.values(groupResults[group]).reduce((acc, val) => acc + val, 0)
         }))
-        .sort((a, b) => b.total - a.total) // 降序排序
+        .sort((a, b) => b.total - a.total)
         .map(item => item.group);
 
       const series = ['1', '2', '3'].map(result => ({
@@ -145,15 +171,16 @@ export default {
 
       return { series, categories };
     },
+
     initBarChart() {
-      const { series, categories } = this.processBarChartData();
+      const { series, categories } = this.processBarChartData(); // 使用过滤后的数据
       const barChart = echarts.init(document.getElementById('bar-chart'));
       const option = {
         title: {
           text: '各乘务班组考核结果',
-          left: 'center', // 标题居中
+          left: 'center',
           textStyle: {
-            fontSize: 20 // 设置字体大小为20
+            fontSize: 20
           }
         },
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -165,15 +192,18 @@ export default {
         xAxis: {
           type: 'category',
           data: categories,
-          axisLabel: { interval: 0, rotate: 45 } // 使所有标签显示并倾斜
+          axisLabel: { interval: 0, rotate: 45 }
         },
         yAxis: { type: 'value' },
-        color: ['#EE6666', '#91CC75', '#5470C6'], // 红、绿、蓝配色
+        color: ['#EE6666', '#91CC75', '#5470C6'],
         series: series
       };
-      barChart.setOption(option);
+      barChart.setOption(option, true); // 确保更新图表时覆盖之前的配置
     },
 
+    onLineChange() {
+      this.initBarChart(); // 当线路改变时，重新初始化柱状图
+    },
     // 处理横向柱状图数据
     processBarplotData() {
       const groupedResults = this.allTrainingData.reduce((acc, item) => {
