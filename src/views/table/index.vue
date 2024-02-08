@@ -368,6 +368,7 @@ export default {
 
     // 科目选择框中加载数据库中所有数据的 train_model 和 assessment_item
     // 调用API文件夹下 fetchAllTrainAndAssessment 获取所有数据的train_model和assessment_item
+    // 解释下为什么不直接用获取的list数据，因为这里需要的是数据库中所有的train_model和assessment_item,而list数据是分页的数据
     async loadAllTrainAndAssessmentItems() {
       try {
         // 使用 await 等待 fetchAllTrainAndAssessment 函数的结果
@@ -423,7 +424,7 @@ export default {
       this.updateFilters(); // 更新 Localstorage，这样当用户刷新页面或者在浏览器中前进后退时，这些状态就会被保留下来
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
-    
+
     // 处理排序改变
     handleSortChange({
       prop,
