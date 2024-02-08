@@ -310,7 +310,28 @@ export default {
         })
         .finally(() => {
           this.listLoading = false;
-        }); 
+        });
+    },
+    buildQueryParams() {
+      const params = {
+        page: this.currentPage,
+        page_size: this.pageSize,
+        ordering: this.sort.order === 'descending' ? `-${this.sort.prop}` : this.sort.prop,
+        start_date: this.dateRange[0] ? dayjs(this.dateRange[0]).format('YYYY-MM-DD') : '',
+        end_date: this.dateRange[1] ? dayjs(this.dateRange[1]).format('YYYY-MM-DD') : '',
+      };
+
+      if (this.selectedLine) {
+        params.train_model_line = this.selectedLine;
+      }
+
+      if (this.selectedOption) {
+        const [trainModel, assessmentItem] = this.selectedOption.split('-');
+        params.train_model = trainModel;
+        params.assessment_item = assessmentItem;
+      }
+
+      return params;
     },
 
     // 分析培训概况
