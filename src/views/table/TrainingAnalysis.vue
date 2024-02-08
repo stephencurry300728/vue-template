@@ -46,9 +46,10 @@ export default {
             }
 
             const data = this.trainingAnalysisData;
-            // 所有不同的 train_model 的前两位数字
-            // 使用了 Set 对象和扩展运算符 ... 来去除重复的线路编号，并使用 sort 方法对线路编号进行排序
-            const trainLines = [...new Set(data.map(item => item.train_model.substring(0, 2)))].sort();
+            // 使用 map 方法从 data 数组中提取出每个元素的 trainLines 属性，生成一个新的数组
+            // new Set() 是创建一个新的 Set 对象。Set 是一种特殊的数据结构，它只存储唯一的值，重复的值会被忽略
+            // sort() 方法是对数组进行排序，最后返回的是['09', '10']
+            const trainLines = [...new Set(data.map(item => item.trainLines))].sort();
             const totalCount = data.length;
             // 通过筛选出 assessment_result 为 2(合格) 或 3(优秀) 的项，然后计算合格率
             const passCount = data.filter(item => item.assessment_result === 2 || item.assessment_result === 3).length;
