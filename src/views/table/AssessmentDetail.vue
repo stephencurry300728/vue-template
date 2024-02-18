@@ -1,8 +1,7 @@
 <template>
     <div class="app-container">
 
-        <el-table class="custom-table" v-loading="listLoading" :data="[detailData]" element-loading-text="拼命加载中" border fit
-            highlight-current-row stripe table-layout="fixed">
+        <el-table class="custom-table" :data="[detailData]" border fit highlight-current-row stripe table-layout="fixed">
             <!-- 忽略 id 和 file_name 字段 -->
             <el-table-column label="记录日期" prop="record_date" width="120" align="center"></el-table-column>
             <el-table-column label="乘务组" prop="crew_group" width="80" align="center"></el-table-column>
