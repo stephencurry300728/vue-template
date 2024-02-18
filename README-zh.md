@@ -6,16 +6,6 @@
 
 [国内访问](https://panjiachen.gitee.io/vue-admin-template)
 
-目前版本为 `v4.0+` 基于 `vue-cli` 进行构建，若你想使用旧版本，可以切换分支到[tag/3.11.0](https://github.com/PanJiaChen/vue-admin-template/tree/tag/3.11.0)，它不依赖 `vue-cli`。
-
-<p align="center">
-  <b>SPONSORED BY</b>
-</p>
-<p align="center">
-   <a href="https://finclip.com?from=vue_element" title="FinClip" target="_blank">
-      <img height="200px" src="https://gitee.com/panjiachen/gitee-cdn/raw/master/vue%E8%B5%9E%E5%8A%A9.png" title="FinClip">
-   </a>
-</p>
 
 ## Extra
 
@@ -42,12 +32,6 @@
 ## Build Setup
 
 ```bash
-# 克隆项目
-git clone https://github.com/PanJiaChen/vue-admin-template.git
-
-# 进入项目目录
-cd vue-admin-template
-
 # 安装依赖
 npm install
 
@@ -55,7 +39,7 @@ npm install
 npm run server
 ```
 
-浏览器访问 [http://localhost:9528](http://localhost:9528)
+浏览器访问 [http://localhost:8080](http://localhost:8080)
 
 ## 发布
 
@@ -84,10 +68,6 @@ npm run lint -- --fix
 ```
 
 更多信息请参考 [使用文档](https://panjiachen.github.io/vue-element-admin-site/zh/)
-
-## Demo
-
-![demo](https://github.com/PanJiaChen/PanJiaChen.github.io/blob/master/images/demo.gif)
 
 ## Browsers support
 
