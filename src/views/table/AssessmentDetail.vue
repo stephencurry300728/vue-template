@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { fetchDetailById } from '@/api/table';
+import { getDetailById } from '@/api/table';
 import { formatAssessmentResult } from '@/utils/assessmentUtils';
 
 export default {
@@ -51,14 +51,15 @@ export default {
             return formatAssessmentResult(value);
         },
 
+        // 获取详情数据
         loadDetailData() {
             const id = this.$route.params.id;
-            fetchDetailById(id)
+            getDetailById(id)
                 .then(response => {
                     this.detailData = response.data;
                 })
                 .catch(error => {
-                    console.error("Error fetching detail data:", error);
+                    console.error("错误获取数据", error);
                     // 根据需要处理错误
                 });
         },
