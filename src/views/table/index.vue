@@ -211,12 +211,12 @@ export default {
       return this.selectedLine === '';
     },
 
-    // 若选择所有线路时 科目 为空
+    // 若选择所有线路时，即科目选择框为空
     filteredOptions() {
       if (this.selectedLine === '') {
-        return []; // 且数据返回空数组
+        return []; // 科目选择框为空选项
       } else {
-        // 过滤 combinedOptions 来只包含与选定线路匹配的选项，即以选定线路开头的选项
+        // 非所有线路，过滤 combinedOptions 来只包含与选定线路匹配的选项，即以选定的特定线路开头的 科目选项
         return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
       }
     },
