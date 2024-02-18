@@ -34,6 +34,10 @@
 import { mapState } from 'vuex';
 
 export default {
+    created() {
+        const id = this.$route.params.id; // 从路由参数中获取 ID
+    },
+
     computed: {
         ...mapState('table', [
             'detailData',
@@ -76,7 +80,7 @@ export default {
         // 将 additional_data 转换为数组形式
         convertAdditionalData(additional_data) {
             return Object.entries(additional_data).map(([key, value]) => ({
-                key, 
+                key,
                 value
             }));
         }

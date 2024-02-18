@@ -545,10 +545,9 @@ export default {
     },
 
     // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
-    // 这个参数 item 是 row.scope 即当前行的完整数据
     goToDetail(rowData) {
-      this.$store.dispatch('table/updateDetailData', rowData); // 注意使用命名空间
-      this.$router.push({ name: 'Detail' }); // 使用正确的路由名称
+      this.$store.dispatch('table/updateDetailData', rowData); // 更新 Vuex 中的数据
+      this.$router.push({ name: 'Detail', params: { id: rowData.id } }); // 使用路由名称和参数进行跳转
     },
   },
 }
