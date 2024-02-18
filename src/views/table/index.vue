@@ -432,7 +432,7 @@ export default {
     }) {
       // 当前排序的属性是否等于传入的属性
       if (this.sort.prop === prop) {
-        // 如果是，则切换排序顺序，便于传递怕rams参数
+        // 如果是，则切换排序顺序，便于传递 params 请求参数
         this.sort.order = this.sort.order === 'ascending' ? 'descending' : this.sort.order === 'descending' ? '' : 'ascending';
         // 清空了排序顺序，那么也需要清空排序的属性
         if (this.sort.order === '') {
@@ -543,7 +543,7 @@ export default {
       }
     },
 
-    // 传递该id的所有信息到Vuex并跳转到详情页/table/detail/${id} 即 AssessmentDetail.vue
+    // 传递该 id 的所有信息到 Vuex 并跳转到详情页的url /table/detail/${id} 即 AssessmentDetail.vue
     goToDetail(rowData) {
       this.$store.dispatch('table/updateDetailData', rowData); // 更新 Vuex 中的数据
       this.$router.push({ name: 'Detail', params: { id: rowData.id } }); // 使用路由名称和参数进行跳转
