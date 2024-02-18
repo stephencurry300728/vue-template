@@ -42,6 +42,7 @@ export default {
         processedData() {
             if (!this.detailData) return [];
 
+            // 解构 detailData 对象，获取 file_name 和 additional_data 和其他属性
             const { file_name, id, additional_data, ...rest } = this.detailData;
 
             // 将rest对象的键值对转换为数组形式，以便在表格中使用
@@ -57,13 +58,13 @@ export default {
     mounted() {
         if (!this.detailData) {
             // 处理数据不存在的情况，比如直接访问URL或数据被清空
-            console.log("No detail data available, redirecting or fetching data...");
+            console.log("数据不存在，重定向到列表页");
             // 可以在这里重定向回列表页或者根据需要进行其他操作
         }
     },
     methods: {
+        // 转换评估结果的值为更易读的文本
         assessmentResultFormatter(value) {
-            // 转换评估结果的值为更易读的文本
             switch (value) {
                 case 3: return '优秀';
                 case 2: return '合格';
@@ -72,8 +73,8 @@ export default {
             }
         },
 
+        // 将 additional_data 转换为数组形式
         convertAdditionalData(additional_data) {
-            // 将additional_data转换为数组形式
             return Object.entries(additional_data).map(([key, value]) => ({
                 key, 
                 value
