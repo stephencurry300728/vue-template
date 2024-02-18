@@ -145,9 +145,10 @@
 </template>
 
 <script>
-import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment, AllTrainingData } from '@/api/table' // 导入获取数据的API
 import dayjs from 'dayjs' // 导入日期处理库
 import { debounce } from 'lodash'; // 引入debounce函数，用于减少重复的API请求
+import { getList, updateItem, deleteItem, fetchAllTrainAndAssessment, AllTrainingData } from '@/api/table' // 导入获取数据的API
+import { formatAssessmentResult } from '@/utils/assessmentUtils';
 
 export default {
   data() {
@@ -464,16 +465,7 @@ export default {
 
     // 转换考核结果呈现在表格中
     formatAssessmentResult(value) {
-      switch (value) {
-        case 3:
-          return '优秀';
-        case 2:
-          return '合格';
-        case 1:
-          return '不合格';
-        default:
-          return '其他';
-      }
+      return formatAssessmentResult(value);
     },
 
     // 根据考核结果返回不同的样式

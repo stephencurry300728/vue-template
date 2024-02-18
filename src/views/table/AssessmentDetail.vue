@@ -12,7 +12,7 @@
             <el-table-column label="考核项目" prop="assessment_item" width="100" align="center"></el-table-column>
             <el-table-column label="评估结果" prop="assessment_result" fixed="left" width="100" align="center">
                 <template v-slot:default="scope">
-                    {{ assessmentResultFormatter(scope.row.assessment_result) }}
+                    {{ formatAssessmentResult(scope.row.assessment_result) }}
                 </template>
             </el-table-column>
 
@@ -33,6 +33,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { formatAssessmentResult } from '@/utils/assessmentUtils';
 
 export default {
     computed: {
@@ -49,14 +50,9 @@ export default {
         }
     },
     methods: {
-        // 转换评估结果的值为更易读的文本
-        assessmentResultFormatter(value) {
-            switch (value) {
-                case 3: return '优秀';
-                case 2: return '合格';
-                case 1: return '不合格';
-                default: return '未知';
-            }
+        // 包装函数
+        formatAssessmentResult(value) {
+            return formatAssessmentResult(value);
         },
     }
 };
