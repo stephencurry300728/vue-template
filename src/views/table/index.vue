@@ -463,7 +463,7 @@ export default {
       this.fetchData(); // 根据新的筛选条件重新获取数据
     },
 
-    // 转换考核结果呈现在表格中
+    // // 调用通用的转换函数转换考核结果
     formatAssessmentResult(value) {
       return formatAssessmentResult(value);
     },

@@ -37,6 +37,7 @@ import { formatAssessmentResult } from '@/utils/assessmentUtils';
 
 export default {
     computed: {
+        // 从 Vuex 中获取 el-table 的某特定行数据
         ...mapState('table', [
             'detailData',
         ]),
@@ -49,8 +50,9 @@ export default {
             // 可以在这里重定向回列表页或者根据需要进行其他操作
         }
     },
+
     methods: {
-        // 包装函数
+        // 调用通用的转换函数
         formatAssessmentResult(value) {
             return formatAssessmentResult(value);
         },
