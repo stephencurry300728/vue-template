@@ -31,23 +31,18 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { fetchDetailById } from '@/api/table';
 import { formatAssessmentResult } from '@/utils/assessmentUtils';
 
 export default {
-    computed: {
-        // 从 Vuex 中获取 el-table 的某特定行数据
-        ...mapState('table', [
-            'detailData',
-        ]),
+    data() {
+        return {
+            detailData: null, // 用于存储获取到的详情数据
+        };
     },
 
     mounted() {
-        if (!this.detailData) {
-            // 处理数据不存在的情况，比如直接访问URL或数据被清空
-            console.log("数据不存在，重定向到列表页");
-            // 可以在这里重定向回列表页或者根据需要进行其他操作
-        }
+        this.loadDetailData();
     },
 
     methods: {
@@ -55,9 +50,20 @@ export default {
         formatAssessmentResult(value) {
             return formatAssessmentResult(value);
         },
-    }
-};
 
+        loadDetailData() {
+            const id = this.$route.params.id;
+            fetchDetailById(id)
+                .then(response => {
+                    this.detailData = response.data;
+                })
+                .catch(error => {
+                    console.error("Error fetching detail data:", error);
+                    // 根据需要处理错误
+                });
+        },
+    },
+};
 </script>
 <style scoped>
 .app-container {

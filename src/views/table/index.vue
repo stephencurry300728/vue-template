@@ -537,7 +537,7 @@ export default {
 
     // 传递该 id 的所有信息到 Vuex 并跳转到详情页的url /table/detail/${id} 即 AssessmentDetail.vue
     goToDetail(rowData) {
-      this.$store.dispatch('table/updateDetailData', rowData); // 更新 Vuex 中的数据
+      // this.$store.dispatch('table/updateDetailData', rowData); // 更新 Vuex 中的数据
       this.$router.push({ name: 'Detail', params: { id: rowData.id } }); // 使用路由名称和参数进行跳转
     },
   },

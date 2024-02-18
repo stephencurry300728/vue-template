@@ -14,6 +14,14 @@ export function getList(params) {
   })
 }
 
+// 新增函数，根据ID获取详情数据
+export function fetchDetailById(id) {
+  return request({
+    url: `/assessment-base/${id}/`, // 这里的URL应该根据你的实际API端点进行调整
+    method: 'get'
+  });
+}
+
 // 部分修改数据万一有错误
 export function updateItem(id, data) {
   return request({
