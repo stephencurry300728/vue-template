@@ -37,9 +37,11 @@ export default {
       selectedLine: '09', // 默认设置为9号线
     };
   },
+
   created() {
     this.getAllTrainingData()
   },
+
   mounted() {
     this.$nextTick(() => {
       this.initPieChart()
@@ -47,6 +49,7 @@ export default {
       this.initBarplotChart()
     })
   },
+
   watch: {
     selectedLine(newVal, oldVal) {
       if (!this.lineOptions.some(option => option.value === newVal)) {
@@ -56,6 +59,7 @@ export default {
       }
     }
   },
+
   computed: {
     // 动态生成线路选项
     lineOptions() {
@@ -72,6 +76,7 @@ export default {
       return []; // 如果没有数据，返回空数组
     },
   },
+
   methods: {
     async getAllTrainingData() {
       const res = await AllTrainingData()
@@ -273,8 +278,7 @@ export default {
       barplotChart.setOption(option);
     },
   }
-}
-
+};
 </script>
 
 <style lang="scss" scoped>
