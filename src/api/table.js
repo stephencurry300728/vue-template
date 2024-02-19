@@ -6,6 +6,7 @@ import request from '@/utils/request'
   该文件中的函数，是用于发起对于表格数据的网络请求的
   其中 params 是 /api/assessment-base/?page=1&page_size=12&ordering=assessment_result&start_date=2023-10-10&end_date=2023-11-10
   id是 /api/assessment-base/1/
+  而后端DefaultRouter配置的API是 /api/assessment-base/ 可以适用于所有数据或是单一样本的增删改查
 */
 export function getList(params) {
   return request({
@@ -52,7 +53,7 @@ export function fetchAllTrainAndAssessment() {
   });
 }
 
-// 由于后端处理了允许无参数的 GET 请求，故该函数可以请求所有不分页的数据，可以是所有的训练数据，也可以是筛选后的数据
+// 由于后端处理了允许无参数 params 的 GET 请求，故该函数可以请求所有不分页的数据，可以是所有的训练数据，也可以是筛选后的数据
 export function AllTrainingData(params) {
   return request({
     url: '/assessment-base/unpaged-data/',
