@@ -17,7 +17,7 @@ export function getList(params) {
 // 根据ID获取详情数据
 export function getDetailById(id) {
   return request({
-    url: `/assessment-base/${id}/`, // 这里的URL应该根据你的实际API端点进行调整
+    url: `/assessment-base/${id}/`, // 获取详情数据的API
     method: 'get'
   });
 }
