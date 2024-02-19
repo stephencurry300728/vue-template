@@ -2,6 +2,11 @@
 // 这个模块导出了一个配置好的 Axios 实例，用于发起网络请求
 import request from '@/utils/request'
 
+/*
+  该文件中的函数，是用于发起对于表格数据的网络请求的
+  其中 params 是 /api/assessment-base/?page=1&page_size=12&ordering=assessment_result&start_date=2023-10-10&end_date=2023-11-10
+  id是 /api/assessment-base/1/
+*/
 export function getList(params) {
   return request({
     // 定义 API 请求的 URL 地址
