@@ -303,6 +303,7 @@ export default {
     async analyzeTrainingOverview() {
       try {
         const params = this.buildQueryParams(); // 重用构建参数逻辑
+        // API 调用接收无分页的筛选后所有数据
         const response = await AllTrainingData(params);
         // 将获取到的筛选数据存储到 Vuex 中
         this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
