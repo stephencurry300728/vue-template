@@ -207,23 +207,24 @@ export default {
   computed: {
     // 若选择所有线路时 科目 无法选择
     isSubjectDisabled() {
-      // selectedLine 为空时（所有线路），返回 true，否则返回 false
+      // selectedLine 为空时（所有线路），返回 true，即 科目 选择框不可用
       return this.selectedLine === '';
     },
 
-    // 若选择所有线路时，即科目选择框为空
+    // 基于线路选择框来计算科目选择框中的内容
     filteredOptions() {
+      // 若选择所有线路时，即科目选择框为空
       if (this.selectedLine === '') {
-        return []; // 科目选择框为空选项
+        return []; // 科目选择框为空选项，即显示placeholder
       } else {
         // 非所有线路，过滤 combinedOptions 来只包含与选定线路匹配的选项，即以选定的特定线路开头的 科目选项
         return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
       }
     },
 
-    // 计算分页大小的选项
+    // 动态计算可用分页大小的选项
     computedPageSizes() {
-      // 预设的分页大小选项
+      // 默认的分页大小选项
       let baseSizes = [12, 30, 50, 100];
       // 移除所有大于当前总数 `total` 的分页大小选项
       baseSizes = baseSizes.filter(size => size <= this.total);
@@ -233,7 +234,7 @@ export default {
       }
       // 对更新后的分页大小选项进行排序，确保分页大小选项的顺序是正确的
       baseSizes.sort((a, b) => a - b);
-      // 返回更新后的分页大小选项
+      // 返回更新后的分页大小列表选项
       return baseSizes;
     },
   },
