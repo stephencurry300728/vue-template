@@ -397,7 +397,7 @@ export default {
       this.dateRange = [new Date(2023, 9, 10), undefined];
       this.currentPage = 1;
       this.pageSize = 12;
-      this.tableKey += 1; // 重新渲染el-table
+      this.tableKey += 1; // 重新渲染el-table，强制刷新升序降序的箭头样式
       this.sort = { prop: '', order: '' };
       this.selectedLine = ''; // 清空选中的线路，默认为全部线路
       this.selectedOption = null;
