@@ -1,10 +1,17 @@
 # vue-admin-template
 
-> 这是一个极简的 vue admin 管理后台。它只包含了 Element UI & axios & iconfont & permission control & lint，这些搭建后台必要的东西。
+> 这是一个极简的 vue admin 管理后台。它只包含了 Element UI & axios & iconfont & permission control & lint。
 
-## Build Setup
+## 环境安装
 
-### 1. 安装所需要的依赖
+### 1. 切换路径安装所需要的依赖
+
+> 路径修改为前端的路径
+
+```bash
+cd vue-admin-template-master
+```
+
 ```bash
 npm install
 ```
