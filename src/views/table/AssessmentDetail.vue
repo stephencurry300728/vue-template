@@ -18,6 +18,7 @@
 
             <!-- 为动态生成的列设置宽度可能需要更多逻辑，因为可能需要根据内容动态调整宽度 -->
             <!-- v-for 在遍历对象时的参数顺序为 (value, key)，这意味着首先得到的是属性的值，其次才是属性名 -->
+            <!-- 后期会对 additional_data 这个 jsonfield 进行一些赋值和修改 这段代码需要用到额外的计算属性以正确显示字段-->
             <el-table-column v-for="(value, key) in detailData.additional_data" :key="key" :label="key"
                 :prop="`additional_data.${key}`" width="130" align="center">
                 <template v-slot:default="scope">
