@@ -15,6 +15,7 @@ cd vue-admin-template-master
 ```bash
 npm install
 ```
+
 ### 2. 启动前端的服务器
 ```bash
 npm run server
