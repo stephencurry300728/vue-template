@@ -6,7 +6,7 @@
 
 ### 1. 切换路径安装所需要的依赖
 
-> 路径修改为前端的路径
+> 移动到前端文件所在的路径
 
 ```bash
 cd vue-admin-template-master
