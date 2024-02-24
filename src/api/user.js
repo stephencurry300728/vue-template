@@ -9,8 +9,9 @@ export function login(data) {
     url: '/login/',
     method: 'post',
     data
-  })
+  });
 }
+
 // 获取用户信息的函数
 // 在请求体中携带 access_token
 export function getInfo(token) {
@@ -18,8 +19,9 @@ export function getInfo(token) {
     url: '/info/',
     method: 'get',
     params: { token }
-  })
+  });
 }
+
 // 退出登录的函数
 // 在请求体中携带 refresh_token
 export function logout(refreshToken) {
@@ -28,5 +30,5 @@ export function logout(refreshToken) {
     method: 'post',
     // 通过 data 选项设置请求体中的数据
     data: { refresh_token: refreshToken }
-  })
+  });
 }

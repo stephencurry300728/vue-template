@@ -7,6 +7,8 @@ import request from '@/utils/request'
   其中 params 是 /api/assessment-base/?page=1&page_size=12&ordering=assessment_result&start_date=2023-10-10&end_date=2023-11-10
   id是 /api/assessment-base/1/
   而后端DefaultRouter配置的API是 /api/assessment-base/ 可以适用于所有数据或是单一样本的增删改查
+  对于GET请求，通常使用params属性传递URL参数
+  对于 POST、PATCH、DELETE 等请求，通常使用data属性传递请求体数据
 */
 export function getList(params) {
   return request({
