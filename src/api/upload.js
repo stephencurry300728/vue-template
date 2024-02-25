@@ -1,4 +1,5 @@
-import request from '@/utils/request'; // 
+// 引入axios(axios的二次封装)
+import request from '@/utils/request'
 
 // 封装文件上传的API调用
 export function uploadFile(file) {
