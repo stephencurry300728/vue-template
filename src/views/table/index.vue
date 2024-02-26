@@ -93,7 +93,7 @@
       <el-table-column label="姓名" prop="name" sortable="custom" align="center" />
       <el-table-column label="工作证号" prop="work_certificate_number" sortable="custom" align="center" />
 
-      <!-- 定义 goToDetail 能够通过车型去特定的测评数据 -->
+      <!-- 定义 goToDetail 能够通过 车型 去特定的测评数据 -->
       <el-table-column label="车型" prop="train_model" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click.stop="goToDetail(scope.row)">
@@ -101,18 +101,19 @@
         </template>
       </el-table-column>
 
-      <!-- 通过goToDetail能够通过考核项目去特定的测评数据 -->
+      <!-- 通过goToDetail能够通过 考核项目 去特定的测评数据 -->
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span class="link-like" @click="goToDetail(scope.row)">
+          <span class="link-like" @click.stop="goToDetail(scope.row)">
             {{ scope.row.assessment_item }}</span>
         </template>
       </el-table-column>
 
+      <!-- 通过goToDetail能够通过 考核结果 去特定的测评数据 -->
       <!-- 转换考核结果并定制 优秀、合格、不合格的样式 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
-          <span :class="getAssessmentClass(scope.row.assessment_result)" @click="goToDetail(scope.row)"
+          <span :class="getAssessmentClass(scope.row.assessment_result)" @click.stop="goToDetail(scope.row)"
             style="cursor: pointer;">
             {{ formatAssessmentResult(scope.row.assessment_result) }}
           </span>
