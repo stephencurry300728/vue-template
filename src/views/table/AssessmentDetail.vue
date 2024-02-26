@@ -55,6 +55,7 @@ export default {
 
         // 获取详情数据
         loadDetailData() {
+            // 从 URL 中获取该 id 参数
             const id = this.$route.params.id;
             getDetailById(id)
                 .then(response => {
