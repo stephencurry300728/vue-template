@@ -12,6 +12,8 @@
 cd vue-admin-template-master
 ```
 
+> 安装依赖
+
 ```bash
 npm install
 ```
