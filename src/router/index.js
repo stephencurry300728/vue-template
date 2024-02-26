@@ -116,7 +116,7 @@ export const constantRoutes = [
       },
       {
         path: '/table/detail/:id',
-        name: 'Detail',
+        name: 'AssessmentDetail',
         component: () => import('@/views/table/AssessmentDetail'),
         meta: { title: '详细信息', icon: 'el-icon-info' },
         hidden: true
