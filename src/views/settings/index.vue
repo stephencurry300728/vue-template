@@ -217,9 +217,12 @@ export default {
 
 .file-name-item {
     display: flex;
-    justify-content: center; /* 确保子项在容器中水平居中 */
-    align-items: center; /* 确保子项在容器中垂直居中 */
-    gap: 10px; /* 图标和文件名之间的间距 */
+    justify-content: center;
+    /* 确保子项在容器中水平居中 */
+    align-items: center;
+    /* 确保子项在容器中垂直居中 */
+    gap: 10px;
+    /* 图标和文件名之间的间距 */
     cursor: pointer;
     padding: 10px;
     border: 2px solid #eee;
@@ -274,4 +277,5 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-}</style>
+}
+</style>
