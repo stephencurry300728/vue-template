@@ -138,11 +138,6 @@ export default {
                 });
             } catch (error) {
                 console.error("Error saving classifications: ", error);
-                this.$message.error({
-                    message: '保存分类信息失败',
-                    duration: 2000,
-                    showClose: true
-                });
             } finally {
                 this.loading = false; // 无论操作成功还是失败，都在button上停止加载
             }
