@@ -140,7 +140,7 @@ export default {
 .file-name-item {
     cursor: pointer;
     padding: 10px;
-    border: 1px solid #eee;
+    border: 2px solid #eee;
     border-radius: 4px;
     transition: transform 0.3s ease;
 }
@@ -199,4 +199,5 @@ export default {
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
-}</style>
+}
+</style>
