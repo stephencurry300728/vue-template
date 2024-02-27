@@ -67,7 +67,7 @@ export default {
         extractUniqueFileNames() {
             // 使用Set来存储唯一获取到的assessments中的 文件名 字段
             const fileNames = new Set(this.assessments.map(item => item.file_name));
-            // 使用Array.from将Set转换为数组,然后将其赋值给uniqueFileNames，展示唯一的文件名
+            // 使用Array.from将Set转换为数组，然后将其赋值给uniqueFileNames，展示唯一的文件名
             this.uniqueFileNames = Array.from(fileNames);
         },
 
