@@ -77,7 +77,7 @@ export default {
             clearTimeout(this.noDataTimer);
         }
     },
-    
+
     computed: {
         // 检查所有分类是否都已经选择，若有没选择的框就不能点击保存这个button
         isAllClassified() {
@@ -222,8 +222,10 @@ export default {
     border-radius: 4px;
     transition: transform 0.3s ease;
     /* 设置固定宽度 */
-    width: 250px; /* 根据实际需求调整这个值 */
-    text-align: center; /* 确保文本在项内居中 */
+    width: 250px;
+    /* 根据实际需求调整这个值 */
+    text-align: center;
+    /* 确保文本在项内居中 */
 }
 
 .file-name-item:hover {
@@ -259,6 +261,7 @@ export default {
     /* 添加flex布局来更好地控制子元素 */
     flex-direction: column;
     /* 使子元素垂直排列 */
+
 }
 
 .data-item>div {
