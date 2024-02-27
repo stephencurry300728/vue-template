@@ -6,7 +6,8 @@
             <div class="file-name-item" v-for="fileName in uniqueFileNames" :key="fileName"
                 @click="selectFileName(fileName)">
                 <!-- 循环展示上传的文件名 -->
-                <h2>{{ fileName }}</h2>
+                <i class="el-icon-files"></i>
+                <h3>{{ fileName }}</h3>
             </div>
         </div>
         <div v-if="showNoDataMessage" class="no-data">无数据</div>
@@ -215,23 +216,22 @@ export default {
 }
 
 .file-name-item {
+    display: flex;
+    justify-content: center; /* 确保子项在容器中水平居中 */
+    align-items: center; /* 确保子项在容器中垂直居中 */
+    gap: 10px; /* 图标和文件名之间的间距 */
     cursor: pointer;
     padding: 10px;
     border: 2px solid #eee;
     border-radius: 4px;
     transition: transform 0.3s ease;
-    /* 设置固定宽度 */
-    width: 250px;
-    /* 根据实际需求调整这个值 */
-    text-align: center;
-    /* 确保文本在项内居中 */
+    width: 200px;
 }
 
 .file-name-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 
 .no-data {
     text-align: center;
@@ -274,5 +274,4 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-}
-</style>
+}</style>
