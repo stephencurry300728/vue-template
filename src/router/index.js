@@ -139,7 +139,7 @@ export const constantRoutes = [
         path: '',
         name: 'settings',
         component: () => import('@/views/settings'),
-        meta: { title: '设置步骤', icon: 'el-icon-setting' }
+        meta: { title: '设置归类', icon: 'el-icon-setting' }
       }
     ]
   },
