@@ -19,7 +19,7 @@
                     <!-- 循环展示 addition_data 中的操作字段 -->
                     <div>{{ key }}</div>
                     <!-- 下拉选择框去分类 -->
-                    <el-select v-model="classifications[key]" placeholder="请选择分类">
+                    <el-select v-model="classifications[key]" clearable placeholder="请选择分类">
                         <el-option label="识故问题" value="识故问题"></el-option>
                         <el-option label="操作问题" value="操作问题"></el-option>
                         <el-option label="安全问题" value="安全问题"></el-option>
