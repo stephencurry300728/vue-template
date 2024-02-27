@@ -16,7 +16,7 @@
             <div class="data-container">
                 <div class="data-item" v-for="key in Object.keys(selectedAdditionalData)" :key="key">
                     <div>{{ key }}</div>
-                    <el-select v-model="classifications[key]" placeholder="请选择操作分类">
+                    <el-select v-model="classifications[key]" placeholder="请选择分类">
                         <el-option label="识故" value="识故"></el-option>
                         <el-option label="排故" value="排故"></el-option>
                         <el-option label="操作确认" value="操作确认"></el-option>
@@ -60,7 +60,7 @@ export default {
     },
 
     computed: {
-        // 检查所有分类是否都已经选择
+        // 检查所有分类是否都已经选择，若有没选择的框就不能点击保存这个button
         isAllClassified() {
             return Object.values(this.classifications).every(value => value !== '');
         },
@@ -82,7 +82,6 @@ export default {
             fetchDataCategories().then(response => {
                 // 假设response.data是上面提到的数据格式
                 const categories = response.data;
-
                 // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
                 this.dataCategories = categories.reduce((acc, item) => {
                     acc[item.file_name] = item.classifications;
@@ -95,18 +94,23 @@ export default {
 
         // 展示唯一的文件名
         extractUniqueFileNames() {
-            // 使用Set来存储唯一获取到的assessments中的 文件名 字段
+            // 使用 Set 来存储唯一获取到的 assessments 中的 文件名 字段
             const fileNames = new Set(this.assessments.map(item => item.file_name));
-            // 使用Array.from将Set转换为数组，然后将其赋值给uniqueFileNames，展示唯一的文件名
+            // 使用 Array.from 将 Set 转换为数组，然后将其赋值给 uniqueFileNames 展示唯一的文件名
             this.uniqueFileNames = Array.from(fileNames);
         },
 
         // 获取用户点击的fileName
         selectFileName(fileName) {
+            // 保存用户选择的文件名
             this.selectedFileName = fileName;
+            // 使用 find 方法获取用户点击的 fileName 对应的 assessment
             const selectedAssessment = this.assessments.find(item => item.file_name === fileName);
+            // 确保selectedAssessment存在，并且有additional_data
             if (selectedAssessment && selectedAssessment.additional_data) {
+                // 使用Object.entries将对象转换为键值对数组，然后使用slice跳过前两个条目
                 const dataEntries = Object.entries(selectedAssessment.additional_data).slice(2);
+                // // 将剩余的条目转换回对象格式
                 this.selectedAdditionalData = dataEntries.reduce((acc, [key, value]) => {
                     acc[key] = value;
                     return acc;
@@ -114,10 +118,10 @@ export default {
             } else {
                 this.selectedAdditionalData = {};
             }
-            // 初始化classifications
+            // 初始化 classifications
             this.initializeClassifications();
 
-            // 新增：根据dataCategories和selectedFileName来填充classifications
+            // 根据 dataCategories 和 selectedFileName 来填充 classifications
             this.fillClassificationsFromDataCategories();
         },
 
@@ -129,10 +133,12 @@ export default {
             });
         },
 
-        // 新增一个方法来填充classifications
+        // 填充 classifications
         fillClassificationsFromDataCategories() {
             if (this.dataCategories[this.selectedFileName]) {
+                // 获取当前文件名对应的分类信息
                 const classificationsData = this.dataCategories[this.selectedFileName];
+                // 遍历selectedAdditionalData中的所有key
                 Object.keys(this.selectedAdditionalData).forEach(key => {
                     // 检查dataCategories中是否有对应的分类信息
                     if (classificationsData[key]) {
@@ -171,7 +177,7 @@ export default {
             } catch (error) {
                 console.error("Error saving classifications: ", error);
             } finally {
-                this.loading = false; // 无论操作成功还是失败，都在button上停止加载
+                this.loading = false; // 无论请求成功还是失败，button 上均停止加载
             }
         },
 
