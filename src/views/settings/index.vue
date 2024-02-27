@@ -38,7 +38,7 @@
 
 <script>
 import { AllTrainingData } from '@/api/table';
-import { SaveClassification, fetchDataCategories} from '@/api/settings';
+import { SaveClassification, fetchDataCategories } from '@/api/settings';
 
 export default {
     name: 'AssessmentClassification',
@@ -50,11 +50,13 @@ export default {
             selectedAdditionalData: {},
             classifications: {},
             loading: false,
+            dataCategories: {}, // 存储从接口获取的分类数据
         };
     },
 
     mounted() {
         this.fetchAllData();
+        this.fetchDataCategories(); // 获取分类数据
     },
 
     computed: {
@@ -75,6 +77,22 @@ export default {
             });
         },
 
+        // 获取分类数据
+        fetchDataCategories() {
+            fetchDataCategories().then(response => {
+                // 假设response.data是上面提到的数据格式
+                const categories = response.data;
+
+                // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
+                this.dataCategories = categories.reduce((acc, item) => {
+                    acc[item.file_name] = item.classifications;
+                    return acc;
+                }, {});
+            }).catch(error => {
+                console.error("Error fetching data categories: ", error);
+            });
+        },
+
         // 展示唯一的文件名
         extractUniqueFileNames() {
             // 使用Set来存储唯一获取到的assessments中的 文件名 字段
@@ -86,13 +104,9 @@ export default {
         // 获取用户点击的fileName
         selectFileName(fileName) {
             this.selectedFileName = fileName;
-            // 使用find方法获取用户点击的fileName对应的assessment
             const selectedAssessment = this.assessments.find(item => item.file_name === fileName);
-            // 确保selectedAssessment存在，并且有additional_data
             if (selectedAssessment && selectedAssessment.additional_data) {
-                // 使用Object.entries将对象转换为键值对数组，然后使用slice跳过前两个条目
                 const dataEntries = Object.entries(selectedAssessment.additional_data).slice(2);
-                // 将剩余的条目转换回对象格式
                 this.selectedAdditionalData = dataEntries.reduce((acc, [key, value]) => {
                     acc[key] = value;
                     return acc;
@@ -100,7 +114,11 @@ export default {
             } else {
                 this.selectedAdditionalData = {};
             }
+            // 初始化classifications
             this.initializeClassifications();
+
+            // 新增：根据dataCategories和selectedFileName来填充classifications
+            this.fillClassificationsFromDataCategories();
         },
 
         // 初始化分类
@@ -109,6 +127,20 @@ export default {
             Object.keys(this.selectedAdditionalData).forEach(key => {
                 this.$set(this.classifications, key, '');
             });
+        },
+
+        // 新增一个方法来填充classifications
+        fillClassificationsFromDataCategories() {
+            if (this.dataCategories[this.selectedFileName]) {
+                const classificationsData = this.dataCategories[this.selectedFileName];
+                Object.keys(this.selectedAdditionalData).forEach(key => {
+                    // 检查dataCategories中是否有对应的分类信息
+                    if (classificationsData[key]) {
+                        // 直接使用从dataCategories获取的分类信息来更新classifications
+                        this.classifications[key] = classificationsData[key];
+                    }
+                });
+            }
         },
 
         // 调用保存分类信息
