@@ -25,7 +25,11 @@
             </div>
             <!-- 保存分类的按钮 -->
             <div class="button-container">
-                <button @click="saveClassifications" class="save-button">保存分类</button>
+                <el-button type="primary" @click="saveClassifications" :disabled="!isAllClassified" :loading="loading"
+                    size="big">
+                    保存分类
+                    <i class="el-icon-check el-icon--right"></i>
+                </el-button>
             </div>
         </div>
 
@@ -45,11 +49,19 @@ export default {
             selectedFileName: '',
             selectedAdditionalData: {},
             classifications: {},
+            loading: false,
         };
     },
 
     mounted() {
         this.fetchAllData();
+    },
+
+    computed: {
+        // 检查所有分类是否都已经选择
+        isAllClassified() {
+            return Object.values(this.classifications).every(value => value !== '');
+        },
     },
 
     methods: {
@@ -101,26 +113,37 @@ export default {
 
         // 调用保存分类信息
         async saveClassifications() {
+            if (!this.isAllClassified) {
+                this.$message.error({
+                    message: '所有字段都必须分类，请完成分类后再保存。',
+                    duration: 2000,
+                    showClose: true
+                });
+                return;
+            }
+
+            this.loading = true; // 开始加载
+
             try {
                 await SaveClassification({
                     file_name: this.selectedFileName,
                     classifications: this.classifications
                 });
-                // 使用this.$message显示成功消息
                 this.$message({
                     type: 'success',
                     message: '分类信息已保存',
-                    duration: 2000, // 显示时长（毫秒）
-                    showClose: true // 显示关闭按钮
+                    duration: 2000,
+                    showClose: true
                 });
             } catch (error) {
                 console.error("Error saving classifications: ", error);
-                // 使用this.$message显示失败消息
                 this.$message.error({
                     message: '保存分类信息失败',
-                    duration: 2000, // 显示时长（毫秒）
-                    showClose: true // 显示关闭按钮
+                    duration: 2000,
+                    showClose: true
                 });
+            } finally {
+                this.loading = false; // 无论操作成功还是失败，都停止加载
             }
         },
 
@@ -190,14 +213,5 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-}
-
-.save-button {
-    cursor: pointer;
-    background-color: #578af8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
 }
 </style>
