@@ -36,6 +36,7 @@ export default {
         ...mapState('table', [
             'trainingAnalysisData',
         ]),
+        
         // 培训数据的总计合格率概况
         processedData() {
             // 检查 trainingAnalysisData 是否存在或是否为空数组
