@@ -7,3 +7,10 @@ export function SaveClassification(data) {
         data
     });
 }
+
+export function fetchDataCategories() {
+    return request({
+        url: '/data-categories/',
+        method: 'get'
+    });
+}

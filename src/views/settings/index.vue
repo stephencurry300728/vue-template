@@ -38,7 +38,7 @@
 
 <script>
 import { AllTrainingData } from '@/api/table';
-import { SaveClassification } from '@/api/settings';
+import { SaveClassification,fetchDataCategories} from '@/api/settings';
 
 export default {
     name: 'AssessmentClassification',
