@@ -101,7 +101,6 @@ export default {
         // 获取分类数据
         fetchDataCategories() {
             fetchCategories().then(response => {
-                // 假设response.data是上面提到的数据格式
                 const categories = response.data;
                 // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
                 this.dataCategories = categories.reduce((acc, item) => {
