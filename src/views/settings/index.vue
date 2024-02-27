@@ -169,16 +169,21 @@ export default {
 }
 
 .data-item {
-    min-width: 300px; /* 保留这个设置以确保最小宽度 */
+    min-width: 300px;
+    /* 保留这个设置以确保最小宽度 */
     margin-bottom: 20px;
     padding: 10px;
-    display: flex; /* 添加flex布局来更好地控制子元素 */
-    flex-direction: column; /* 使子元素垂直排列 */
+    display: flex;
+    /* 添加flex布局来更好地控制子元素 */
+    flex-direction: column;
+    /* 使子元素垂直排列 */
 }
 
-.data-item > div {
-    width: 100%; /* 使key字段和el-select的宽度相同 */
-    margin-bottom: 10px; /* 在key字段和el-select框之间添加10px的间距 */
+.data-item>div {
+    width: 100%;
+    /* 使key字段和el-select的宽度相同 */
+    margin-bottom: 10px;
+    /* 在key字段和el-select框之间添加10px的间距 */
 }
 
 .button-container {
@@ -194,5 +199,4 @@ export default {
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
-}
-</style>
+}</style>
