@@ -20,9 +20,9 @@
                     <div>{{ key }}</div>
                     <!-- 下拉选择框去分类 -->
                     <el-select v-model="classifications[key]" placeholder="请选择分类">
-                        <el-option label="识故" value="识故"></el-option>
-                        <el-option label="排故" value="排故"></el-option>
-                        <el-option label="操作确认" value="操作确认"></el-option>
+                        <el-option label="识故问题" value="识故问题"></el-option>
+                        <el-option label="操作问题" value="操作问题"></el-option>
+                        <el-option label="安全问题" value="安全问题"></el-option>
                     </el-select>
                 </div>
             </div>
