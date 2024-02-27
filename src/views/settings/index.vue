@@ -5,6 +5,7 @@
         <div class="file-names-container">
             <div class="file-name-item" v-for="fileName in uniqueFileNames" :key="fileName"
                 @click="selectFileName(fileName)">
+                <!-- 循环展示上传的文件名 -->
                 <h2>{{ fileName }}</h2>
             </div>
         </div>
@@ -15,7 +16,9 @@
             <h3>为文件名 {{ selectedFileName }} 的操作分类:</h3>
             <div class="data-container">
                 <div class="data-item" v-for="key in Object.keys(selectedAdditionalData)" :key="key">
+                    <!-- 循环展示 addition_data 中的操作字段 -->
                     <div>{{ key }}</div>
+                    <!-- 下拉选择框去分类 -->
                     <el-select v-model="classifications[key]" placeholder="请选择分类">
                         <el-option label="识故" value="识故"></el-option>
                         <el-option label="排故" value="排故"></el-option>
@@ -23,6 +26,7 @@
                     </el-select>
                 </div>
             </div>
+
             <!-- 保存分类的按钮 -->
             <div class="button-container">
                 <el-button type="primary" @click="saveClassifications" :disabled="!isAllClassified" :loading="loading"
@@ -38,25 +42,25 @@
 
 <script>
 import { AllTrainingData } from '@/api/table';
-import { SaveClassification, fetchDataCategories } from '@/api/settings';
+import { SaveClassification, fetchCategories } from '@/api/settings';
 
 export default {
     name: 'AssessmentClassification',
     data() {
         return {
-            assessments: [],
-            uniqueFileNames: [],
-            selectedFileName: '',
-            selectedAdditionalData: {},
-            classifications: {},
-            loading: false,
+            assessments: [], // 存储获取到的所有数据
+            uniqueFileNames: [], // 存储去重后的文件名
+            selectedFileName: '', // 存储用户当前选择的文件名
+            selectedAdditionalData: {}, // 存储用户选择的文件名对应的 additional_data
+            classifications: {}, // 存储用户对 additional_data 中的字段进行的分类（跟后端数据库交互）
+            loading: false, // 保存的按钮是否在加载状态
             dataCategories: {}, // 存储从接口获取的分类数据
         };
     },
 
     mounted() {
-        this.fetchAllData();
-        this.fetchDataCategories(); // 获取分类数据
+        this.fetchAllData(); // 获取所有数据
+        this.fetchDataCategories(); // 获取先前分类后的数据
     },
 
     computed: {
@@ -67,10 +71,12 @@ export default {
     },
 
     methods: {
-        // 获取所有数据
+        // 获取所有表格数据
         fetchAllData() {
             AllTrainingData().then(response => {
+                // 存储获取到的所有数据
                 this.assessments = response.data;
+                // 展示唯一的文件名
                 this.extractUniqueFileNames();
             }).catch(error => {
                 console.error("Error fetching data: ", error);
@@ -79,11 +85,12 @@ export default {
 
         // 获取分类数据
         fetchDataCategories() {
-            fetchDataCategories().then(response => {
+            fetchCategories().then(response => {
                 // 假设response.data是上面提到的数据格式
                 const categories = response.data;
                 // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
                 this.dataCategories = categories.reduce((acc, item) => {
+                    // 将文件名作为键，分类信息作为值赋值给acc
                     acc[item.file_name] = item.classifications;
                     return acc;
                 }, {});
@@ -94,9 +101,9 @@ export default {
 
         // 展示唯一的文件名
         extractUniqueFileNames() {
-            // 使用 Set 来存储唯一获取到的 assessments 中的 文件名 字段
+            // 使用 Set 来存储唯一获取到的 assessments 中的 文件名
             const fileNames = new Set(this.assessments.map(item => item.file_name));
-            // 使用 Array.from 将 Set 转换为数组，然后将其赋值给 uniqueFileNames 展示唯一的文件名
+            // uniqueFileNames 展示唯一的文件名（循环展示）
             this.uniqueFileNames = Array.from(fileNames);
         },
 

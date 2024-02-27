@@ -8,7 +8,7 @@ export function SaveClassification(data) {
     });
 }
 
-export function fetchDataCategories() {
+export function fetchCategories() {
     return request({
         url: '/data-categories/',
         method: 'get'
