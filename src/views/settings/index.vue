@@ -100,11 +100,12 @@ export default {
         },
 
         // 调用保存分类信息
-        saveClassifications() {
-            SaveClassification({
-                file_name: this.selectedFileName,
-                classifications: this.classifications
-            }).then(() => {
+        async saveClassifications() {
+            try {
+                await SaveClassification({
+                    file_name: this.selectedFileName,
+                    classifications: this.classifications
+                });
                 // 使用this.$message显示成功消息
                 this.$message({
                     type: 'success',
@@ -112,7 +113,7 @@ export default {
                     duration: 2000, // 显示时长（毫秒）
                     showClose: true // 显示关闭按钮
                 });
-            }).catch(error => {
+            } catch (error) {
                 console.error("Error saving classifications: ", error);
                 // 使用this.$message显示失败消息
                 this.$message.error({
@@ -120,7 +121,7 @@ export default {
                     duration: 2000, // 显示时长（毫秒）
                     showClose: true // 显示关闭按钮
                 });
-            });
+            }
         },
 
     },
@@ -168,7 +169,8 @@ export default {
 }
 
 .data-item {
-    min-width: 300px; /* 调整为适当的最小宽度 */
+    min-width: 300px;
+    /* 调整为适当的最小宽度 */
     margin-bottom: 20px;
     padding: 10px;
 }
@@ -186,4 +188,5 @@ export default {
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
-}</style>
+}
+</style>
