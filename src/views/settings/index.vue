@@ -222,12 +222,16 @@ export default {
     border: 2px solid #eee;
     border-radius: 4px;
     transition: transform 0.3s ease;
+    /* 设置固定宽度 */
+    width: 250px; /* 根据实际需求调整这个值 */
+    text-align: center; /* 确保文本在项内居中 */
 }
 
 .file-name-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 
 .no-data {
     text-align: center;
