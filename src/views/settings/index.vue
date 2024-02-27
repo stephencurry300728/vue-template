@@ -1,9 +1,14 @@
 <template>
+    
     <div class="classification-container">
         <h1>分类 Additional Data</h1>
         <div v-for="fileName in uniqueFileNames" :key="fileName" class="file-name">
             <h2 @click="selectFileName(fileName)">{{ fileName }}</h2>
         </div>
+        <div v-if="uniqueFileNames.length === 0" class="no-data">
+            无数据
+        </div>
+
         <div v-if="selectedFileName" class="additional-data-container">
             <h3>为 {{ selectedFileName }} 的 Additional Data 分类:</h3>
             <div v-for="key in Object.keys(selectedAdditionalData)" :key="key" class="data-item">
@@ -19,7 +24,6 @@
         </div>
     </div>
 </template>
-
 
 <script>
 import { AllTrainingData } from '@/api/table';
@@ -42,6 +46,7 @@ export default {
     },
 
     methods: {
+        // 获取所有数据
         fetchAllData() {
             AllTrainingData().then(response => {
                 this.assessments = response.data;
@@ -51,6 +56,7 @@ export default {
             });
         },
 
+        // 展示唯一的文件名
         extractUniqueFileNames() {
             const fileNames = new Set(this.assessments.map(item => item.file_name));
             this.uniqueFileNames = Array.from(fileNames);
