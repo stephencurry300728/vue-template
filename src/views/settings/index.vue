@@ -113,6 +113,7 @@ export default {
 
         // 调用保存分类信息
         async saveClassifications() {
+            // 如果没有选择所有分类，展示错误信息
             if (!this.isAllClassified) {
                 this.$message.error({
                     message: '所有字段都必须分类，请完成分类后再保存。',
@@ -143,7 +144,7 @@ export default {
                     showClose: true
                 });
             } finally {
-                this.loading = false; // 无论操作成功还是失败，都停止加载
+                this.loading = false; // 无论操作成功还是失败，都在button上停止加载
             }
         },
 
