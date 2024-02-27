@@ -99,7 +99,7 @@ export const constantRoutes = [
         path: '',
         name: 'upload',
         component: () => import('@/views/upload/index'),
-        meta: { title: '上传文件', icon: 'el-icon-document' }
+        meta: { title: '上传文件', icon: 'el-icon-upload' }
       }
     ]
   },
@@ -132,27 +132,40 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
+    path: '/settings',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: '进阶数据分析', icon: 'el-icon-s-help' },
-    // 当一个Layout路由下面的 children 声明的路由大于1个时，自动会变成嵌套的模式--如Example页面
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: '表格', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: '相关性分析', icon: 'tree' }
+        path: '',
+        name: 'settings',
+        component: () => import('@/views/settings'),
+        meta: { title: '设置步骤', icon: 'el-icon-setting' }
       }
     ]
   },
+
+  // {
+  //   path: '/example',
+  //   component: Layout,
+  //   redirect: '/example/table',
+  //   name: 'Example',
+  //   meta: { title: '进阶数据分析', icon: 'el-icon-s-help' },
+  //   // 当一个Layout路由下面的 children 声明的路由大于1个时，自动会变成嵌套的模式--如Example页面
+  //   children: [
+  //     {
+  //       path: 'table',
+  //       name: 'Table',
+  //       component: () => import('@/views/table/index'),
+  //       meta: { title: '表格', icon: 'table' }
+  //     },
+  //     {
+  //       path: 'tree',
+  //       name: 'Tree',
+  //       component: () => import('@/views/tree/index'),
+  //       meta: { title: '相关性分析', icon: 'tree' }
+  //     }
+  //   ]
+  // },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
