@@ -44,7 +44,7 @@ export default {
             uniqueFileNames: [],
             selectedFileName: '',
             selectedAdditionalData: {},
-            classifications: {}
+            classifications: {},
         };
     },
 
