@@ -1,27 +1,34 @@
 <template>
-    
     <div class="classification-container">
-        <h1>分类 Additional Data</h1>
-        <div v-for="fileName in uniqueFileNames" :key="fileName" class="file-name">
-            <h2 @click="selectFileName(fileName)">{{ fileName }}</h2>
+        <!-- 顶部展现文件选项 -->
+        <h2 style="text-align: center;">步骤归类</h2>
+        <div class="file-names-container">
+            <div class="file-name-item" v-for="fileName in uniqueFileNames" :key="fileName"
+                @click="selectFileName(fileName)">
+                <h2>{{ fileName }}</h2>
+            </div>
         </div>
-        <div v-if="uniqueFileNames.length === 0" class="no-data">
-            无数据
+        <div v-if="uniqueFileNames.length === 0" class="no-data">无数据</div>
+
+        <!-- 展示字段并保存分类到数据库中 -->
+        <div v-if="selectedFileName" class="additional-data-container">
+            <h3>为文件名 {{ selectedFileName }} 的操作分类:</h3>
+            <div class="data-container">
+                <div class="data-item" v-for="key in Object.keys(selectedAdditionalData)" :key="key">
+                    <div>{{ key }}</div>
+                    <el-select v-model="classifications[key]" placeholder="请选择操作分类">
+                        <el-option label="识故" value="识故"></el-option>
+                        <el-option label="排故" value="排故"></el-option>
+                        <el-option label="操作确认" value="操作确认"></el-option>
+                    </el-select>
+                </div>
+            </div>
+            <!-- 保存分类的按钮 -->
+            <div class="button-container">
+                <button @click="saveClassifications" class="save-button">保存分类</button>
+            </div>
         </div>
 
-        <div v-if="selectedFileName" class="additional-data-container">
-            <h3>为 {{ selectedFileName }} 的 Additional Data 分类:</h3>
-            <div v-for="key in Object.keys(selectedAdditionalData)" :key="key" class="data-item">
-                <div>{{ key }}</div> <!-- 只展示 key -->
-                <select v-model="classifications[key]" class="category-select">
-                    <option disabled value="">请选择分类</option>
-                    <option value="识故">识故</option>
-                    <option value="排故">排故</option>
-                    <option value="操作确认">操作确认</option>
-                </select>
-            </div>
-            <button @click="saveClassifications" class="save-button">保存分类</button>
-        </div>
     </div>
 </template>
 
@@ -58,12 +65,16 @@ export default {
 
         // 展示唯一的文件名
         extractUniqueFileNames() {
+            // 使用Set来存储唯一获取到的assessments中的 文件名 字段
             const fileNames = new Set(this.assessments.map(item => item.file_name));
+            // 使用Array.from将Set转换为数组,然后将其赋值给uniqueFileNames，展示唯一的文件名
             this.uniqueFileNames = Array.from(fileNames);
         },
 
+        // 获取用户点击的fileName
         selectFileName(fileName) {
             this.selectedFileName = fileName;
+            // 使用find方法获取用户点击的fileName对应的assessment
             const selectedAssessment = this.assessments.find(item => item.file_name === fileName);
             // 确保selectedAssessment存在，并且有additional_data
             if (selectedAssessment && selectedAssessment.additional_data) {
@@ -80,6 +91,7 @@ export default {
             this.initializeClassifications();
         },
 
+        // 初始化分类
         initializeClassifications() {
             this.classifications = {};
             Object.keys(this.selectedAdditionalData).forEach(key => {
@@ -87,6 +99,7 @@ export default {
             });
         },
 
+        // 调用保存分类信息
         saveClassifications() {
             SaveClassification({
                 file_name: this.selectedFileName,
@@ -115,32 +128,62 @@ export default {
 </script>
 
 <style scoped>
-.file-name h2 {
+.file-names-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.file-name-item {
     cursor: pointer;
-    color: #42b983;
-    /* 示例颜色 */
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+}
+
+.file-name-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.no-data {
+    text-align: center;
+    margin-top: 20px;
 }
 
 .additional-data-container {
-    margin-top: 20px;
+    padding: 20px;
+}
+
+.data-container {
+    display: flex;
+    /* 使用flex布局 */
+    flex-wrap: wrap;
+    /* 允许换行 */
+    gap: 20px;
+    /* 项目之间的间隔 */
 }
 
 .data-item {
-    margin-bottom: 10px;
+    min-width: 300px; /* 调整为适当的最小宽度 */
+    margin-bottom: 20px;
+    padding: 10px;
 }
 
-.category-select {
-    margin-left: 10px;
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 .save-button {
-    margin-top: 20px;
     cursor: pointer;
-    background-color: #42b983;
-    /* 示例颜色 */
+    background-color: #578af8;
     color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
-}
-</style>
+}</style>
