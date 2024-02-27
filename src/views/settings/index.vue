@@ -9,7 +9,7 @@
                 <h2>{{ fileName }}</h2>
             </div>
         </div>
-        <div v-if="uniqueFileNames.length === 0" class="no-data">无数据</div>
+        <div v-if="showNoDataMessage" class="no-data">无数据</div>
 
         <!-- 展示字段并保存分类到数据库中 -->
         <div v-if="selectedFileName" class="additional-data-container">
@@ -55,14 +55,29 @@ export default {
             classifications: {}, // 存储用户对 additional_data 中的字段进行的分类（跟后端数据库交互）
             loading: false, // 保存的按钮是否在加载状态
             dataCategories: {}, // 存储从接口获取的分类数据
+            showNoDataMessage: false, // 控制无数据提示的显示
+            noDataTimer: null, // 定时器标识
         };
     },
 
     mounted() {
         this.fetchAllData(); // 获取所有数据
         this.fetchDataCategories(); // 获取先前分类后的数据
+        // 在组件挂载后设置定时器
+        this.noDataTimer = setTimeout(() => {
+            if (this.uniqueFileNames.length === 0) {
+                this.showNoDataMessage = true; // 显示无数据提示
+            }
+        }, 2000); // 2秒后执行
     },
 
+    beforeDestroy() {
+        // 在组件销毁前清除定时器
+        if (this.noDataTimer) {
+            clearTimeout(this.noDataTimer);
+        }
+    },
+    
     computed: {
         // 检查所有分类是否都已经选择，若有没选择的框就不能点击保存这个button
         isAllClassified() {
