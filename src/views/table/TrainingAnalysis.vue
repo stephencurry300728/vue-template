@@ -49,14 +49,17 @@ import { fetchCategories } from '@/api/settings';
 
 export default {
     name: 'TrainingAnalysis',
+
     data() {
         return {
             categories: [],
         };
     },
+
     mounted() {
         this.fetchDataCategories();
     },
+    
     computed: {
         // 从 store 中获取筛选后的培训数据
         ...mapState('table', [
