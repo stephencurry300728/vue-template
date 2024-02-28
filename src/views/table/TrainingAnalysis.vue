@@ -24,20 +24,28 @@
         <div v-else class="no-data">
             无培训数据
         </div>
+        <h2 style="margin-left: 20px;">二、 问题分析</h2>
+        <el-card>
+
+        </el-card>
     </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import { fetchCategories } from '@/api/settings';
 
 export default {
     name: 'TrainingAnalysis',
+    mounted() {
+        this.fetchDataCategories();
+    },
     computed: {
         // 从 store 中获取筛选后的培训数据
         ...mapState('table', [
             'trainingAnalysisData',
         ]),
-        
+
         // 培训数据的总计合格率概况
         processedData() {
             // 检查 trainingAnalysisData 是否存在或是否为空数组
@@ -120,7 +128,23 @@ export default {
                 unqualified: `${groupStats[group].unqualified} (${((groupStats[group].unqualified / groupStats[group].count) * 100).toFixed(2)}%)`,
             }));
         },
+    },
 
+    methods: {
+        fetchDataCategories() {
+            fetchCategories().then(response => {
+                const categories = response.data;
+                // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
+                this.dataCategories = categories.reduce((acc, item) => {
+                    // 将文件名作为键，分类信息作为值赋值给acc
+                    acc[item.file_name] = item.classifications;
+                    return acc;
+                }, {});
+                console.log('dataCategories-----: ', this.dataCategories);
+            }).catch(error => {
+                console.error("Error fetching data categories: ", error);
+            });
+        },
     },
 }
 </script>
