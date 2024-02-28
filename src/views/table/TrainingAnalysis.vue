@@ -53,6 +53,7 @@
                 </el-table>
             </el-card>
         </div>
+        
     </div>
 </template>
 
@@ -305,6 +306,7 @@ export default {
         goToSettings() {
             this.$router.push({ path: '/settings' });
         },
+        
     },
 }
 </script>
