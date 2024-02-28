@@ -30,7 +30,7 @@
         <!-- 验证哪些文件未设定步骤 -->
         <div v-if="missingFileNames.length > 0" class="no-data-info">
             <p>
-                文件名： {{ missingFileNames.join('，') }} 缺少步骤设定！
+                文件名： {{ missingFileNames.join('，') }} 缺少步骤归类！
                 请<a href="#" @click.prevent="goToSettings">点击这里</a>去设置步骤。
             </p>
         </div>
