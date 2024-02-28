@@ -30,13 +30,13 @@
         <div class="tableData">
             <el-card class="box-card">
                 <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
-                    <el-table-column prop="group" label="问题大类" align="center" width="220">
+                    <el-table-column prop="group" label="步骤归类" align="center" width="220">
                         <template v-slot="{ row }">
                             <span v-if="row.rowspan">{{ row.group }}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="classification" label="操作步骤" align="center"></el-table-column>
-                    <el-table-column prop="percentage" label="详情占比" align="center">
+                    <el-table-column prop="classification" label="详情操作" align="center"></el-table-column>
+                    <el-table-column prop="percentage" label="错误占比" align="center">
                         <template slot-scope="scope">
                             {{ scope.row.percentage }}
                         </template>
@@ -190,20 +190,34 @@ export default {
 
             // 转换统计结果为数组格式，并计算百分比
             return Object.entries(issueCounts).map(([group, classifications]) => {
+                let totalEmpty = 0; // 总空值数
+                let total = 0; // 总数
                 let classificationsArray = Object.entries(classifications).map(([classification, counts]) => {
+                    totalEmpty += counts.empty; // 累加空值数
+                    total += counts.total; // 累加总数
                     const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
-                    return { classification, count: counts.empty, percentage: `${counts.empty}人 (${percentage}%)`, rawPercentage: parseFloat(percentage) };
+                    return {
+                        classification,
+                        count: counts.empty,
+                        percentage: `${counts.empty}人 (${percentage}%)`,
+                        rawPercentage: parseFloat(percentage)
+                    };
                 });
 
                 // 对问题分类内部进行排序
                 classificationsArray.sort((a, b) => b.rawPercentage - a.rawPercentage);
 
+                const groupPercentage = total > 0 ? ((totalEmpty / total) * 100).toFixed(2) : 0;
                 return {
                     group,
+                    totalEmpty,
+                    total,
+                    groupPercentage: `(${groupPercentage}%)`, // 添加大类的空值百分比
                     classifications: classificationsArray
                 };
             });
         },
+
 
         // 展开问题分析数据
         flattenedIssues() {
@@ -211,20 +225,28 @@ export default {
             let flatIssues = [];
             issueAnalysis.forEach(group => {
                 group.classifications.forEach((classification, index) => {
-                    flatIssues.push({
-                        group: group.group,
-                        classification: classification.classification,
-                        count: classification.count,
-                        percentage: classification.percentage,
-                        rowspan: index === 0 ? group.classifications.length : 0,
-                    });
+                    if (index === 0) { // 只在大类的第一行添加总空值人数和占比
+                        flatIssues.push({
+                            group: `${group.group} ${group.groupPercentage}`, // 修改此处以包括总空值百分比
+                            classification: classification.classification,
+                            count: classification.count,
+                            percentage: classification.percentage,
+                            rowspan: group.classifications.length,
+                        });
+                    } else {
+                        flatIssues.push({
+                            group: group.group,
+                            classification: classification.classification,
+                            count: classification.count,
+                            percentage: classification.percentage,
+                            rowspan: 0, // 非第一行不显示大类名称和百分比
+                        });
+                    }
                 });
             });
-
-            // 在这个步骤中不需要对 flatIssues 进行排序
-            // 因为 issueAnalysis 已经按照每个分类内的百分比进行了排序
             return flatIssues;
         }
+
 
     },
 
