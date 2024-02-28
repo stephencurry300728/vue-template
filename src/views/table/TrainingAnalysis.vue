@@ -28,7 +28,7 @@
 
         <h2 style="margin-left: 20px;">二、 问题分析</h2>
         <div class="tableData">
-            <el-card class="box-card">
+            <el-card class="box-card" v-if="!allPercentagesZero">
                 <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
                     <el-table-column prop="group" label="步骤归类" align="center" width="220">
                         <template v-slot="{ row }">
@@ -43,6 +43,9 @@
                     </el-table-column>
                 </el-table>
             </el-card>
+            <div v-else class="no-data-info">
+                <p>未设置归类，请<a href="#" @click.prevent="goToSettings">点击这里</a>去设置步骤。</p>
+            </div>
         </div>
     </div>
 </template>
@@ -218,7 +221,6 @@ export default {
             });
         },
 
-
         // 展开问题分析数据
         flattenedIssues() {
             const issueAnalysis = this.issueAnalysis;
@@ -245,9 +247,11 @@ export default {
                 });
             });
             return flatIssues;
-        }
+        },
 
-
+        allPercentagesZero() {
+            return this.flattenedIssues.every(issue => parseFloat(issue.percentage) === 0);
+        },
     },
 
     methods: {
@@ -266,6 +270,10 @@ export default {
                 return [row.rowspan, 1];
             }
             return [1, 1];
+        },
+
+        goToSettings() {
+            this.$router.push({ path: '/settings' });
         },
     },
 }
@@ -301,6 +309,32 @@ export default {
 
 .table-card {
     margin-top: 20px;
+}
+
+.no-data-info {
+    padding: 20px;
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.no-data-info p {
+    margin: 0;
+    padding: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.no-data-info a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.no-data-info a:hover {
+    text-decoration: underline;
 }
 </style>
 
