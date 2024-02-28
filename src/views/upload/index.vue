@@ -24,6 +24,14 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css'; // 引入nprogress样式文件
 
 export default {
+    data() {
+        return {
+            // 其他数据属性
+            isNavigating: false, // 新增状态标志
+            confirmShown: false, // 新增状态标志，确认框是否已显示
+        };
+    },
+
     methods: {
         // 上传前的校验是否为csv文件
         beforeUpload(file) {
@@ -37,20 +45,32 @@ export default {
 
         // 调用API上传批量csv文件
         async uploadRequest(options) {
-            NProgress.start(); // 开始显示进度条
-            let fileNameWithoutExtension = options.file.name.split('.').slice(0, -1).join('.'); // 提前定义，以便在catch块中使用
+            NProgress.start();
+            let fileNameWithoutExtension = options.file.name.split('.').slice(0, -1).join('.');
             try {
                 const response = await uploadFile(options.file);
                 this.$message.success(`${fileNameWithoutExtension} 文件上传成功！`);
-                this.$router.push({ path: '/settings' }); // 成功上传后跳转到/settings路径去设置步骤
+
+                // 只在确认框未显示且未决定导航时弹出确认框
+                if (!this.isNavigating && !this.confirmShown) {
+                    this.confirmShown = true; // 标记确认框已显示
+                    this.$confirm('是否继续上传文件，或是前往设置步骤?', '上传成功', {
+                        confirmButtonText: '前往设置',
+                        cancelButtonText: '继续上传',
+                        type: 'warning'
+                    }).then(() => {
+                        this.isNavigating = true; // 更新导航状态标志
+                        this.$router.push({ path: '/settings' });
+                    }).catch(() => {
+                        // 用户选择继续上传，不做任何操作
+                    });
+                }
             } catch (error) {
                 console.error('Upload error:', error);
-                // 可以在这里添加更多的错误处理逻辑，比如重试机制或提示用户检查文件格式等
             } finally {
-                NProgress.done(); // 完成后隐藏进度条
+                NProgress.done();
             }
         },
-
 
         // 在处理文件上传后重置input的value
         resetInput(inputElement) {
@@ -65,6 +85,7 @@ export default {
         },
         // 处理批量文件上传
         async handleFileUpload(event) {
+            this.confirmShown = false; // 重置确认框显示状态
             const files = event.target.files;
             for (const file of files) {
                 await this.uploadRequest({ file });
@@ -78,6 +99,7 @@ export default {
         },
         // 处理文件夹上传
         async handleFolderUpload(event) {
+            this.confirmShown = false; // 重置确认框显示状态
             const files = event.target.files;
             for (const file of files) {
                 try {
@@ -89,7 +111,14 @@ export default {
                 }
             }
             this.resetInput(event.target); // 重置文件夹输入，允许重新上传相同文件夹
-        }
+        },
+
+        beforeRouteLeave(to, from, next) {
+            // 重置状态
+            this.isNavigating = false;
+            this.confirmShown = false;
+            next();
+        },
     }
 };
 </script>
@@ -165,13 +194,13 @@ export default {
 }
 
 /* 调整文件和文件夹上传按钮的样式，使其更一致且具有现代感 */
-.el-button.upload-button {
+.upload-button {
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1);
     /* 给按钮添加轻微的阴影 */
     transition: all 0.3s ease;
 }
 
-.el-button.upload-button:hover {
+.upload-button:hover {
     transform: translateY(-2px);
     /* 鼠标悬停时轻微上移，增加交互感 */
     box-shadow: 0 6px 15px 0 rgba(0, 0, 0, 0.15);
