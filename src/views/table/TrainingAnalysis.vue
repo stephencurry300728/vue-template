@@ -227,9 +227,9 @@ export default {
             let flatIssues = [];
             issueAnalysis.forEach(group => {
                 group.classifications.forEach((classification, index) => {
-                    if (index === 0) { // 只在大类的第一行添加总空值人数和占比
+                    if (index === 0) { // 只在大类的第一行添加总空值占比
                         flatIssues.push({
-                            group: `${group.group} ${group.groupPercentage}`, // 修改此处以包括总空值百分比
+                            group: `${group.group} ${group.groupPercentage}`, // 总空值百分比
                             classification: classification.classification,
                             count: classification.count,
                             percentage: classification.percentage,
@@ -249,6 +249,7 @@ export default {
             return flatIssues;
         },
 
+        // 检查是否所有问题分类的百分比都为0
         allPercentagesZero() {
             return this.flattenedIssues.every(issue => parseFloat(issue.percentage) === 0);
         },
