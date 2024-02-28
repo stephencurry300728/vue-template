@@ -31,10 +31,10 @@
         <div v-if="missingFileNames.length > 0" class="no-data-info">
             <p>
                 文件名： {{ missingFileNames.join('，') }} 缺少步骤归类！
-                请<a href="#" @click.prevent="goToSettings">点击这里</a>去设置步骤。
+                请<a href="#" @click.prevent="goToSettings">点击这里</a>去为其设置步骤归类
             </p>
         </div>
-        
+
         <!-- 第二张表格的数据 -->
         <div class="tableData">
             <el-card class="box-card" v-if="!allPercentagesZero">
@@ -53,7 +53,7 @@
                 </el-table>
             </el-card>
         </div>
-        
+
     </div>
 </template>
 
@@ -273,7 +273,33 @@ export default {
             const allFileNamesInCategories = new Set(this.categories.map(category => category.file_name));
 
             // 找出 trainingAnalysisData 中存在，但在 categories 中不存在的 file_name
-            const missingFileNames = [...allFileNamesInTrainingData].filter(fileName => !allFileNamesInCategories.has(fileName));
+            let missingFileNames = [...allFileNamesInTrainingData].filter(fileName => !allFileNamesInCategories.has(fileName));
+
+            // 对 missingFileNames 进行排序
+            missingFileNames = missingFileNames.sort((a, b) => {
+                // 分离数字和文本部分
+                const matchA = a.match(/(\d+)([a-zA-Z]+)(\d*)/);
+                const matchB = b.match(/(\d+)([a-zA-Z]+)(\d*)/);
+
+                // 比较主要数字部分
+                const numA = parseInt(matchA[1], 10);
+                const numB = parseInt(matchB[1], 10);
+
+                if (numA !== numB) {
+                    return numA - numB;
+                }
+
+                // 如果主要数字部分相同，比较文本部分
+                if (matchA[2] !== matchB[2]) {
+                    return matchA[2].localeCompare(matchB[2]);
+                }
+
+                // 如果文本部分也相同，比较次要数字部分
+                const subNumA = matchA[3] ? parseInt(matchA[3], 10) : 0;
+                const subNumB = matchB[3] ? parseInt(matchB[3], 10) : 0;
+
+                return subNumA - subNumB;
+            });
 
             return missingFileNames;
         },
