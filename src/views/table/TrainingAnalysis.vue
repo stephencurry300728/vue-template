@@ -29,10 +29,14 @@
         <h2 style="margin-left: 20px;">二、 问题分析</h2>
         <div class="tableData">
             <el-card class="box-card">
-                <el-table :data="flattenedIssues" style="width: 100%" border stripe>
-                    <el-table-column prop="group" label="问题大类" width="180" align="center"></el-table-column>
+                <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
+                    <el-table-column prop="group" label="问题大类" align="center" width="220">
+                        <template v-slot="{ row }">
+                            <span v-if="row.rowspan">{{ row.group }}</span>
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="classification" label="操作步骤" align="center"></el-table-column>
-                    <el-table-column prop="details" label="详情占比" align="center">
+                    <el-table-column prop="percentage" label="详情占比" align="center">
                         <template slot-scope="scope">
                             {{ scope.row.percentage }}
                         </template>
@@ -198,19 +202,23 @@ export default {
 
         // 展开问题分析数据
         flattenedIssues() {
+            const issueAnalysis = this.issueAnalysis;
             let flatIssues = [];
-            this.issueAnalysis.forEach(group => {
-                group.classifications.forEach(classification => {
+            issueAnalysis.forEach(group => {
+                group.classifications.forEach((classification, index) => {
                     flatIssues.push({
                         group: group.group,
                         classification: classification.classification,
                         count: classification.count,
-                        percentage: classification.percentage
+                        percentage: classification.percentage,
+                        rowspan: index === 0 ? group.classifications.length : 0,
                     });
                 });
             });
+
             return flatIssues;
-        },
+        }
+
     },
 
     methods: {
@@ -224,6 +232,12 @@ export default {
             }
         },
 
+        spanMethod({ row, column, rowIndex, columnIndex }) {
+            if (columnIndex === 0) { // 只在第一列应用合并逻辑
+                return [row.rowspan, 1];
+            }
+            return [1, 1];
+        },
     },
 }
 </script>
