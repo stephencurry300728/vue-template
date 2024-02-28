@@ -26,7 +26,6 @@ import 'nprogress/nprogress.css'; // 引入nprogress样式文件
 export default {
     data() {
         return {
-            // 其他数据属性
             isNavigating: false, // 导航的状态标志
             confirmShown: false, // 确认框的状态标志
         };
