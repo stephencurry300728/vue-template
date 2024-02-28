@@ -114,12 +114,36 @@ export default {
             });
         },
 
-        // 展示唯一的文件名
+        // 展示唯一的文件名，并且升序排列
         extractUniqueFileNames() {
             // 使用 Set 来存储唯一获取到的 assessments 中的 文件名
             const fileNames = new Set(this.assessments.map(item => item.file_name));
             // uniqueFileNames 展示唯一的文件名（循环展示）
-            this.uniqueFileNames = Array.from(fileNames);
+            this.uniqueFileNames = Array.from(fileNames).sort((a, b) => {
+                // 分离数字和文本部分
+                const matchA = a.match(/(\d+)([a-zA-Z]+)(\d*)/);
+                const matchB = b.match(/(\d+)([a-zA-Z]+)(\d*)/);
+
+                // 比较主要数字部分
+                const numA = parseInt(matchA[1], 10);
+                const numB = parseInt(matchB[1], 10);
+
+                if (numA !== numB) {
+                    return numA - numB;
+                }
+
+                // 如果主要数字部分相同，比较文本部分
+                if (matchA[2] !== matchB[2]) {
+                    return matchA[2].localeCompare(matchB[2]);
+                }
+
+                // 如果文本部分也相同，比较次要数字部分
+                const subNumA = matchA[3] ? parseInt(matchA[3], 10) : 0;
+                const subNumB = matchB[3] ? parseInt(matchB[3], 10) : 0;
+
+                return subNumA - subNumB;
+            });
+
         },
 
         // 获取用户点击的fileName
