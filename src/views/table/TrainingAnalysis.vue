@@ -31,8 +31,8 @@
             <el-card class="box-card">
                 <el-table :data="flattenedIssues" style="width: 100%" border stripe>
                     <el-table-column prop="group" label="问题大类" width="180" align="center"></el-table-column>
-                    <el-table-column prop="classification" label="问题分类" align="center"></el-table-column>
-                    <el-table-column prop="details" label="详情" align="center">
+                    <el-table-column prop="classification" label="操作步骤" align="center"></el-table-column>
+                    <el-table-column prop="details" label="详情占比" align="center">
                         <template slot-scope="scope">
                             {{ scope.row.percentage }}
                         </template>
@@ -59,7 +59,7 @@ export default {
     mounted() {
         this.fetchDataCategories();
     },
-    
+
     computed: {
         // 从 store 中获取筛选后的培训数据
         ...mapState('table', [
