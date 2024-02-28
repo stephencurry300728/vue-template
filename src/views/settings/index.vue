@@ -100,8 +100,9 @@ export default {
         },
 
         // 获取分类数据
-        fetchDataCategories() {
-            fetchCategories().then(response => {
+        async fetchDataCategories() {
+            try {
+                const response = await fetchCategories();
                 const categories = response.data;
                 // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
                 this.dataCategories = categories.reduce((acc, item) => {
@@ -109,9 +110,9 @@ export default {
                     acc[item.file_name] = item.classifications;
                     return acc;
                 }, {});
-            }).catch(error => {
+            } catch (error) {
                 console.error("Error fetching data categories: ", error);
-            });
+            }
         },
 
         // 展示唯一的文件名，并且升序排列
