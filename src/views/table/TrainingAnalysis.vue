@@ -239,7 +239,6 @@ export default {
             return results.filter(result => result.totalEmpty > 0);
         },
 
-
         // 展开问题分析数据
         flattenedIssues() {
             const issueAnalysis = this.issueAnalysis;
@@ -306,7 +305,7 @@ export default {
         goToSettings() {
             this.$router.push({ path: '/settings' });
         },
-        
+
     },
 }
 </script>
