@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+        <h2 style="margin-left: 20px;">一、 培训概况</h2>
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
 
             <div class="text-center">
