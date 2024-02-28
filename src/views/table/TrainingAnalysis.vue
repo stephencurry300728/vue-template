@@ -27,6 +27,15 @@
         </div>
 
         <h2 style="margin-left: 20px;">二、 问题分析</h2>
+        <!-- 验证哪些文件未设定步骤 -->
+        <div v-if="missingFileNames.length > 0" class="no-data-info">
+            <p>
+                文件名： {{ missingFileNames.join('，') }} 缺少步骤设定！
+                请<a href="#" @click.prevent="goToSettings">点击这里</a>去设置步骤。
+            </p>
+        </div>
+        
+        <!-- 第二张表格的数据 -->
         <div class="tableData">
             <el-card class="box-card" v-if="!allPercentagesZero">
                 <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
@@ -43,9 +52,6 @@
                     </el-table-column>
                 </el-table>
             </el-card>
-            <div v-else class="no-data-info">
-                <p>未设置归类，请<a href="#" @click.prevent="goToSettings">点击这里</a>去设置步骤。</p>
-            </div>
         </div>
     </div>
 </template>
@@ -158,6 +164,7 @@ export default {
 
         // 问题分析
         issueAnalysis() {
+            // 确保有培训数据和分类数据
             if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0 || !this.categories || this.categories.length === 0) {
                 return [];
             }
@@ -166,60 +173,71 @@ export default {
 
             // 初始化问题分类统计
             this.categories.forEach(category => {
+                if (!issueCounts[category.file_name]) {
+                    issueCounts[category.file_name] = { groups: {} };
+                }
                 Object.entries(category.classifications).forEach(([key, value]) => {
-                    if (!issueCounts[value]) {
-                        issueCounts[value] = {};
+                    if (!issueCounts[category.file_name].groups[value]) {
+                        issueCounts[category.file_name].groups[value] = {};
                     }
-                    if (!issueCounts[value][key]) {
-                        issueCounts[value][key] = { empty: 0, total: 0 };
+                    if (!issueCounts[category.file_name].groups[value][key]) {
+                        issueCounts[category.file_name].groups[value][key] = { empty: 0, total: 0 };
                     }
                 });
             });
 
-            // 统计每个分类下的问题的空值和总数
+            // 统计每个文件名下的分类问题
             this.trainingAnalysisData.forEach(dataItem => {
+                // 只处理存在于 categories 中的文件名
                 const categoryItem = this.categories.find(category => category.file_name === dataItem.file_name);
-                if (categoryItem) {
+                if (categoryItem && issueCounts[categoryItem.file_name]) {
                     Object.keys(categoryItem.classifications).forEach(classification => {
                         const group = categoryItem.classifications[classification];
                         const isValueEmpty = !dataItem.additional_data || !dataItem.additional_data[classification] || dataItem.additional_data[classification] === '';
-                        issueCounts[group][classification].total++;
+                        issueCounts[categoryItem.file_name].groups[group][classification].total++;
                         if (isValueEmpty) {
-                            issueCounts[group][classification].empty++;
+                            issueCounts[categoryItem.file_name].groups[group][classification].empty++;
                         }
                     });
                 }
             });
 
             // 转换统计结果为数组格式，并计算百分比
-            return Object.entries(issueCounts).map(([group, classifications]) => {
-                let totalEmpty = 0; // 总空值数
-                let total = 0; // 总数
-                let classificationsArray = Object.entries(classifications).map(([classification, counts]) => {
-                    totalEmpty += counts.empty; // 累加空值数
-                    total += counts.total; // 累加总数
-                    const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
-                    return {
-                        classification,
-                        count: counts.empty,
-                        percentage: `${counts.empty}人 (${percentage}%)`,
-                        rawPercentage: parseFloat(percentage)
-                    };
+            let results = [];
+            Object.entries(issueCounts).forEach(([file_name, data]) => {
+                Object.entries(data.groups).map(([group, classifications]) => {
+                    let totalEmpty = 0;
+                    let total = 0;
+                    let classificationsArray = Object.entries(classifications).map(([classification, counts]) => {
+                        totalEmpty += counts.empty;
+                        total += counts.total;
+                        const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
+                        return {
+                            classification,
+                            count: counts.empty,
+                            percentage: `${counts.empty}人 (${percentage}%)`,
+                            rawPercentage: parseFloat(percentage)
+                        };
+                    });
+
+                    classificationsArray.sort((a, b) => b.rawPercentage - a.rawPercentage);
+
+                    const groupPercentage = total > 0 ? ((totalEmpty / total) * 100).toFixed(2) : 0;
+                    results.push({
+                        file_name,
+                        group,
+                        totalEmpty,
+                        total,
+                        groupPercentage: `(${groupPercentage}%)`,
+                        classifications: classificationsArray
+                    });
                 });
-
-                // 对问题分类内部进行排序
-                classificationsArray.sort((a, b) => b.rawPercentage - a.rawPercentage);
-
-                const groupPercentage = total > 0 ? ((totalEmpty / total) * 100).toFixed(2) : 0;
-                return {
-                    group,
-                    totalEmpty,
-                    total,
-                    groupPercentage: `(${groupPercentage}%)`, // 添加大类的空值百分比
-                    classifications: classificationsArray
-                };
             });
+
+            // 过滤掉所有百分比为0的结果
+            return results.filter(result => result.totalEmpty > 0);
         },
+
 
         // 展开问题分析数据
         flattenedIssues() {
@@ -247,6 +265,17 @@ export default {
                 });
             });
             return flatIssues;
+        },
+
+        missingFileNames() {
+            // 确保每个 trainingAnalysisData 中的 file_name 都在 categories 中有匹配
+            const allFileNamesInTrainingData = new Set(this.trainingAnalysisData.map(data => data.file_name));
+            const allFileNamesInCategories = new Set(this.categories.map(category => category.file_name));
+
+            // 找出 trainingAnalysisData 中存在，但在 categories 中不存在的 file_name
+            const missingFileNames = [...allFileNamesInTrainingData].filter(fileName => !allFileNamesInCategories.has(fileName));
+
+            return missingFileNames;
         },
 
         // 检查是否所有问题分类的百分比都为0
