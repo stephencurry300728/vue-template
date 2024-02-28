@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+
         <h2 style="margin-left: 20px;">一、 培训概况</h2>
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
 
@@ -24,10 +25,16 @@
         <div v-else class="no-data">
             无培训数据
         </div>
-        <h2 style="margin-left: 20px;">二、 问题分析</h2>
-        <el-card>
 
-        </el-card>
+        <h2 style="margin-left: 20px;">二、 问题分析</h2>
+        <div class="tableData">
+            <el-card class="box-card">
+                <el-table :data="issueAnalysis" style="width: 100%" fit element-loading-text="拼命加载中" border stripe>
+                    <el-table-column prop="classification" label="问题分类" width="180" align="center"></el-table-column>
+                    <el-table-column prop="percentage" label="空值比例" align="center"></el-table-column>
+                </el-table>
+            </el-card>
+        </div>
     </div>
 </template>
 
@@ -37,6 +44,11 @@ import { fetchCategories } from '@/api/settings';
 
 export default {
     name: 'TrainingAnalysis',
+    data() {
+        return {
+            categories: [],
+        };
+    },
     mounted() {
         this.fetchDataCategories();
     },
@@ -128,23 +140,48 @@ export default {
                 unqualified: `${groupStats[group].unqualified} (${((groupStats[group].unqualified / groupStats[group].count) * 100).toFixed(2)}%)`,
             }));
         },
+
+        issueAnalysis() {
+
+            if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0 || !this.categories || this.categories.length === 0) {
+                return [];
+            }
+
+            const categoryCounts = this.trainingAnalysisData.reduce((acc, dataItem) => {
+                const categoryItem = this.categories.find(category => category.file_name === dataItem.file_name);
+                if (categoryItem) {
+                    Object.keys(categoryItem.classifications).forEach(classification => {
+                        if (!acc[classification]) {
+                            acc[classification] = { empty: 0, total: 0 };
+                        }
+                        const isValueEmpty = !dataItem.additional_data || !dataItem.additional_data[classification] || dataItem.additional_data[classification] === '';
+                        acc[classification].total++;
+                        if (isValueEmpty) {
+                            acc[classification].empty++;
+                        }
+                    });
+                }
+                return acc;
+            }, {});
+
+            return Object.keys(categoryCounts).map(classification => {
+                const { empty, total } = categoryCounts[classification];
+                const percentage = total > 0 ? ((empty / total) * 100).toFixed(2) : 0;
+                return { classification, percentage: `${percentage}%` };
+            });
+        },
     },
 
     methods: {
-        fetchDataCategories() {
-            fetchCategories().then(response => {
-                const categories = response.data;
-                // 转换数据格式以便易于访问，将其转换为以文件名为键的对象
-                this.dataCategories = categories.reduce((acc, item) => {
-                    // 将文件名作为键，分类信息作为值赋值给acc
-                    acc[item.file_name] = item.classifications;
-                    return acc;
-                }, {});
-                console.log('dataCategories-----: ', this.dataCategories);
-            }).catch(error => {
-                console.error("Error fetching data categories: ", error);
-            });
+        async fetchDataCategories() {
+            try {
+                const response = await fetchCategories();
+                this.categories = response.data;
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
         },
+
     },
 }
 </script>
