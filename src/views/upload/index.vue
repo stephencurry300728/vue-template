@@ -96,6 +96,7 @@ export default {
         triggerFolderSelect() {
             this.$refs.folderInput.click();
         },
+
         // 处理文件夹上传
         async handleFolderUpload(event) {
             this.confirmShown = false; // 重置确认框显示状态
@@ -112,6 +113,7 @@ export default {
             this.resetInput(event.target); // 重置文件夹输入，允许重新上传相同文件夹
         },
 
+        // 导航离开时的钩子函数
         beforeRouteLeave(to, from, next) {
             // 重置状态
             this.isNavigating = false;
