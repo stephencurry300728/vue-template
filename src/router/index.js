@@ -75,7 +75,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard', // 设定路由的名字，一定要填写不然使用<keep-alive>时会出现各种问题
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'el-icon-s-home' }
     }]
   },
   // 重定向
