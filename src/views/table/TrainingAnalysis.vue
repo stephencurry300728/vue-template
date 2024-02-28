@@ -149,6 +149,7 @@ export default {
             }));
         },
 
+        // 问题分析
         issueAnalysis() {
             if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0 || !this.categories || this.categories.length === 0) {
                 return [];
@@ -195,6 +196,7 @@ export default {
             });
         },
 
+        // 展开问题分析数据
         flattenedIssues() {
             let flatIssues = [];
             this.issueAnalysis.forEach(group => {
