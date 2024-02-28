@@ -190,12 +190,17 @@ export default {
 
             // 转换统计结果为数组格式，并计算百分比
             return Object.entries(issueCounts).map(([group, classifications]) => {
+                let classificationsArray = Object.entries(classifications).map(([classification, counts]) => {
+                    const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
+                    return { classification, count: counts.empty, percentage: `${counts.empty}人 (${percentage}%)`, rawPercentage: parseFloat(percentage) };
+                });
+
+                // 对问题分类内部进行排序
+                classificationsArray.sort((a, b) => b.rawPercentage - a.rawPercentage);
+
                 return {
                     group,
-                    classifications: Object.entries(classifications).map(([classification, counts]) => {
-                        const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
-                        return { classification, count: counts.empty, percentage: `${counts.empty}人 (${percentage}%)` };
-                    })
+                    classifications: classificationsArray
                 };
             });
         },
@@ -216,6 +221,8 @@ export default {
                 });
             });
 
+            // 在这个步骤中不需要对 flatIssues 进行排序
+            // 因为 issueAnalysis 已经按照每个分类内的百分比进行了排序
             return flatIssues;
         }
 
