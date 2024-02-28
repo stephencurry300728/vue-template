@@ -42,14 +42,15 @@ export default {
             try {
                 const response = await uploadFile(options.file);
                 this.$message.success(`${fileNameWithoutExtension} 文件上传成功！`);
+                this.$router.push({ path: '/settings' }); // 成功上传后跳转到/settings路径去设置步骤
             } catch (error) {
                 console.error('Upload error:', error);
-                this.$message.error(`${fileNameWithoutExtension} 文件上传失败！`);
                 // 可以在这里添加更多的错误处理逻辑，比如重试机制或提示用户检查文件格式等
             } finally {
                 NProgress.done(); // 完成后隐藏进度条
             }
         },
+
 
         // 在处理文件上传后重置input的value
         resetInput(inputElement) {
