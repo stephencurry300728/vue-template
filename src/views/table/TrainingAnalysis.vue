@@ -29,9 +29,14 @@
         <h2 style="margin-left: 20px;">二、 问题分析</h2>
         <div class="tableData">
             <el-card class="box-card">
-                <el-table :data="issueAnalysis" style="width: 100%" fit element-loading-text="拼命加载中" border stripe>
-                    <el-table-column prop="classification" label="问题分类" width="180" align="center"></el-table-column>
-                    <el-table-column prop="percentage" label="空值比例" align="center"></el-table-column>
+                <el-table :data="flattenedIssues" style="width: 100%" border stripe>
+                    <el-table-column prop="group" label="问题大类" width="180" align="center"></el-table-column>
+                    <el-table-column prop="classification" label="问题分类" align="center"></el-table-column>
+                    <el-table-column prop="details" label="详情" align="center">
+                        <template slot-scope="scope">
+                            {{ scope.row.percentage }}
+                        </template>
+                    </el-table-column>
                 </el-table>
             </el-card>
         </div>
@@ -142,37 +147,69 @@ export default {
         },
 
         issueAnalysis() {
-
             if (!this.trainingAnalysisData || this.trainingAnalysisData.length === 0 || !this.categories || this.categories.length === 0) {
                 return [];
             }
 
-            const categoryCounts = this.trainingAnalysisData.reduce((acc, dataItem) => {
+            let issueCounts = {};
+
+            // 初始化问题分类统计
+            this.categories.forEach(category => {
+                Object.entries(category.classifications).forEach(([key, value]) => {
+                    if (!issueCounts[value]) {
+                        issueCounts[value] = {};
+                    }
+                    if (!issueCounts[value][key]) {
+                        issueCounts[value][key] = { empty: 0, total: 0 };
+                    }
+                });
+            });
+
+            // 统计每个分类下的问题的空值和总数
+            this.trainingAnalysisData.forEach(dataItem => {
                 const categoryItem = this.categories.find(category => category.file_name === dataItem.file_name);
                 if (categoryItem) {
                     Object.keys(categoryItem.classifications).forEach(classification => {
-                        if (!acc[classification]) {
-                            acc[classification] = { empty: 0, total: 0 };
-                        }
+                        const group = categoryItem.classifications[classification];
                         const isValueEmpty = !dataItem.additional_data || !dataItem.additional_data[classification] || dataItem.additional_data[classification] === '';
-                        acc[classification].total++;
+                        issueCounts[group][classification].total++;
                         if (isValueEmpty) {
-                            acc[classification].empty++;
+                            issueCounts[group][classification].empty++;
                         }
                     });
                 }
-                return acc;
-            }, {});
-
-            return Object.keys(categoryCounts).map(classification => {
-                const { empty, total } = categoryCounts[classification];
-                const percentage = total > 0 ? ((empty / total) * 100).toFixed(2) : 0;
-                return { classification, percentage: `${percentage}%` };
             });
+
+            // 转换统计结果为数组格式，并计算百分比
+            return Object.entries(issueCounts).map(([group, classifications]) => {
+                return {
+                    group,
+                    classifications: Object.entries(classifications).map(([classification, counts]) => {
+                        const percentage = counts.total > 0 ? ((counts.empty / counts.total) * 100).toFixed(2) : 0;
+                        return { classification, count: counts.empty, percentage: `${counts.empty}人 (${percentage}%)` };
+                    })
+                };
+            });
+        },
+
+        flattenedIssues() {
+            let flatIssues = [];
+            this.issueAnalysis.forEach(group => {
+                group.classifications.forEach(classification => {
+                    flatIssues.push({
+                        group: group.group,
+                        classification: classification.classification,
+                        count: classification.count,
+                        percentage: classification.percentage
+                    });
+                });
+            });
+            return flatIssues;
         },
     },
 
     methods: {
+        // 获取分类数据
         async fetchDataCategories() {
             try {
                 const response = await fetchCategories();
