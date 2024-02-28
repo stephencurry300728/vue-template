@@ -90,7 +90,7 @@ export const constantRoutes = [
       }
     ]
   },
-  
+
   {
     path: '/upload',
     component: Layout,
@@ -100,6 +100,19 @@ export const constantRoutes = [
         name: 'upload',
         component: () => import('@/views/upload/index'),
         meta: { title: '上传文件', icon: 'el-icon-upload' }
+      }
+    ]
+  },
+
+  {
+    path: '/settings',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'settings',
+        component: () => import('@/views/settings'),
+        meta: { title: '设置归类', icon: 'el-icon-setting' }
       }
     ]
   },
@@ -120,26 +133,13 @@ export const constantRoutes = [
         component: () => import('@/views/table/AssessmentDetail'),
         meta: { title: '详细信息', icon: 'el-icon-info' },
         hidden: true
-      },   
+      },
       {
         path: 'training',
         name: 'TrainingAnalysis',
         component: () => import('@/views/table/TrainingAnalysis'),
         meta: { title: '培训概况', icon: 'el-icon-s-data' },
         hidden: true // 该路由不会在侧边栏出现
-      }
-    ]
-  },
-
-  {
-    path: '/settings',
-    component: Layout,
-    children: [
-      {
-        path: '',
-        name: 'settings',
-        component: () => import('@/views/settings'),
-        meta: { title: '设置归类', icon: 'el-icon-setting' }
       }
     ]
   },
