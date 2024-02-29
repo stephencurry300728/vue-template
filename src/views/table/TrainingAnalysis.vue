@@ -165,7 +165,7 @@ export default {
 
         // 问题分析计算
         issueAnalysis() {
-            // 记录所有处理过程中遇到的 null值 的总数（分母）
+            // 记录所有处理过程中遇到的 null 值的总数（分母）
             let totalNulls = 0;
             // 存储按照分类分组的统计信息，包括每个分类的null值计数、总计数和具体分类信息
             let issueCountsByGroup = {};
@@ -173,7 +173,7 @@ export default {
             // 生成一个有效的文件名集合
             // 用于检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
             // 因为 categories 中的 file_name 是用户设置好步骤归类的
-            // 而 trainingAnalysisData 中的 file_name 直接读取上传的文件名，可能有些没有设置步骤归类
+            // 而 trainingAnalysisData 中的 file_name 直接读取数据库中上传的文件名，可能有些文件没有设置步骤归类
             const validFileNames = new Set(this.categories.map(category => category.file_name));
 
             /*
@@ -183,7 +183,7 @@ export default {
         ]
             */
 
-            // 遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“操作问题”、“安全问题”等）
+            // 遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“识故问题”、“操作问题”、“安全问题”）
             // 如果没有，则为该分组创建一个新的条目，并初始化 nullCount、total 和 classifications
             this.categories.forEach(category => {
                 Object.values(category.classifications).forEach(group => {
@@ -199,27 +199,31 @@ export default {
                 "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}
             }
             */
-            // 遍历trainingAnalysisData数组，处理每个数据项
+            // 遍历 trainingAnalysisData 数组，处理每个数据项
             this.trainingAnalysisData.forEach(dataItem => {
-                // 检查 trainingAnalysisData的 file_name 是否存在于之前创建的validFileNames集合中
-                // 这个集合包含了所有在categories中已经被定义为有效分类的 file_name
+                // 检查 trainingAnalysisData的 file_name 是否存在于之前创建的 validFileNames 集合中
+                // 这个集合包含了所有在 categories 中已经被定义为有效分类的 file_name
                 if (!validFileNames.has(dataItem.file_name)) {
-                    // 如果dataItem的file_name不在validFileNames集合中，意味着这个数据项没有被归类到任何有效的分类中
+                    // 如果 dataItem 的 file_name 不在 validFileNames 集合中，意味着这个数据项没有被归类到任何有效的分类中
                     // 因此直接跳过这个数据项的进一步处理
                     return;
                 }
 
                 // 遍历当前数据项的 additional_data 中的每个键值对
                 Object.entries(dataItem.additional_data).forEach(([key, value]) => {
-                    // 根据key找到对应的分组
-                    // 对于additional_data中的每个键（代表一个具体的操作），通过在categories中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
-                    // 通过将categories扁平化（使用flatMap）并过滤出与当前键匹配的分类项
+                    // 根据 key 找到对应的分组
+                    // 对于 additional_data 中的每个键（代表一个具体的操作），通过在 categories 中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
+                    // 通过将 categories 扁平化（使用flatMap）并过滤出与当前键匹配的分类项
                     const group = this.categories.flatMap(category => Object.entries(category.classifications)
+                        // flatMap操作首先将categories中的每个分类（每个category对象）转换为一个由其classifications属性（也就是一个对象，键为任务/问题，值为分组名）的键值对构成的数组
+                        // 然后对这些数组中的每个元素（键值对）进行过滤，以找到当前正在处理的key（来自additional_data）匹配的项
+                        // 最后，从匹配的项中抽取分组名（groupValue）
                         .filter(([classificationKey, _]) => classificationKey === key)
                         .map(([_, groupValue]) => groupValue))
+                        // 使用.find(Boolean)是为了从可能的分组名数组中获取第一个有效的分组名（即非空、非undefined的值），作为当前键所属的分组
                         .find(Boolean);
 
-                    // 如果当前键的值为null，则递增总的null值计数器和相应分组的null值计数器
+                    // 如果当前键的值为 null，则递增总的 null 值计数器和相应分组的 null 值计数器
                     if (value === null) {
                         totalNulls++;
                         if (group && issueCountsByGroup[group]) {
@@ -231,14 +235,14 @@ export default {
                     if (group && issueCountsByGroup[group]) {
                         // 递增该分组的总计数器
                         issueCountsByGroup[group].total++;
-                        // 检查并更新或初始化该键在classifications中的统计信息
+                        // 检查并更新或初始化该键在 classifications 中的统计信息
                         if (!issueCountsByGroup[group].classifications[key]) {
                             issueCountsByGroup[group].classifications[key] = { nullCount: 0, total: 1 };
                         } else {
                             issueCountsByGroup[group].classifications[key].total++;
                         }
 
-                        // 如果当前键的值为null，则递增其在classifications中的null值计数器
+                        // 如果当前键的值为 null，则递增其在 classifications 中的 null 值计数器
                         if (value === null) {
                             issueCountsByGroup[group].classifications[key].nullCount++;
                         }
@@ -246,10 +250,10 @@ export default {
                 });
             });
 
-            // 遍历issueCountsByGroup中的每个分组，计算并设置每个分组null值的百分比
+            // 遍历 issueCountsByGroup 中的每个分组，计算并设置每个分组 null 值的百分比
             Object.values(issueCountsByGroup).forEach(group => {
                 group.percentage = `${((group.nullCount / totalNulls) * 100).toFixed(2)}%`;
-                // 将classifications对象转换为包含更多详细信息（包括显示用的百分比）的形式
+                // 将 classifications 对象转换为包含更多详细信息（包括显示用的百分比）的形式
                 group.classifications = Object.entries(group.classifications).reduce((acc, [key, value]) => {
                     acc[key] = {
                         classification: key,
@@ -292,15 +296,16 @@ export default {
             return flatIssues;
         },
 
+        // 确保每个 trainingAnalysisData 中的 file_name 都在 categories 中有匹配
         missingFileNames() {
-            // 确保每个 trainingAnalysisData 中的 file_name 都在 categories 中有匹配
+
             const allFileNamesInTrainingData = new Set(this.trainingAnalysisData.map(data => data.file_name));
             const allFileNamesInCategories = new Set(this.categories.map(category => category.file_name));
 
             // 找出 trainingAnalysisData 中存在，但在 categories 中不存在的 file_name
             let missingFileNames = [...allFileNamesInTrainingData].filter(fileName => !allFileNamesInCategories.has(fileName));
 
-            // 对 missingFileNames 进行排序
+            // 对 missingFileNames 进行降序展示
             missingFileNames = missingFileNames.sort((a, b) => {
                 // 分离数字和文本部分
                 const matchA = a.match(/(\d+)([a-zA-Z]+)(\d*)/);
@@ -329,7 +334,7 @@ export default {
             return missingFileNames;
         },
 
-        // 检查是否所有问题分类的百分比都为0
+        // 检查是否所有步骤的百分比都为0，若是则不显示问题分析表格
         allPercentagesZero() {
             return this.flattenedIssues.every(issue => parseFloat(issue.percentage) === 0);
         },
