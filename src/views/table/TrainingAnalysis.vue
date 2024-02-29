@@ -181,7 +181,7 @@ export default {
             // 存储按照分类分组的统计信息，包括每个大分类的 null 值计数、总计数和具体分类信息
             let issueCountsByGroup = {};
 
-            // 生成一个有效的文件名集合
+            // 生成一个有效的文件名集合（包含所有唯一的 file_name）
             // 用于后续检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
             // 因为 categories 中的 file_name 是用户设置好步骤归类的
             // 而 trainingAnalysisData 中的 file_name 直接读取数据库中上传的文件名，可能有些文件没有设置步骤归类
