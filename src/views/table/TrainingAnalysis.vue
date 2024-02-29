@@ -38,6 +38,13 @@
         <!-- 第二张表格的数据 -->
         <div class="tableData">
             <el-card class="box-card" v-if="!allPercentagesZero">
+
+                <!-- 选择器 -->
+                <el-select v-model="selectedAnalysisType" placeholder="请选择分析类型" class="select-analysis-type">
+                    <el-option label="所有人" value="all"></el-option>
+                    <el-option label="不合格" value="fail"></el-option>
+                </el-select>
+
                 <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
                     <el-table-column prop="group" label="步骤归类" align="center" width="220">
                         <template v-slot="{ row }">
@@ -66,7 +73,8 @@ export default {
 
     data() {
         return {
-            categories: [],
+            categories: [], // 分类数据
+            selectedAnalysisType: 'all', // 默认选择分析所有人
         };
     },
 
@@ -176,11 +184,16 @@ export default {
 
         // 问题分析计算
         issueAnalysis() {
+            // 根据 selectedAnalysisType 过滤数据
+            let filteredData = this.trainingAnalysisData;
+            if (this.selectedAnalysisType === 'fail') {
+                filteredData = this.trainingAnalysisData.filter(dataItem => dataItem.assessment_result === 1);
+            }
+
             // 记录所有的 null 值的总数（作为所有百分比计算的分母）
             let totalNulls = 0;
             // 存储按照分类分组的统计信息，包括每个大分类的 null 值计数、总计数和具体分类信息
             let issueCountsByGroup = {};
-
             // 生成一个有效的文件名集合（包含所有唯一的 file_name）
             // 用于后续检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
             // 因为 categories 中的 file_name 是用户设置好步骤归类的
@@ -191,7 +204,7 @@ export default {
             categories:[
                 {"file_name":"9tsm2.csv",
                 "classifications":{……,"解锁逃生门红色手柄":"操作问题","复位扭杆":"操作问题","取下蝴蝶销":"安全问题","复位蝴蝶销":"识故问题",……}}
-        ]
+            ]
             */
 
             // 拆解并遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“识故问题”、“操作问题”、“安全问题”）
@@ -218,9 +231,10 @@ export default {
                 "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}
             }
             */
+
             // 遍历 trainingAnalysisData 数组，处理每个数据项
-            this.trainingAnalysisData.forEach(dataItem => {
-                // 检查 trainingAnalysisData的 file_name 是否存在于之前创建的 validFileNames 集合中
+            filteredData.forEach(dataItem => {
+                // 检查 trainingAnalysisData 的 file_name 是否存在于之前创建的 validFileNames 集合中
                 // 这个集合包含了所有在 categories 中已经设定好步骤归类的 file_name
                 if (!validFileNames.has(dataItem.file_name)) {
                     // 如果 dataItem 的 file_name 不在 validFileNames 集合中，则该文件未被设定步骤归类
@@ -232,7 +246,7 @@ export default {
                 Object.entries(dataItem.additional_data).forEach(([key, value]) => {
                     // 根据 key 找到对应的分组
                     // 对于 additional_data 中的每个键（代表一个具体的操作），通过在 categories 中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
-                    // 通过将 categories 扁平化（使用 flatMap ）并过滤出与当前键匹配的分类项
+                    // 通过将 categories 扁平化（使用 flatMap ）并过滤出与当前键匹配的分类项                    
                     const group = this.categories.flatMap(category => Object.entries(category.classifications)
                         // flatMap 操作首先将 categories 中的每个分类（每个 category 对象）转换为一个由其 classifications 属性（也就是一个对象，键为任务，值为分组名）的键值对构成的数组
                         // 然后对这些数组中的每个元素（键值对）进行过滤，以找到当前正在处理的 key（来自 additional_data）匹配的项
@@ -454,6 +468,15 @@ export default {
 
 .no-data-info a:hover {
     text-decoration: underline;
+}
+
+.select-analysis-type {
+    display: flex;
+    /* 使用 Flexbox 进行布局 */
+    justify-content: center;
+    /* 水平居中 */
+    margin-bottom: 20px;
+    /* 与下方表格的间隔 */
 }
 </style>
 
