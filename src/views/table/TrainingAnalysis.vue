@@ -296,9 +296,11 @@ export default {
                     // 从 display 字段中提取 nullCount 数值
                     const nullCountA = parseInt(a.display);
                     const nullCountB = parseInt(b.display);
-                    return nullCountB - nullCountA; // 降序排序
+                    // 降序排序
+                    return nullCountB - nullCountA;
                 });
 
+                // 仅对归类合并多行
                 sortedClassifications.forEach((detail, index) => {
                     if (index === 0) {
                         flatIssues.push({
