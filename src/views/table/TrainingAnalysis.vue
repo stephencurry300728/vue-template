@@ -194,7 +194,7 @@ export default {
         ]
             */
 
-            // 遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“识故问题”、“操作问题”、“安全问题”）
+            // 拆解并遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“识故问题”、“操作问题”、“安全问题”）
             // 如果没有，则为该分组创建一个新的条目，并初始化 nullCount、total 和 classifications
             this.categories.forEach(category => {
                 // Object.values将提取 classifications 对象的所有值，结果是一个数组，如：["操作问题", "操作问题", "安全问题", "识故问题"]
@@ -221,10 +221,10 @@ export default {
             // 遍历 trainingAnalysisData 数组，处理每个数据项
             this.trainingAnalysisData.forEach(dataItem => {
                 // 检查 trainingAnalysisData的 file_name 是否存在于之前创建的 validFileNames 集合中
-                // 这个集合包含了所有在 categories 中已经被定义为有效分类的 file_name
+                // 这个集合包含了所有在 categories 中已经设定好步骤归类的 file_name
                 if (!validFileNames.has(dataItem.file_name)) {
-                    // 如果 dataItem 的 file_name 不在 validFileNames 集合中，意味着这个数据项没有被归类到任何有效的分类中
-                    // 因此直接跳过这个数据项的进一步处理
+                    // 如果 dataItem 的 file_name 不在 validFileNames 集合中，则该文件未被设定步骤归类
+                    // 故直接跳过该数据项
                     return;
                 }
 
@@ -242,7 +242,6 @@ export default {
                         // 使用.find(Boolean)是为了从可能的分组名数组中获取第一个有效的分组名（即非空、非undefined的值），作为当前键所属的分组
                         .find(Boolean);
 
-                    // 如果当前键的值为 null，则递增 totalNulls 值计数器和相应分组的 null 值计数器
                     // 如果找到了对应的分组
                     if (group && issueCountsByGroup[group]) {
                         // 递增该分组的总计数器
@@ -252,9 +251,10 @@ export default {
                         if (!issueCountsByGroup[group].classifications[key]) {
                             issueCountsByGroup[group].classifications[key] = { nullCount: 0, total: 0 };
                         }
+                        // 递增该分组的总计数器
                         issueCountsByGroup[group].classifications[key].total++;
 
-                        // 如果当前键的值为 null
+                        // 如果遍历的当前键的值为 null（未测评）
                         if (value === null) {
                             // 递增总的 null 值计数器
                             totalNulls++;
@@ -285,19 +285,27 @@ export default {
             return issueCountsByGroup;
         },
 
-        // 展开问题分析数据用于表格展示
+        // 处理数据用于表格展示
         flattenedIssues() {
             const issueAnalysis = this.issueAnalysis;
             let flatIssues = [];
 
             Object.entries(issueAnalysis).forEach(([group, data]) => {
-                Object.values(data.classifications).forEach((detail, index) => {
+                // 先对 classifications 进行排序，基于 nullCount 降序
+                const sortedClassifications = Object.values(data.classifications).sort((a, b) => {
+                    // 从 display 字段中提取 nullCount 数值
+                    const nullCountA = parseInt(a.display);
+                    const nullCountB = parseInt(b.display);
+                    return nullCountB - nullCountA; // 降序排序
+                });
+
+                sortedClassifications.forEach((detail, index) => {
                     if (index === 0) {
                         flatIssues.push({
                             group: `${group} (${data.percentage})`,
                             classification: detail.classification,
                             percentage: detail.display,
-                            rowspan: Object.values(data.classifications).length,
+                            rowspan: sortedClassifications.length,
                         });
                     } else {
                         flatIssues.push({
@@ -310,6 +318,8 @@ export default {
                 });
             });
 
+            // 由于已经对每个分组内的 classifications 进行了排序
+            // 整个 flatIssues 本身按分组组织，不需要额外排序
             return flatIssues;
         },
 
