@@ -170,6 +170,10 @@ export default {
 
             const validFileNames = new Set(this.categories.map(category => category.file_name));
 
+            /*
+            categories:[{"file_name":"9tsm2.csv",
+            "classifications":{"解锁逃生门红色手柄":"操作问题","复位扭杆":"操作问题",……}}]
+            */
             this.categories.forEach(category => {
                 Object.values(category.classifications).forEach(group => {
                     if (!issueCountsByGroup[group]) {
@@ -178,6 +182,10 @@ export default {
                 });
             });
 
+            /*
+            trainingAnalysisData:{……,"file_name":"9tsm2.csv",
+            "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}}
+            */
             this.trainingAnalysisData.forEach(dataItem => {
                 if (!validFileNames.has(dataItem.file_name)) {
                     return;
