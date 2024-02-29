@@ -163,16 +163,23 @@ export default {
             }));
         },
 
-        // 问题分析
+        // 问题分析计算
         issueAnalysis() {
+            // 初始化全部的空值，即分母
             let totalNulls = 0;
             let issueCountsByGroup = {};
 
+            // 生成一个有效的文件名集合
+            // 用于检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
+            // 因为 categories 中的 file_name 是用户设置好步骤归类的
+            // 而 trainingAnalysisData 中的 file_name 直接读取上传的文件名，可能有些没有设置步骤归类
             const validFileNames = new Set(this.categories.map(category => category.file_name));
 
             /*
-            categories:[{"file_name":"9tsm2.csv",
-            "classifications":{"解锁逃生门红色手柄":"操作问题","复位扭杆":"操作问题",……}}]
+            categories:[
+                {"file_name":"9tsm2.csv",
+                "classifications":{"解锁逃生门红色手柄":"操作问题","复位扭杆":"操作问题","取下蝴蝶销":"安全问题","复位蝴蝶销":"识故问题",…………}}
+        ]
             */
             this.categories.forEach(category => {
                 Object.values(category.classifications).forEach(group => {
@@ -183,8 +190,10 @@ export default {
             });
 
             /*
-            trainingAnalysisData:{……,"file_name":"9tsm2.csv",
-            "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}}
+            trainingAnalysisData:{
+                "file_name":"9tsm2.csv",
+                "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}
+            }
             */
             this.trainingAnalysisData.forEach(dataItem => {
                 if (!validFileNames.has(dataItem.file_name)) {
@@ -234,7 +243,7 @@ export default {
             return issueCountsByGroup;
         },
 
-        // 展开问题分析数据
+        // 展开问题分析数据用于表格展示
         flattenedIssues() {
             const issueAnalysis = this.issueAnalysis;
             let flatIssues = [];
