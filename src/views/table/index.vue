@@ -300,15 +300,19 @@ export default {
       }
     },
 
-    // 携带着筛选参数跳转到分析培训概况
     async analyzeTrainingOverview() {
       try {
-        const params = this.buildQueryParams(); // 重用构建参数逻辑
+        // 重用构建参数逻辑
+        const params = this.buildQueryParams();
         // API 调用接收无分页的筛选后所有数据
         const response = await AllTrainingData(params);
         // 将获取到的筛选数据存储到 Vuex 中
         this.$store.dispatch('table/updateTrainingAnalysisData', response.data);
-        // 路由跳转到培训概况分析页面
+
+        // 设置 sessionStorage 标志
+        sessionStorage.setItem('fromAnalyze', 'true');
+
+        // 路由跳转到分析页面
         this.$router.push({ name: 'TrainingAnalysis' });
       } catch (error) {
         console.error("培训概况分析请求失败:", error);

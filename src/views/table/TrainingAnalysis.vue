@@ -70,6 +70,17 @@ export default {
         };
     },
 
+    created() {
+        // 检查是否通过点击事件导航
+        if (!sessionStorage.getItem('fromAnalyze')) {
+            // 如果不是，可能是刷新操作，执行重定向
+            this.$router.push('/table');
+        } else {
+            // 如果是通过点击事件导航，清除标志以允许正常刷新行为
+            sessionStorage.removeItem('fromAnalyze');
+        }
+    },
+
     mounted() {
         this.fetchDataCategories();
     },
