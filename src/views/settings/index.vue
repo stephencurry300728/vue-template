@@ -220,8 +220,15 @@ export default {
                     duration: 2000,
                     showClose: true
                 });
+                // 成功保存后刷新页面
+                window.location.reload();
             } catch (error) {
                 console.error("Error saving classifications: ", error);
+                this.$message.error({
+                    message: '保存分类信息失败，请重试。',
+                    duration: 2000,
+                    showClose: true
+                });
             } finally {
                 this.loading = false; // 无论请求成功还是失败，button 上均停止加载
             }
