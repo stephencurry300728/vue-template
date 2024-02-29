@@ -274,7 +274,7 @@ export default {
     // 获取数据，基本上每次都要调用
     async fetchData() {
       this.listLoading = true;
-      const params = this.buildQueryParams(); // 调用buildQueryParams构建请求参数
+      const params = this.buildQueryParams(); // 调用通用函数构建请求参数
 
       try {
         const response = await getList(params); // 等待异步请求完成
