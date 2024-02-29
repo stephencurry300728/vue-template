@@ -290,14 +290,23 @@ export default {
             const issueAnalysis = this.issueAnalysis;
             let flatIssues = [];
 
-            Object.entries(issueAnalysis).forEach(([group, data]) => {
-                // 先对 classifications 进行排序，基于 nullCount 降序
+            // 预定义的排序顺序
+            const order = ['识故问题', '操作问题', '安全问题'];
+
+            // 根据预定义的顺序对 issueAnalysis 的键进行排序
+            const orderedGroups = Object.keys(issueAnalysis).sort((a, b) => {
+                return order.indexOf(a) - order.indexOf(b);
+            });
+
+            orderedGroups.forEach(group => {
+                const data = issueAnalysis[group];
+
+                // 对 classifications 进行排序，基于 nullCount 降序
                 const sortedClassifications = Object.values(data.classifications).sort((a, b) => {
                     // 从 display 字段中提取 nullCount 数值
-                    const nullCountA = parseInt(a.display);
-                    const nullCountB = parseInt(b.display);
-                    // 降序排序
-                    return nullCountB - nullCountA;
+                    const nullCountA = parseInt(a.display.match(/\d+/)[0], 10);
+                    const nullCountB = parseInt(b.display.match(/\d+/)[0], 10);
+                    return nullCountB - nullCountA; // 降序排序
                 });
 
                 // 仅对归类合并多行
@@ -320,8 +329,6 @@ export default {
                 });
             });
 
-            // 由于已经对每个分组内的 classifications 进行了排序
-            // 整个 flatIssues 本身按分组组织，不需要额外排序
             return flatIssues;
         },
 
