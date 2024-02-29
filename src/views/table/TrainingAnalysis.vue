@@ -165,8 +165,9 @@ export default {
 
         // 问题分析计算
         issueAnalysis() {
-            // 初始化全部的空值，即分母
+            // 记录所有处理过程中遇到的 null值 的总数（分母）
             let totalNulls = 0;
+            // 存储按照分类分组的统计信息，包括每个分类的null值计数、总计数和具体分类信息
             let issueCountsByGroup = {};
 
             // 生成一个有效的文件名集合
@@ -181,6 +182,9 @@ export default {
                 "classifications":{"解锁逃生门红色手柄":"操作问题","复位扭杆":"操作问题","取下蝴蝶销":"安全问题","复位蝴蝶销":"识故问题",…………}}
         ]
             */
+
+            // 遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“操作问题”、“安全问题”等）
+            // 如果没有，则为该分组创建一个新的条目，并初始化 nullCount、total 和 classifications
             this.categories.forEach(category => {
                 Object.values(category.classifications).forEach(group => {
                     if (!issueCountsByGroup[group]) {
@@ -195,17 +199,27 @@ export default {
                 "additional_data":{……,"解锁逃生门红色手柄":"00:02.8","复位扭杆":null,"取下蝴蝶销":null,"复位蝴蝶销":null,……}
             }
             */
+            // 遍历trainingAnalysisData数组，处理每个数据项
             this.trainingAnalysisData.forEach(dataItem => {
+                // 检查 trainingAnalysisData的 file_name 是否存在于之前创建的validFileNames集合中
+                // 这个集合包含了所有在categories中已经被定义为有效分类的 file_name
                 if (!validFileNames.has(dataItem.file_name)) {
+                    // 如果dataItem的file_name不在validFileNames集合中，意味着这个数据项没有被归类到任何有效的分类中
+                    // 因此直接跳过这个数据项的进一步处理
                     return;
                 }
 
+                // 遍历当前数据项的 additional_data 中的每个键值对
                 Object.entries(dataItem.additional_data).forEach(([key, value]) => {
+                    // 根据key找到对应的分组
+                    // 对于additional_data中的每个键（代表一个具体的操作），通过在categories中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
+                    // 通过将categories扁平化（使用flatMap）并过滤出与当前键匹配的分类项
                     const group = this.categories.flatMap(category => Object.entries(category.classifications)
                         .filter(([classificationKey, _]) => classificationKey === key)
                         .map(([_, groupValue]) => groupValue))
                         .find(Boolean);
 
+                    // 如果当前键的值为null，则递增总的null值计数器和相应分组的null值计数器
                     if (value === null) {
                         totalNulls++;
                         if (group && issueCountsByGroup[group]) {
@@ -213,14 +227,18 @@ export default {
                         }
                     }
 
+                    // 如果找到了对应的分组
                     if (group && issueCountsByGroup[group]) {
+                        // 递增该分组的总计数器
                         issueCountsByGroup[group].total++;
+                        // 检查并更新或初始化该键在classifications中的统计信息
                         if (!issueCountsByGroup[group].classifications[key]) {
                             issueCountsByGroup[group].classifications[key] = { nullCount: 0, total: 1 };
                         } else {
                             issueCountsByGroup[group].classifications[key].total++;
                         }
 
+                        // 如果当前键的值为null，则递增其在classifications中的null值计数器
                         if (value === null) {
                             issueCountsByGroup[group].classifications[key].nullCount++;
                         }
@@ -228,8 +246,10 @@ export default {
                 });
             });
 
+            // 遍历issueCountsByGroup中的每个分组，计算并设置每个分组null值的百分比
             Object.values(issueCountsByGroup).forEach(group => {
                 group.percentage = `${((group.nullCount / totalNulls) * 100).toFixed(2)}%`;
+                // 将classifications对象转换为包含更多详细信息（包括显示用的百分比）的形式
                 group.classifications = Object.entries(group.classifications).reduce((acc, [key, value]) => {
                     acc[key] = {
                         classification: key,
@@ -240,6 +260,7 @@ export default {
                 }, {});
             });
 
+            // 返回处理和统计完成后的分组信息
             return issueCountsByGroup;
         },
 
