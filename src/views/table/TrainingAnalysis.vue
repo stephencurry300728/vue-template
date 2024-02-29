@@ -167,11 +167,11 @@ export default {
         issueAnalysis() {
             // 记录所有处理过程中遇到的 null 值的总数（分母）
             let totalNulls = 0;
-            // 存储按照分类分组的统计信息，包括每个分类的null值计数、总计数和具体分类信息
+            // 存储按照分类分组的统计信息，包括每个分类的 null 值计数、总计数和具体分类信息
             let issueCountsByGroup = {};
 
             // 生成一个有效的文件名集合
-            // 用于检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
+            // 用于后续检查 trainingAnalysisData 中的 file_name 是否在 categories 中有匹配
             // 因为 categories 中的 file_name 是用户设置好步骤归类的
             // 而 trainingAnalysisData 中的 file_name 直接读取数据库中上传的文件名，可能有些文件没有设置步骤归类
             const validFileNames = new Set(this.categories.map(category => category.file_name));
@@ -186,8 +186,16 @@ export default {
             // 遍历 categories 数组，对于每个分类中的每个具体的问题，检查 issueCountsByGroup 对象是否已经有了对应的分组（例如“识故问题”、“操作问题”、“安全问题”）
             // 如果没有，则为该分组创建一个新的条目，并初始化 nullCount、total 和 classifications
             this.categories.forEach(category => {
+                // Object.values将提取 classifications 对象的所有值，结果是一个数组，如：["操作问题", "操作问题", "安全问题", "识故问题"]
                 Object.values(category.classifications).forEach(group => {
+                    // 然后，对这个值数组进行forEach循环，每次循环时 group 变量就代表数组中的一个元素（即一个问题分类，如"操作问题"）
+                    // 检查 issueCountsByGroup 对象是否已经有了当前 group（问题分类）的条目。如果没有，就为这个 group 创建一个新条目，并初始化
                     if (!issueCountsByGroup[group]) {
+                        /*
+                            nullCount: 用于计数当前分类中值为 null 的条目数量。
+                            total: 用于计数当前分类中的总条目数量。
+                            classifications: 一个空对象，将用于存储属于当前分类下每个具体操作的统计信息
+                        */
                         issueCountsByGroup[group] = { nullCount: 0, total: 0, classifications: {} };
                     }
                 });
@@ -215,15 +223,15 @@ export default {
                     // 对于 additional_data 中的每个键（代表一个具体的操作），通过在 categories 中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
                     // 通过将 categories 扁平化（使用flatMap）并过滤出与当前键匹配的分类项
                     const group = this.categories.flatMap(category => Object.entries(category.classifications)
-                        // flatMap操作首先将categories中的每个分类（每个category对象）转换为一个由其classifications属性（也就是一个对象，键为任务/问题，值为分组名）的键值对构成的数组
-                        // 然后对这些数组中的每个元素（键值对）进行过滤，以找到当前正在处理的key（来自additional_data）匹配的项
-                        // 最后，从匹配的项中抽取分组名（groupValue）
+                        // flatMap 操作首先将 categories 中的每个分类（每个category对象）转换为一个由其 classifications 属性（也就是一个对象，键为任务，值为分组名）的键值对构成的数组
+                        // 然后对这些数组中的每个元素（键值对）进行过滤，以找到当前正在处理的 key（来自 additional_data）匹配的项
+                        // 最后，从匹配的项中抽取分组名（ groupValue ）
                         .filter(([classificationKey, _]) => classificationKey === key)
                         .map(([_, groupValue]) => groupValue))
                         // 使用.find(Boolean)是为了从可能的分组名数组中获取第一个有效的分组名（即非空、非undefined的值），作为当前键所属的分组
                         .find(Boolean);
 
-                    // 如果当前键的值为 null，则递增总的 null 值计数器和相应分组的 null 值计数器
+                    // 如果当前键的值为 null，则递增 totalNulls 值计数器和相应分组的 null 值计数器
                     if (value === null) {
                         totalNulls++;
                         if (group && issueCountsByGroup[group]) {
