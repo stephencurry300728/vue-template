@@ -217,13 +217,13 @@ export default {
                     return;
                 }
 
-                // 遍历当前数据项的 additional_data 中的每个键值对
+                // 遍历包含 validFileNames 数据项的 additional_data 中的每个键值对
                 Object.entries(dataItem.additional_data).forEach(([key, value]) => {
                     // 根据 key 找到对应的分组
                     // 对于 additional_data 中的每个键（代表一个具体的操作），通过在 categories 中查找来确定它属于哪个分组（例如“识故问题”、“操作问题”、“安全问题”）
-                    // 通过将 categories 扁平化（使用flatMap）并过滤出与当前键匹配的分类项
+                    // 通过将 categories 扁平化（使用 flatMap ）并过滤出与当前键匹配的分类项
                     const group = this.categories.flatMap(category => Object.entries(category.classifications)
-                        // flatMap 操作首先将 categories 中的每个分类（每个category对象）转换为一个由其 classifications 属性（也就是一个对象，键为任务，值为分组名）的键值对构成的数组
+                        // flatMap 操作首先将 categories 中的每个分类（每个 category 对象）转换为一个由其 classifications 属性（也就是一个对象，键为任务，值为分组名）的键值对构成的数组
                         // 然后对这些数组中的每个元素（键值对）进行过滤，以找到当前正在处理的 key（来自 additional_data）匹配的项
                         // 最后，从匹配的项中抽取分组名（ groupValue ）
                         .filter(([classificationKey, _]) => classificationKey === key)
@@ -232,26 +232,24 @@ export default {
                         .find(Boolean);
 
                     // 如果当前键的值为 null，则递增 totalNulls 值计数器和相应分组的 null 值计数器
-                    if (value === null) {
-                        totalNulls++;
-                        if (group && issueCountsByGroup[group]) {
-                            issueCountsByGroup[group].nullCount++;
-                        }
-                    }
-
                     // 如果找到了对应的分组
                     if (group && issueCountsByGroup[group]) {
                         // 递增该分组的总计数器
                         issueCountsByGroup[group].total++;
-                        // 检查并更新或初始化该键在 classifications 中的统计信息
-                        if (!issueCountsByGroup[group].classifications[key]) {
-                            issueCountsByGroup[group].classifications[key] = { nullCount: 0, total: 1 };
-                        } else {
-                            issueCountsByGroup[group].classifications[key].total++;
-                        }
 
-                        // 如果当前键的值为 null，则递增其在 classifications 中的 null 值计数器
+                        // 初始化或更新 classifications 中对应 key 的统计信息
+                        if (!issueCountsByGroup[group].classifications[key]) {
+                            issueCountsByGroup[group].classifications[key] = { nullCount: 0, total: 0 };
+                        }
+                        issueCountsByGroup[group].classifications[key].total++;
+
+                        // 如果当前键的值为 null
                         if (value === null) {
+                            // 递增总的 null 值计数器
+                            totalNulls++;
+                            // 递增该分组的 null 值计数器
+                            issueCountsByGroup[group].nullCount++;
+                            // 递增其在 classifications 中的 null 值计数器
                             issueCountsByGroup[group].classifications[key].nullCount++;
                         }
                     }
