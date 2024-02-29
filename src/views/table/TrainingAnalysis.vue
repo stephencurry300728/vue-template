@@ -168,10 +168,8 @@ export default {
             let totalNulls = 0;
             let issueCountsByGroup = {};
 
-            // 首先，构建一个包含所有有效 file_name 的集合
             const validFileNames = new Set(this.categories.map(category => category.file_name));
 
-            // 初始化issueCountsByGroup，确保每个可能的分类都被包含
             this.categories.forEach(category => {
                 Object.values(category.classifications).forEach(group => {
                     if (!issueCountsByGroup[group]) {
@@ -180,11 +178,9 @@ export default {
                 });
             });
 
-            // 然后，仅当 trainingAnalysisData 的 file_name 存在于 validFileNames 中时，才处理这些数据
             this.trainingAnalysisData.forEach(dataItem => {
-                // 检查当前 dataItem 的 file_name 是否有效
                 if (!validFileNames.has(dataItem.file_name)) {
-                    return; // 如果不匹配，跳过当前 dataItem
+                    return;
                 }
 
                 Object.entries(dataItem.additional_data).forEach(([key, value]) => {
@@ -215,22 +211,14 @@ export default {
                 });
             });
 
-            // 计算百分比并进行排序
             Object.values(issueCountsByGroup).forEach(group => {
                 group.percentage = `${((group.nullCount / totalNulls) * 100).toFixed(2)}%`;
-                let classificationsArray = Object.entries(group.classifications).map(([key, value]) => ({
-                    classification: key,
-                    ...value,
-                    // 确保显示格式为 XX人（XX%）
-                    display: `${value.nullCount}人 (${((value.nullCount / totalNulls) * 100).toFixed(2)}%)`
-                }));
-
-                // 对具体操作的百分比进行降序排序
-                classificationsArray.sort((a, b) => parseFloat(b.display.split(' ')[1].replace('%)', '')) - parseFloat(a.display.split(' ')[1].replace('%)', '')));
-
-                // 重新构造classifications对象，现在是排序后的数组
-                group.classifications = classificationsArray.reduce((acc, current) => {
-                    acc[current.classification] = current;
+                group.classifications = Object.entries(group.classifications).reduce((acc, [key, value]) => {
+                    acc[key] = {
+                        classification: key,
+                        ...value,
+                        display: `${value.nullCount}人 (${((value.nullCount / totalNulls) * 100).toFixed(2)}%)`
+                    };
                     return acc;
                 }, {});
             });
@@ -243,33 +231,21 @@ export default {
             const issueAnalysis = this.issueAnalysis;
             let flatIssues = [];
 
-            // 遍历每个大类
             Object.entries(issueAnalysis).forEach(([group, data]) => {
-                // 为了确保排序稳定和正确，我们需要先将 classifications 转换成数组并排序
-                // 按照每个分类的 nullCount 百分比进行降序排序
-                const sortedClassifications = Object.values(data.classifications).sort((a, b) => {
-                    const percentageA = parseFloat(a.display.split(' ')[1].replace('%)', ''));
-                    const percentageB = parseFloat(b.display.split(' ')[1].replace('%)', ''));
-                    return percentageB - percentageA; // 降序排序
-                });
-
-                // 现在 sortedClassifications 包含了排序后的分类
-                sortedClassifications.forEach((detail, index) => {
+                Object.values(data.classifications).forEach((detail, index) => {
                     if (index === 0) {
-                        // 为第一个元素设置 rowspan
                         flatIssues.push({
-                            group: `${group} (${data.percentage})`, // 使用大类的百分比
+                            group: `${group} (${data.percentage})`,
                             classification: detail.classification,
-                            percentage: detail.display, // 使用格式化后的字符串
-                            rowspan: sortedClassifications.length, // 为第一个项目设置 rowspan，以合并单元格
+                            percentage: detail.display,
+                            rowspan: Object.values(data.classifications).length,
                         });
                     } else {
-                        // 后续元素的 rowspan 为 0
                         flatIssues.push({
-                            group, // 这里不显示大类的百分比
+                            group,
                             classification: detail.classification,
-                            percentage: detail.display, // 使用格式化后的字符串
-                            rowspan: 0, // 除了第一项之外，其他项的 rowspan 为 0
+                            percentage: detail.display,
+                            rowspan: 0,
                         });
                     }
                 });
