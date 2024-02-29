@@ -221,7 +221,7 @@ export default {
                 let classificationsArray = Object.entries(group.classifications).map(([key, value]) => ({
                     classification: key,
                     ...value,
-                    // 确保显示格式为“XX人（XX%）”
+                    // 确保显示格式为 XX人（XX%）
                     display: `${value.nullCount}人 (${((value.nullCount / totalNulls) * 100).toFixed(2)}%)`
                 }));
 
