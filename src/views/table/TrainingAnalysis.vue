@@ -375,10 +375,6 @@ export default {
     padding: 20px;
 }
 
-.table-card {
-    margin-top: 20px;
-}
-
 .no-data-info {
     padding: 20px;
     background-color: #f2f2f2;
