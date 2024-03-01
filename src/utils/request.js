@@ -8,7 +8,7 @@ const service = axios.create({
   // 从环境变量获取的基础 URL, 在api下面不需要再写baseURL了
   baseURL: process.env.VUE_APP_BASE_API, // 最后在浏览器的url = base url + request url进行拼接
   // withCredentials: true, // 跨域请求的时候携带cookie
-  timeout: 8000 // 请求超时时间为8s
+  timeout: 20000 // 请求超时时间为20s
 })
 
 /* 当一个请求通过 service 发送时，它首先经过这个请求拦截器
