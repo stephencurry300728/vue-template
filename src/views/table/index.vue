@@ -101,7 +101,7 @@
         </template>
       </el-table-column>
 
-      <!-- 通过goToDetail能够通过 考核项目 去特定的测评数据 -->
+      <!-- 通过 goToDetail 能够通过 考核项目 去特定的测评数据 -->
       <el-table-column label="考核项目" prop="assessment_item" sortable="custom" align="center">
         <template slot-scope="scope">
           <span class="link-like" @click.stop="goToDetail(scope.row)">
@@ -109,7 +109,7 @@
         </template>
       </el-table-column>
 
-      <!-- 通过goToDetail能够通过 考核结果 去特定的测评数据 -->
+      <!-- 通过 goToDetail 能够通过 考核结果 去特定的测评数据 -->
       <!-- 转换考核结果并定制 优秀、合格、不合格的样式 -->
       <el-table-column label="考核结果" prop="assessment_result" sortable="custom" align="center">
         <template slot-scope="scope">
@@ -216,7 +216,7 @@ export default {
     filteredOptions() {
       // 若选择所有线路时，即科目选择框为空
       if (this.selectedLine === '') {
-        return []; // 科目选择框为空选项，即显示placeholder
+        return []; // 科目选择框为空选项，即显示placeholder，且不可选（调用 isSubjectDisabled 计算属性）
       } else {
         // 非所有线路，过滤 combinedOptions 来只包含与选定线路匹配的选项，即以选定的特定线路开头的 科目选项
         return this.combinedOptions.filter(option => option.value.startsWith(this.selectedLine));
