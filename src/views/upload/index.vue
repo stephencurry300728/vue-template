@@ -65,7 +65,8 @@ export default {
                         this.isNavigating = true; // 更新导航状态标志
                         this.$router.push({ path: '/settings' });
                     }).catch(() => {
-                        // 用户选择继续上传，不做任何操作
+                        // 用户选择继续上传，重置确认框显示状态标志
+                        this.confirmShown = false;
                     });
                 }
             } catch (error) {
