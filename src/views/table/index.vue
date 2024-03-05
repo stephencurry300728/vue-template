@@ -262,6 +262,7 @@ export default {
       }
 
       if (this.selectedOption) {
+        // 做了多选框的话，需要循环遍历利用split拆分成train_model和assessment_item
         // 从选中的选项中拆分出 train_model 和 assessment_item，并添加到查询参数中
         const [trainModel, assessmentItem] = this.selectedOption.split('-');
         params.train_model = trainModel;
