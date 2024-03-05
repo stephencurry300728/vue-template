@@ -210,7 +210,7 @@ export default {
                 return;
             }
 
-            this.loading = true; // 开始加载
+            this.loading = true; // button 开始加载
             NProgress.start(); // 开始显示NProgress进度条
 
             try {
