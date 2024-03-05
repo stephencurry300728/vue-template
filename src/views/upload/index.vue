@@ -42,7 +42,7 @@ export default {
             return true;
         },
 
-        // 调用API上传批量csv文件
+        // 调用 API 上传批量 csv 文件
         async uploadRequest(options) {
             NProgress.start();
             let fileNameWithoutExtension = options.file.name.split('.').slice(0, -1).join('.');

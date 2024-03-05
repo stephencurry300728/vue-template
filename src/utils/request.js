@@ -25,7 +25,7 @@ service.interceptors.request.use(
   config => {
     // 如果 Vuex store 中有 token，拦截器会修改请求的 config，添加 token 到请求头
     if (store.getters.token) {
-      // 请求头信息每次请求携带 后端JWT 验证的 access_token
+      // 请求头信息每次请求携带 后端 JWT 验证的 access_token
       config.headers['Authorization'] = 'Bearer ' + getToken()
     }
     return config
