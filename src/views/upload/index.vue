@@ -1,5 +1,6 @@
 <template>
     <div class="upload-container">
+
         <!-- 文件上传拖拽区域 -->
         <el-upload class="upload-demo" :multiple="true" :before-upload="beforeUpload" :http-request="uploadRequest"
             :show-file-list="false" drag action="/upload-assessment/">
@@ -7,14 +8,17 @@
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div slot="tip" class="el-upload__tip">*只能上传csv文件*</div>
         </el-upload>
+
         <!-- 批量文件上传按钮 -->
         <el-button class="upload-button" @click="triggerFileSelect" type="primary"
             icon="el-icon-folder-opened">选择文件上传</el-button>
-        <input v-show="false" ref="fileInput" type="file" accept=".csv, text/csv" multiple @change="handleFileUpload" />
+        <input v-show="false" ref="fileInput" type="file" accept=".csv, text/csv" multiple @change="handleUpload" />
+
         <!-- 文件夹上传按钮 -->
         <el-button class="upload-button" @click="triggerFolderSelect" type="success"
             icon="el-icon-folder">选择文件夹上传</el-button>
-        <input v-show="false" ref="folderInput" type="file" webkitdirectory @change="handleFolderUpload" />
+        <input v-show="false" ref="folderInput" type="file" webkitdirectory @change="handleUpload" />
+
     </div>
 </template>
 
@@ -66,6 +70,8 @@ export default {
                 }
             } catch (error) {
                 console.error('Upload error:', error);
+                // 上传失败时显示错误信息
+                this.$message.error(`上传失败：${fileNameWithoutExtension}，错误信息：${error.message || '未知错误'}`);
             } finally {
                 NProgress.done();
             }
@@ -82,35 +88,26 @@ export default {
         triggerFileSelect() {
             this.$refs.fileInput.click();
         },
-        // 处理批量文件上传
-        async handleFileUpload(event) {
-            this.confirmShown = false; // 重置确认框显示状态
-            const files = event.target.files;
-            for (const file of files) {
-                await this.uploadRequest({ file });
-            }
-            this.resetInput(event.target); // 重置文件输入
-        },
 
         // 触发文件夹选择
         triggerFolderSelect() {
             this.$refs.folderInput.click();
         },
 
-        // 处理文件夹上传
-        async handleFolderUpload(event) {
+        // 处理文件和文件夹上传
+        async handleUpload(event) {
             this.confirmShown = false; // 重置确认框显示状态
             const files = event.target.files;
             for (const file of files) {
                 try {
-                    console.log('Uploading file from folder:', file.name);
+                    console.log('Uploading:', file.name);
                     await this.uploadRequest({ file });
                 } catch (error) {
-                    console.error(`Error uploading file ${file.name}:`, error);
+                    console.error(`Error uploading ${file.name}:`, error);
                     // 错误处理逻辑，根据需要添加
                 }
             }
-            this.resetInput(event.target); // 重置文件夹输入，允许重新上传相同文件夹
+            this.resetInput(event.target); // 重置输入以允许重新上传相同文件/文件夹
         },
 
         // 导航离开时的钩子函数
