@@ -44,6 +44,10 @@
 <script>
 import { AllTrainingData } from '@/api/table';
 import { SaveClassification, fetchCategories } from '@/api/settings';
+// 在<script>标签的顶部导入NProgress
+import NProgress from 'nprogress';
+// 导入NProgress的CSS样式
+import 'nprogress/nprogress.css';
 
 export default {
     name: 'AssessmentClassification',
@@ -155,7 +159,7 @@ export default {
             const selectedAssessment = this.assessments.find(item => item.file_name === fileName);
             // 确保selectedAssessment存在，并且有additional_data
             if (selectedAssessment && selectedAssessment.additional_data) {
-                // 使用Object.entries将对象转换为键值对数组，然后使用slice跳过前两个条目
+                // 使用Object.entries将对象转换为键值对数组，然后使用 slice 跳过前两个条目
                 const dataEntries = Object.entries(selectedAssessment.additional_data).slice(2);
                 // // 将剩余的条目转换回对象格式
                 this.selectedAdditionalData = dataEntries.reduce((acc, [key, value]) => {
@@ -197,7 +201,6 @@ export default {
 
         // 调用保存分类信息
         async saveClassifications() {
-            // 如果没有选择所有分类，展示错误信息
             if (!this.isAllClassified) {
                 this.$message.error({
                     message: '所有字段都必须分类，请完成分类后再保存。',
@@ -208,6 +211,7 @@ export default {
             }
 
             this.loading = true; // 开始加载
+            NProgress.start(); // 开始显示NProgress进度条
 
             try {
                 await SaveClassification({
@@ -231,6 +235,7 @@ export default {
                 });
             } finally {
                 this.loading = false; // 无论请求成功还是失败，button 上均停止加载
+                NProgress.done(); // 结束NProgress进度条
             }
         },
 
