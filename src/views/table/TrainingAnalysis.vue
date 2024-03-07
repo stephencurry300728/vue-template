@@ -39,7 +39,7 @@
         <div class="tableData">
             <el-card class="box-card" v-if="!allPercentagesZero">
 
-                <!-- 选择器 -->
+                <!-- 合格与不合格的选择器 -->
                 <el-select v-model="selectedAnalysisType" placeholder="请选择分析类型" class="select-analysis-type">
                     <el-option label="所有人" value="all"></el-option>
                     <el-option label="不合格" value="fail"></el-option>
@@ -186,6 +186,7 @@ export default {
         issueAnalysis() {
             // 根据 selectedAnalysisType 过滤数据
             let filteredData = this.trainingAnalysisData;
+            // 增加合格不和不合格的选择框来过滤数据
             if (this.selectedAnalysisType === 'fail') {
                 filteredData = this.trainingAnalysisData.filter(dataItem => dataItem.assessment_result === 1);
             }
