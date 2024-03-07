@@ -24,9 +24,12 @@ npm run server
 ```
 
 ### 浏览器访问 [http://localhost:8080](http://localhost:8080)
+
 ![alt text](dashbord.png)
 ![alt text](upload.png)
 ![alt text](table.png)
+![alt text](settings.png)
+![alt text](analysis.png)
 
 ## 发布
 
