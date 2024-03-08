@@ -269,7 +269,7 @@ export default {
                         // 递增该分组的总计数器
                         issueCountsByGroup[group].classifications[key].total++;
 
-                        // 如果遍历的当前键的值为 null（未测评）
+                        // 如果遍历的当前键的值为 null（未测评即是问题）
                         if (value === null) {
                             // 递增总的 null 值计数器
                             totalNulls++;
