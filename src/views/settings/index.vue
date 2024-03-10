@@ -157,9 +157,9 @@ export default {
             this.selectedFileName = fileName;
             // 使用 find 方法获取用户点击的 fileName 对应的 assessment
             const selectedAssessment = this.assessments.find(item => item.file_name === fileName);
-            // 确保selectedAssessment存在，并且有additional_data
+            // 确保 selectedAssessment 存在，并且有 additional_data
             if (selectedAssessment && selectedAssessment.additional_data) {
-                // 使用Object.entries将对象转换为键值对数组，然后使用 slice 跳过前两个条目
+                // 使用 Object.entries 将对象转换为键值对数组，然后使用 slice 跳过前两个条目
                 const dataEntries = Object.entries(selectedAssessment.additional_data).slice(2);
                 // // 将剩余的条目转换回对象格式
                 this.selectedAdditionalData = dataEntries.reduce((acc, [key, value]) => {
@@ -188,11 +188,11 @@ export default {
             if (this.dataCategories[this.selectedFileName]) {
                 // 获取当前文件名对应的分类信息
                 const classificationsData = this.dataCategories[this.selectedFileName];
-                // 遍历selectedAdditionalData中的所有key
+                // 遍历 selectedAdditionalData 中的所有key
                 Object.keys(this.selectedAdditionalData).forEach(key => {
-                    // 检查dataCategories中是否有对应的分类信息
+                    // 检查 dataCategories 中是否有对应的分类信息
                     if (classificationsData[key]) {
-                        // 直接使用从dataCategories获取的分类信息来更新classifications
+                        // 直接使用从 dataCategories 获取的分类信息来更新 classifications
                         this.classifications[key] = classificationsData[key];
                     }
                 });
