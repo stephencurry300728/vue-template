@@ -35,7 +35,7 @@
       </span>
     </el-dialog>
 
-    <!-- 外部容器放置重置按钮、日期选择器、选择框 -->
+    <!-- 外部容器放置重置按钮、日期选择器、线路选择框、科目选择框 -->
     <div class="filters-container">
       <!-- 按钮容器 -->
       <div class="reset-button-container">
