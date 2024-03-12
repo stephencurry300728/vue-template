@@ -37,29 +37,26 @@
 
         <!-- 第二张表格的数据 -->
         <div class="tableData">
-            <el-card class="box-card" v-if="!allPercentagesZero">
+            <el-card class="box-card">
+                <!-- 始终显示的动态班组选择器和合格与不合格的选择器 -->
+                <el-select v-model="selectedCrewGroup" clearable placeholder="请选择班组" class="select-analysis-type">
+                    <el-option v-for="group in crewGroupOptions" :key="group" :label="group" :value="group"></el-option>
+                </el-select>
 
-                <!-- 合格与不合格的选择器 -->
-                <el-select v-model="selectedAnalysisType" placeholder="请选择分析类型" class="select-analysis-type">
+                <el-select v-model="selectedAnalysisType" clearable placeholder="请选择分析类型" class="select-analysis-type">
                     <el-option label="所有人" value="all"></el-option>
                     <el-option label="不合格" value="fail"></el-option>
                 </el-select>
 
-                <el-table :data="flattenedIssues" border stripe :span-method="spanMethod">
-                    <el-table-column prop="group" label="步骤归类" align="center" width="220">
-                        <template v-slot="{ row }">
-                            <span v-if="row.rowspan">{{ row.group }}</span>
-                        </template>
-                    </el-table-column>
+                <!-- 根据条件显示表格或“无数据”文本 -->
+                <el-table :data="flattenedIssues" border stripe :span-method="spanMethod" empty-text="无数据">
+                    <el-table-column prop="group" label="步骤归类" align="center" width="220"></el-table-column>
                     <el-table-column prop="classification" label="详情操作" align="center"></el-table-column>
-                    <el-table-column prop="percentage" label="错误占比" align="center">
-                        <template slot-scope="scope">
-                            {{ scope.row.percentage }}
-                        </template>
-                    </el-table-column>
+                    <el-table-column prop="percentage" label="错误占比" align="center"></el-table-column>
                 </el-table>
             </el-card>
         </div>
+
 
     </div>
 </template>
@@ -75,6 +72,8 @@ export default {
         return {
             categories: [], // 分类数据
             selectedAnalysisType: 'all', // 默认选择分析所有人
+            selectedCrewGroup: '', // 新增当前选中的班组
+            crewGroupOptions: [], // 新增班组列表
         };
     },
 
@@ -91,6 +90,15 @@ export default {
 
     mounted() {
         this.fetchDataCategories();
+    },
+
+    watch: {
+        trainingAnalysisData: {
+            immediate: true,
+            handler() {
+                this.updateCrewGroupOptions();
+            }
+        }
     },
 
     computed: {
@@ -186,9 +194,12 @@ export default {
         issueAnalysis() {
             // 根据 selectedAnalysisType 过滤数据
             let filteredData = this.trainingAnalysisData;
-            // 增加合格不和不合格的选择框来过滤数据
+            // 根据选择的分析类型和班组进行筛选
             if (this.selectedAnalysisType === 'fail') {
-                filteredData = this.trainingAnalysisData.filter(dataItem => dataItem.assessment_result === 1);
+                filteredData = filteredData.filter(item => item.assessment_result === 1);
+            }
+            if (this.selectedCrewGroup) {
+                filteredData = filteredData.filter(item => item.crew_group === this.selectedCrewGroup);
             }
 
             // 记录所有的 null 值的总数（作为所有百分比计算的分母）
@@ -402,6 +413,15 @@ export default {
             }
         },
 
+        updateCrewGroupOptions() {
+            if (this.trainingAnalysisData && this.trainingAnalysisData.length > 0) {
+                const crewGroups = new Set(this.trainingAnalysisData.map(item => item.crew_group));
+                this.crewGroupOptions = [...crewGroups];
+            } else {
+                this.crewGroupOptions = [];
+            }
+        },
+
         spanMethod({ row, column, rowIndex, columnIndex }) {
             if (columnIndex === 0) { // 只在第一列应用合并逻辑
                 return [row.rowspan, 1];
@@ -472,12 +492,13 @@ export default {
 }
 
 .select-analysis-type {
-    display: flex;
-    /* 使用 Flexbox 进行布局 */
-    justify-content: center;
-    /* 水平居中 */
+    display: inline-block;
+    /* 调整为行内块 */
+    width: 45%;
+    /* 每个选择器占用一行的一半宽度 */
+    margin-right: 5%;
+    /* 为选择器之间添加一些间隔 */
     margin-bottom: 20px;
     /* 与下方表格的间隔 */
 }
 </style>
-
