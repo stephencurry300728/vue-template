@@ -1,7 +1,16 @@
 <template>
   <div class="dashboard-container">
+
+    <!-- 当 allTrainingData 为空时显示提示信息并不渲染 el-card 组件 -->
+    <div v-if="allTrainingData.length === 0" class="no-data-info">
+      <p>
+        无数据，请<a href="#" @click.prevent="goToUploadPage">点击这里</a>上传。
+      </p>
+    </div>
+    <!-- 当 allTrainingData 不为空时，正常显示内容 -->
+
     <!-- 使用 Element UI 的栅格布局来安排图表 -->
-    <el-row :gutter="20">
+    <el-row v-else :gutter="20">
       <el-col :span="12">
         <el-card>
           <div id="pie-chart" style="height: 340px;"></div>
@@ -42,14 +51,6 @@ export default {
     this.getAllTrainingData()
   },
 
-  mounted() {
-    this.$nextTick(() => {
-      this.initPieChart()
-      this.initBarChart()
-      this.initBarplotChart()
-    })
-  },
-
   watch: {
     selectedLine(newVal, oldVal) {
       if (!this.lineOptions.some(option => option.value === newVal)) {
@@ -79,12 +80,23 @@ export default {
 
   methods: {
     async getAllTrainingData() {
-      const res = await AllTrainingData()
-      this.allTrainingData = res.data
-      // 数据加载后重新初始化图表
-      this.initPieChart()
-      this.initBarChart()
-      this.initBarplotChart()
+      const res = await AllTrainingData();
+      if (res.data && res.data.length > 0) {
+        this.allTrainingData = res.data;
+        // 使用 $nextTick 确保 DOM 完全更新后再初始化图表
+        this.$nextTick(() => {
+          this.initPieChart();
+          this.initBarChart();
+          this.initBarplotChart();
+        });
+      } else {
+        // 如果没有数据，显示提示并跳转到上传页面
+        this.$router.push('/upload');
+      }
+    },
+
+    goToUploadPage() {
+      this.$router.push('/upload');
     },
 
     // 转换数据为饼状图所需的格式
@@ -291,5 +303,31 @@ export default {
     font-size: 30px;
     line-height: 46px;
   }
+}
+
+.no-data-info {
+  padding: 20px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.no-data-info p {
+  margin: 0;
+  padding: 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.no-data-info a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.no-data-info a:hover {
+  text-decoration: underline;
 }
 </style>
