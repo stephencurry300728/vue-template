@@ -42,11 +42,12 @@
         <!-- 第二张表格的数据 -->
         <div class="tableData">
             <el-card class="box-card">
-                <!-- 始终显示的动态班组选择器和合格与不合格的选择器 -->
+                <!-- 动态班组选择器 -->
                 <el-select v-model="selectedCrewGroup" clearable placeholder="请选择班组" class="select-analysis-type">
                     <el-option v-for="group in crewGroupOptions" :key="group" :label="group" :value="group"></el-option>
                 </el-select>
 
+                <!-- 合格与不合格的选择器，默认所有人 -->
                 <el-select v-model="selectedAnalysisType" clearable placeholder="请选择分析类型" class="select-analysis-type">
                     <el-option label="所有人" value="all"></el-option>
                     <el-option label="不合格" value="fail"></el-option>
