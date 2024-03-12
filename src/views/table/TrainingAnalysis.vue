@@ -295,18 +295,19 @@ export default {
 
             // 遍历 issueCountsByGroup 中的每个分组，计算并设置每个分组 null 值的百分比
             Object.values(issueCountsByGroup).forEach(group => {
-                group.percentage = `${((group.nullCount / totalNulls) * 100).toFixed(2)}%`;
+                group.percentage = totalNulls > 0 ? `${((group.nullCount / totalNulls) * 100).toFixed(2)}%` : '0.00%';
                 // 将 classifications 对象转换为包含更多详细信息（包括显示用的百分比）的形式
                 group.classifications = Object.entries(group.classifications).reduce((acc, [key, value]) => {
+                    const percentage = totalNulls > 0 ? `${((value.nullCount / totalNulls) * 100).toFixed(2)}%` : '0.00%';
                     acc[key] = {
                         classification: key,
                         ...value,
-                        display: `${value.nullCount}人 (${((value.nullCount / totalNulls) * 100).toFixed(2)}%)`
+                        display: `${value.nullCount}人 (${percentage})`
                     };
                     return acc;
                 }, {});
             });
-
+            
             // 返回处理和统计完成后的分组信息
             return issueCountsByGroup;
         },
