@@ -67,6 +67,8 @@ export default {
                     }).catch(() => {
                         // 用户选择继续上传，重置确认框显示状态标志
                         this.confirmShown = false;
+                        // 添加页面刷新逻辑
+                        window.location.reload();
                     });
                 }
             } catch (error) {

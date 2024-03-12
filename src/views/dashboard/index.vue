@@ -81,18 +81,13 @@ export default {
   methods: {
     async getAllTrainingData() {
       const res = await AllTrainingData();
-      if (res.data && res.data.length > 0) {
-        this.allTrainingData = res.data;
-        // 使用 $nextTick 确保 DOM 完全更新后再初始化图表
-        this.$nextTick(() => {
-          this.initPieChart();
-          this.initBarChart();
-          this.initBarplotChart();
-        });
-      } else {
-        // 如果没有数据，显示提示并跳转到上传页面
-        this.$router.push('/upload');
-      }
+      this.allTrainingData = res.data;
+      // 使用 $nextTick 确保 DOM 完全更新后再初始化图表
+      this.$nextTick(() => {
+        this.initPieChart();
+        this.initBarChart();
+        this.initBarplotChart();
+      });
     },
 
     goToUploadPage() {
