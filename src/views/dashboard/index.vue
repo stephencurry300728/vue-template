@@ -305,7 +305,7 @@ export default {
   background-color: #f2f2f2;
   border: 1px solid #ccc;
   border-radius: 4px;
-  margin: 20px 0;
+  margin: 50px 0;
   text-align: center;
 }
 
