@@ -3,7 +3,7 @@
 
         <div class="header">
             <h2 style="margin-left: 20px;">一、 培训概况</h2>
-            <el-button :loading="loading" type="primary" icon="el-icon-download" @click="exportAsPDF">导出PDF</el-button>
+            <el-button :loading="loading" type="primary" icon="el-icon-download" @click="exportAsPNG">导出为PNG</el-button>
         </div>
 
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
@@ -67,7 +67,6 @@
 <script>
 import { mapState } from 'vuex';
 import { fetchCategories } from '@/api/settings';
-import JsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export default {
@@ -440,7 +439,7 @@ export default {
             this.$router.push({ path: '/settings' });
         },
 
-        async exportAsPDF() {
+        async exportAsPNG() {
             this.loading = true; // 开始操作前，启动加载状态
             try {
                 await this.$nextTick();
@@ -453,26 +452,18 @@ export default {
                 }
 
                 const canvas = await html2canvas(element);
+                // 生成PNG图片
                 const imgData = canvas.toDataURL('image/png');
 
-                let pdf = new JsPDF('p', 'mm', 'a4');
-                let pageWidth = pdf.internal.pageSize.getWidth();
-                let pageHeight = pdf.internal.pageSize.getHeight();
-                let canvasWidth = canvas.width;
-                let canvasHeight = canvas.height;
-
-                let canvasImageWidth = pageWidth;
-                let canvasImageHeight = (canvasHeight * canvasImageWidth) / canvasWidth;
-
-                if (canvasImageHeight > pageHeight) {
-                    canvasImageHeight = pageHeight;
-                    canvasImageWidth = (canvasWidth * canvasImageHeight) / canvasHeight;
-                }
-
-                pdf.addImage(imgData, 'PNG', 0, 0, canvasImageWidth, canvasImageHeight);
-                pdf.save('export.pdf');
+                // 创建一个链接元素用于下载
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imgData;
+                downloadLink.download = '培训概况.png'; // 设置下载的文件名
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
             } catch (error) {
-                console.error("Error generating PDF: ", error);
+                console.error("Error generating PNG: ", error);
             } finally {
                 this.loading = false; // 完成操作后，无论成功与否，停止加载状态
             }
