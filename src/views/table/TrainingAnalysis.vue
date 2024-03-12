@@ -402,10 +402,6 @@ export default {
             return missingFileNames;
         },
 
-        // 检查是否所有步骤的百分比都为0，若是则不显示问题分析表格
-        allPercentagesZero() {
-            return this.flattenedIssues.every(issue => parseFloat(issue.percentage) === 0);
-        },
     },
 
     methods: {
