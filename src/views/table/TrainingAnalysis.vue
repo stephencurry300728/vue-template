@@ -12,7 +12,7 @@
             </div>
 
             <div class="tableData">
-                <el-table :data="tableData" fit element-loading-text="拼命加载中" border stripe>
+                <el-table :data="tableData" fit element-loading-text="拼命加载中" border stripe empty-text="无数据">
                     <el-table-column prop="crew_group" label="班组" width="180" align="center"></el-table-column>
                     <el-table-column prop="count" label="人数" align="center"></el-table-column>
                     <el-table-column prop="excellent" label="优秀" align="center"></el-table-column>
