@@ -1,7 +1,11 @@
 <template>
-    <div class="container">
+    <div ref="containerRef" class="container">
 
-        <h2 style="margin-left: 20px;">一、 培训概况</h2>
+        <div class="header">
+            <h2 style="margin-left: 20px;">一、 培训概况</h2>
+            <el-button :loading="loading" type="primary" icon="el-icon-download" @click="exportAsPDF">导出PDF</el-button>
+        </div>
+
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
 
             <div class="text-center">
@@ -57,13 +61,14 @@
             </el-card>
         </div>
 
-
     </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import { fetchCategories } from '@/api/settings';
+import JsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default {
     name: 'TrainingAnalysis',
@@ -74,6 +79,7 @@ export default {
             selectedAnalysisType: 'all', // 默认选择分析所有人
             selectedCrewGroup: '', // 新增当前选中的班组
             crewGroupOptions: [], // 新增班组列表
+            loading: false, // 控制按钮的加载状态
         };
     },
 
@@ -307,7 +313,7 @@ export default {
                     return acc;
                 }, {});
             });
-            
+
             // 返回处理和统计完成后的分组信息
             return issueCountsByGroup;
         },
@@ -434,11 +440,59 @@ export default {
             this.$router.push({ path: '/settings' });
         },
 
+        async exportAsPDF() {
+            this.loading = true; // 开始操作前，启动加载状态
+            try {
+                await this.$nextTick();
+
+                const element = this.$refs.containerRef;
+                if (!element) {
+                    console.error("Cannot find element with ref 'containerRef'");
+                    this.loading = false; // 如果找不到元素，停止加载状态并返回
+                    return;
+                }
+
+                const canvas = await html2canvas(element);
+                const imgData = canvas.toDataURL('image/png');
+
+                let pdf = new JsPDF('p', 'mm', 'a4');
+                let pageWidth = pdf.internal.pageSize.getWidth();
+                let pageHeight = pdf.internal.pageSize.getHeight();
+                let canvasWidth = canvas.width;
+                let canvasHeight = canvas.height;
+
+                let canvasImageWidth = pageWidth;
+                let canvasImageHeight = (canvasHeight * canvasImageWidth) / canvasWidth;
+
+                if (canvasImageHeight > pageHeight) {
+                    canvasImageHeight = pageHeight;
+                    canvasImageWidth = (canvasWidth * canvasImageHeight) / canvasHeight;
+                }
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvasImageWidth, canvasImageHeight);
+                pdf.save('export.pdf');
+            } catch (error) {
+                console.error("Error generating PDF: ", error);
+            } finally {
+                this.loading = false; // 完成操作后，无论成功与否，停止加载状态
+            }
+        },
+
     },
 }
 </script>
 
 <style scoped>
+.header {
+    display: flex;
+    justify-content: space-between;
+    /* 在主轴上分布空间，确保左侧的标题和右侧的按钮相隔最远距离 */
+    align-items: center;
+    /* 在交叉轴上居中对齐子元素 */
+    margin-bottom: 20px;
+    /* 添加一些到下一个元素的间距 */
+}
+
 .box-card {
     margin: 20px auto;
     width: 90%;
