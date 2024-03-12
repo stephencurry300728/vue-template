@@ -482,6 +482,7 @@ export default {
     /* 在交叉轴上居中对齐子元素 */
     margin-bottom: 20px;
     /* 添加一些到下一个元素的间距 */
+    margin-right: 20px;
 }
 
 .box-card {
