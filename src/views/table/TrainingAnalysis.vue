@@ -3,7 +3,7 @@
 
         <div class="header">
             <h2 style="margin-left: 20px;">一、 培训概况</h2>
-            <el-button :loading="loading" type="primary" icon="el-icon-download" @click="exportAsPNG">导出为PNG</el-button>
+            <el-button :loading="loading" type="primary" icon="el-icon-download" @click="exportAsPNG">导出图片</el-button>
         </div>
 
         <el-card v-if="trainingAnalysisData && trainingAnalysisData.length > 0" class="box-card">
