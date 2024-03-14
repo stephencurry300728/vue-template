@@ -173,8 +173,8 @@ export const constantRoutes = [
 
 // 定义一个函数来创建新的Router实例
 const createRouter = () => new Router({
-  // mode: 'history'
   // history 需要服务器的支持，被注释掉代表现在使用默认的hash模式
+  mode: 'history',  // 设置路由模式为history
   scrollBehavior: () => ({ y: 0 }), // 滚动条距离顶部为0
   routes: constantRoutes // 所有路由进行注册
 })
