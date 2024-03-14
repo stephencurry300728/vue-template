@@ -644,26 +644,43 @@ export default {
 
 .filters-container {
   display: flex;
+  flex-wrap: wrap; /* 允许子项换行 */
   align-items: center;
-  /* 确保子项垂直居中对齐 */
+  justify-content: flex-start; /* 默认左对齐 */
   gap: 10px;
-  /* 在子项之间设置间隔 */
 }
 
-.date-picker-offset {
-  margin: 0;
-  padding-left: 0px;
-  /* 推动日期选择器向右边移动 */
-}
-
+/* 向右偏移的元素开始 */
 .select-container {
-  margin-left: 630px;
-  /* 调整左边距以向右移动选择框 */
+  margin-left: auto; /* 将这个元素及其后面的所有元素推向右侧 */
 }
 
+.date-picker-offset,
 .select-offset {
-  margin-left: 0px;
-  /* 调整左边距以向右移动选择框 */
+  margin: 0;
+  padding-left: 0;
+}
+
+/* 使用媒体查询调整对小屏幕的布局 */
+@media (max-width: 768px) {
+  .select-container {
+    margin-left: 0; /* 移除左边距，防止小屏幕上的布局问题 */
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .select-offset {
+    margin-top: 10px;
+  }
+  
+  .analysis-button-container {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .analysis-button-container el-button {
+    width: 100%;
+  }
 }
 
 .pagination-container {
